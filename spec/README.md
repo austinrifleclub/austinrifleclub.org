@@ -25,6 +25,9 @@ A comprehensive website for a private, non-profit shooting club in Manor, Texas.
 | [09-content-strategy.md](./09-content-strategy.md) | Educational content and range guides |
 | [10-governance.md](./10-governance.md) | Bylaws, BOD structure, elections, compliance |
 | [11-operations.md](./11-operations.md) | Admin runbooks and procedures |
+| [12-validation.md](./12-validation.md) | Field validation rules and constraints |
+| [13-business-rules.md](./13-business-rules.md) | Edge cases, calculations, system behavior |
+| [14-security.md](./14-security.md) | Data protection, access control, privacy |
 
 ---
 
