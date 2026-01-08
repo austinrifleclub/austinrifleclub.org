@@ -485,6 +485,200 @@ range_status (
 )
 ```
 
+### Governance Tables
+
+```sql
+-- Board Positions
+board_positions (
+  id TEXT PRIMARY KEY,
+  title TEXT NOT NULL UNIQUE,
+  description TEXT,
+  election_year_parity TEXT NOT NULL, -- 'even' or 'odd'
+  term_years INTEGER NOT NULL DEFAULT 2,
+  sort_order INTEGER NOT NULL
+)
+
+-- Board Members (who holds each position)
+board_members (
+  id TEXT PRIMARY KEY,
+  position_id TEXT NOT NULL REFERENCES board_positions(id),
+  member_id TEXT NOT NULL REFERENCES members(id),
+  term_start INTEGER NOT NULL,
+  term_end INTEGER NOT NULL,
+  is_current INTEGER NOT NULL DEFAULT 1,
+  created_at INTEGER NOT NULL
+)
+
+-- Elections
+elections (
+  id TEXT PRIMARY KEY,
+  election_year INTEGER NOT NULL,
+  status TEXT NOT NULL, -- nominations_open, voting_open, closed
+  nominations_open_at INTEGER,
+  nominations_close_at INTEGER,
+  voting_open_at INTEGER,
+  voting_close_at INTEGER,
+  created_at INTEGER NOT NULL
+)
+
+-- Election Candidates
+election_candidates (
+  id TEXT PRIMARY KEY,
+  election_id TEXT NOT NULL REFERENCES elections(id),
+  position_id TEXT NOT NULL REFERENCES board_positions(id),
+  member_id TEXT NOT NULL REFERENCES members(id),
+  bio TEXT,
+  statement TEXT,
+  photo_url TEXT,
+  is_eligible INTEGER NOT NULL DEFAULT 1,
+  created_at INTEGER NOT NULL,
+  UNIQUE(election_id, position_id, member_id)
+)
+
+-- Election Votes
+election_votes (
+  id TEXT PRIMARY KEY,
+  election_id TEXT NOT NULL REFERENCES elections(id),
+  position_id TEXT NOT NULL REFERENCES board_positions(id),
+  voter_id TEXT NOT NULL REFERENCES members(id),
+  candidate_id TEXT NOT NULL REFERENCES election_candidates(id),
+  voted_at INTEGER NOT NULL,
+  UNIQUE(election_id, position_id, voter_id)
+)
+
+-- Meetings
+meetings (
+  id TEXT PRIMARY KEY,
+  meeting_type TEXT NOT NULL, -- annual, board, membership, special
+  title TEXT NOT NULL,
+  scheduled_at INTEGER NOT NULL,
+  location TEXT,
+  agenda_url TEXT,
+  minutes_url TEXT,
+  is_executive_session INTEGER NOT NULL DEFAULT 0,
+  attendance_count INTEGER,
+  created_at INTEGER NOT NULL,
+  updated_at INTEGER NOT NULL
+)
+
+-- Meeting Attendance
+meeting_attendance (
+  id TEXT PRIMARY KEY,
+  meeting_id TEXT NOT NULL REFERENCES meetings(id),
+  member_id TEXT NOT NULL REFERENCES members(id),
+  attended_at INTEGER NOT NULL,
+  UNIQUE(meeting_id, member_id)
+)
+
+-- Motions (for tracking votes at meetings)
+motions (
+  id TEXT PRIMARY KEY,
+  meeting_id TEXT NOT NULL REFERENCES meetings(id),
+  title TEXT NOT NULL,
+  description TEXT,
+  motion_type TEXT NOT NULL, -- general, expenditure, bylaw, dues, discipline
+  proposed_by TEXT REFERENCES members(id),
+  seconded_by TEXT REFERENCES members(id),
+  votes_for INTEGER,
+  votes_against INTEGER,
+  votes_abstain INTEGER,
+  required_threshold TEXT, -- majority, two_thirds, three_quarters
+  passed INTEGER, -- 1 = passed, 0 = failed, null = pending
+  created_at INTEGER NOT NULL
+)
+
+-- Petitions (for special meetings, bylaw changes)
+petitions (
+  id TEXT PRIMARY KEY,
+  petition_type TEXT NOT NULL, -- special_meeting, bylaw_amendment
+  title TEXT NOT NULL,
+  description TEXT,
+  required_signatures INTEGER NOT NULL,
+  deadline INTEGER,
+  status TEXT NOT NULL, -- collecting, threshold_met, submitted, acted_upon, expired
+  created_by TEXT NOT NULL REFERENCES members(id),
+  created_at INTEGER NOT NULL,
+  updated_at INTEGER NOT NULL
+)
+
+-- Petition Signatures
+petition_signatures (
+  id TEXT PRIMARY KEY,
+  petition_id TEXT NOT NULL REFERENCES petitions(id),
+  member_id TEXT NOT NULL REFERENCES members(id),
+  signed_at INTEGER NOT NULL,
+  UNIQUE(petition_id, member_id)
+)
+
+-- Discipline Cases
+discipline_cases (
+  id TEXT PRIMARY KEY,
+  member_id TEXT NOT NULL REFERENCES members(id),
+  status TEXT NOT NULL, -- filed, notified, hearing_scheduled, decided, appealed, closed
+  charges TEXT NOT NULL,
+  filed_by TEXT NOT NULL REFERENCES users(id),
+  filed_at INTEGER NOT NULL,
+  certified_mail_sent_at INTEGER,
+  certified_mail_tracking TEXT,
+  hearing_date INTEGER,
+  member_statement TEXT,
+  member_attended_hearing INTEGER,
+  decision TEXT, -- expelled, suspended, warning, dismissed
+  decision_date INTEGER,
+  votes_for INTEGER,
+  votes_against INTEGER,
+  appeal_requested INTEGER DEFAULT 0,
+  appeal_meeting_id TEXT REFERENCES meetings(id),
+  appeal_result TEXT, -- restored, upheld
+  notes TEXT,
+  created_at INTEGER NOT NULL,
+  updated_at INTEGER NOT NULL
+)
+
+-- Five Year Plan Projects
+five_year_projects (
+  id TEXT PRIMARY KEY,
+  title TEXT NOT NULL,
+  description TEXT,
+  start_year INTEGER NOT NULL,
+  end_year INTEGER NOT NULL,
+  estimated_budget INTEGER, -- in cents
+  funding_source TEXT,
+  status TEXT NOT NULL, -- proposed, approved, in_progress, completed, cancelled
+  sponsor_position_id TEXT REFERENCES board_positions(id),
+  approved_at_meeting_id TEXT REFERENCES meetings(id),
+  created_at INTEGER NOT NULL,
+  updated_at INTEGER NOT NULL
+)
+
+-- Ballots (for online voting on dues, bylaws, expenditures)
+ballots (
+  id TEXT PRIMARY KEY,
+  title TEXT NOT NULL,
+  description TEXT,
+  ballot_type TEXT NOT NULL, -- dues_change, bylaw_amendment, expenditure
+  options TEXT NOT NULL, -- JSON array of options
+  required_threshold TEXT NOT NULL, -- majority, two_thirds
+  opens_at INTEGER NOT NULL,
+  closes_at INTEGER NOT NULL,
+  status TEXT NOT NULL, -- draft, open, closed
+  results TEXT, -- JSON with vote counts
+  passed INTEGER, -- 1 = passed, 0 = failed, null = pending
+  created_by TEXT NOT NULL REFERENCES users(id),
+  created_at INTEGER NOT NULL
+)
+
+-- Ballot Votes
+ballot_votes (
+  id TEXT PRIMARY KEY,
+  ballot_id TEXT NOT NULL REFERENCES ballots(id),
+  member_id TEXT NOT NULL REFERENCES members(id),
+  vote TEXT NOT NULL,
+  voted_at INTEGER NOT NULL,
+  UNIQUE(ballot_id, member_id)
+)
+```
+
 ---
 
 ## API Structure

@@ -4,7 +4,9 @@ A comprehensive website for a private, non-profit shooting club in Manor, Texas.
 
 **Location**: 16312 Littig Rd, Manor, TX 78653
 **Current Members**: ~1,500
-**Established**: 1894
+**Founded**: 1894 | **Incorporated**: December 8, 1928
+**Charter #**: 52790 (Texas Non-Profit Corporation)
+**Fiscal Year**: April 1 – March 31
 
 ---
 
@@ -21,6 +23,7 @@ A comprehensive website for a private, non-profit shooting club in Manor, Texas.
 | [07-tech-stack.md](./07-tech-stack.md) | Technology stack and database schema |
 | [08-success-metrics.md](./08-success-metrics.md) | Success metrics and KPIs |
 | [09-content-strategy.md](./09-content-strategy.md) | Educational content and range guides |
+| [10-governance.md](./10-governance.md) | Bylaws, BOD structure, elections, compliance |
 
 ---
 
