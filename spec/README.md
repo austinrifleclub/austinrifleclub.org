@@ -24,6 +24,7 @@ A comprehensive website for a private, non-profit shooting club in Manor, Texas.
 | [08-success-metrics.md](./08-success-metrics.md) | Success metrics and KPIs |
 | [09-content-strategy.md](./09-content-strategy.md) | Educational content and range guides |
 | [10-governance.md](./10-governance.md) | Bylaws, BOD structure, elections, compliance |
+| [11-operations.md](./11-operations.md) | Admin runbooks and procedures |
 
 ---
 
