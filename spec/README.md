@@ -20,6 +20,7 @@ A comprehensive website for a private, non-profit shooting club in Manor, Texas.
 | [06-notifications.md](./06-notifications.md) | Notification system |
 | [07-tech-stack.md](./07-tech-stack.md) | Technology stack and database schema |
 | [08-success-metrics.md](./08-success-metrics.md) | Success metrics and KPIs |
+| [09-content-strategy.md](./09-content-strategy.md) | Educational content and range guides |
 
 ---
 
