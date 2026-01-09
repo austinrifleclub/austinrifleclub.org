@@ -10,46 +10,14 @@ A comprehensive website for a private, non-profit shooting club in Manor, Texas.
 
 ---
 
-## Specification Index
-
-### Core Domain
+## Specification Files
 
 | Document | Description |
 |----------|-------------|
-| [membership.md](./membership.md) | Applications, dues, renewals, family members, life membership |
-| [events.md](./events.md) | Calendar, matches, classes, scoring, volunteer tracking |
-| [guests.md](./guests.md) | Guest sign-in, waivers, visit limits |
-| [shop.md](./shop.md) | Products, orders, volunteer credits |
-| [ranges.md](./ranges.md) | Status, reservations, rentals, digital member card |
-| [content.md](./content.md) | Public website, announcements, documents, AI features |
-| [community.md](./community.md) | Forums, classifieds, photos, mentorship, gamification |
-
-### System & Operations
-
-| Document | Description |
-|----------|-------------|
-| [01-overview.md](./01-overview.md) | Project overview and user roles |
-| [05-admin-dashboard.md](./05-admin-dashboard.md) | Admin dashboard and reports |
-| [06-notifications.md](./06-notifications.md) | Notification system |
-| [07-tech-stack.md](./07-tech-stack.md) | Technology stack and database schema |
-| [08-success-metrics.md](./08-success-metrics.md) | Success metrics and KPIs |
-| [analytics.md](./analytics.md) | Web analytics, SEO, advertising, attribution |
-
-### Governance & Compliance
-
-| Document | Description |
-|----------|-------------|
-| [09-content-strategy.md](./09-content-strategy.md) | Educational content and range guides |
-| [10-governance.md](./10-governance.md) | Bylaws, BOD structure, elections, compliance |
-| [11-operations.md](./11-operations.md) | Admin runbooks and procedures |
-
-### Technical Reference
-
-| Document | Description |
-|----------|-------------|
-| [12-validation.md](./12-validation.md) | Field validation rules and constraints |
-| [13-business-rules.md](./13-business-rules.md) | Edge cases, calculations, system behavior |
-| [14-security.md](./14-security.md) | Data protection, access control, privacy |
+| [features.md](./features.md) | All user-facing features: membership, events, guests, shop, ranges, content, community |
+| [admin.md](./admin.md) | Admin dashboard, notifications, governance, bylaws, operations runbook |
+| [technical.md](./technical.md) | Tech stack, database schema, validation rules, business rules, security |
+| [growth.md](./growth.md) | Analytics, SEO, marketing, KPIs, content strategy |
 
 ---
 
@@ -78,15 +46,42 @@ A comprehensive website for a private, non-profit shooting club in Manor, Texas.
 | Cloudflare | Hosting, CDN, security |
 | Practiscore | Match results |
 
+### Tech Stack
+
+| Layer | Technology |
+|-------|------------|
+| Runtime | Cloudflare Workers |
+| Framework | Hono |
+| Database | Cloudflare D1 (SQLite) |
+| ORM | Drizzle |
+| Auth | better-auth |
+| Validation | Zod |
+| Frontend | Astro on Cloudflare Pages |
+| Files | Cloudflare R2 |
+
 ---
 
-## Development Notes
+## How to Use This Spec
 
-Each spec document is organized by feature domain rather than implementation phase. This allows:
+**For developers:** Start with `technical.md` for architecture, then `features.md` for requirements.
 
-1. **Clear ownership** — Each document covers one area of functionality
-2. **Easy reference** — Find related features in one place
-3. **Incremental delivery** — Build features from any document independently
-4. **Board handoffs** — Volunteers can understand their domain without reading everything
+**For board members:** Read `admin.md` for operations runbook and governance rules.
 
-All documents reference the business rules and validation specs for implementation details.
+**For marketing:** See `growth.md` for analytics, SEO, and content strategy.
+
+**Looking for something specific:**
+
+| Topic | File | Section |
+|-------|------|---------|
+| Membership application | features.md | 1. Membership |
+| Event registration | features.md | 2. Events |
+| Guest waivers | features.md | 3. Guests |
+| Shop orders | features.md | 4. Shop |
+| Range status | features.md | 5. Ranges |
+| BOD elections | admin.md | 3. Governance |
+| Discipline process | admin.md | 3. Governance |
+| Database schema | technical.md | 2. Database |
+| Validation rules | technical.md | 3. Validation |
+| Security | technical.md | 5. Security |
+| SEO | growth.md | 2. SEO & Marketing |
+| KPIs | growth.md | 3. Success Metrics |
