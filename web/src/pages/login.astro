@@ -1,0 +1,46 @@
+---
+/**
+ * Login Page
+ *
+ * Member authentication page.
+ */
+import Layout from '../layouts/Layout.astro';
+import LoginForm from '../components/LoginForm';
+---
+
+<Layout title="Member Login" description="Sign in to your Austin Rifle Club member account">
+  <section class="py-12 md:py-20 bg-gray-50 min-h-[80vh] flex items-center">
+    <div class="max-w-md mx-auto px-4 sm:px-6 lg:px-8 w-full">
+      <div class="bg-white rounded-lg shadow-md p-8">
+        <div class="text-center mb-8">
+          <img src="/logo.svg" alt="ARC" class="h-16 w-16 mx-auto mb-4" />
+          <h1 class="text-2xl font-bold text-gray-900">Member Login</h1>
+          <p class="text-gray-600 text-sm mt-2">
+            Sign in to access your member dashboard
+          </p>
+        </div>
+
+        <LoginForm client:load />
+
+        <div class="mt-6 text-center text-sm text-gray-600">
+          <p>
+            Not a member?{' '}
+            <a href="/membership" class="text-green-700 hover:text-green-800 font-medium">
+              Join the club
+            </a>
+          </p>
+        </div>
+      </div>
+
+      <!-- Help -->
+      <div class="mt-6 text-center text-sm text-gray-500">
+        <p>
+          Having trouble logging in?{' '}
+          <a href="mailto:info@austinrifleclub.org" class="text-green-700 hover:text-green-800">
+            Contact us
+          </a>
+        </p>
+      </div>
+    </div>
+  </section>
+</Layout>

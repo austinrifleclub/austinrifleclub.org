@@ -29,3 +29,7 @@ npm-debug.log*
 .wrangler/
 *.sqlite
 *.sqlite3
+
+# Nix
+.direnv/
+result

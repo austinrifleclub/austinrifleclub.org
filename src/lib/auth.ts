@@ -2,6 +2,7 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { createDb } from "../db";
 import * as schema from "../db/schema";
+import { sendEmail, passwordResetEmail } from "./email";
 
 export type Env = {
   DB: D1Database;
@@ -9,6 +10,11 @@ export type Env = {
   R2: R2Bucket;
   BETTER_AUTH_SECRET: string;
   BETTER_AUTH_URL: string;
+  RESEND_API_KEY?: string;
+  STRIPE_SECRET_KEY?: string;
+  STRIPE_WEBHOOK_SECRET?: string;
+  TWILIO_ACCOUNT_SID?: string;
+  TWILIO_AUTH_TOKEN?: string;
 };
 
 // Create auth instance per request with environment bindings
@@ -30,6 +36,15 @@ export function createAuth(env: Env) {
     emailAndPassword: {
       enabled: true,
       requireEmailVerification: false, // Set to true in production
+      sendResetPassword: async ({ user, url }) => {
+        const email = passwordResetEmail(url);
+        await sendEmail(env.RESEND_API_KEY || '', {
+          to: user.email,
+          subject: email.subject,
+          html: email.html,
+          text: email.text,
+        });
+      },
     },
     session: {
       expiresIn: 60 * 60 * 24 * 7, // 7 days

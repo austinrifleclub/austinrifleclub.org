@@ -1,0 +1,158 @@
+---
+/**
+ * FAQ Page
+ *
+ * Frequently asked questions about Austin Rifle Club.
+ */
+import Layout from '../layouts/Layout.astro';
+
+const faqs = [
+  {
+    category: 'Membership',
+    questions: [
+      {
+        q: 'How do I join Austin Rifle Club?',
+        a: 'Complete the online application, pay your dues, and attend a new member orientation. The process typically takes 5-7 business days for approval.'
+      },
+      {
+        q: 'What are the membership requirements?',
+        a: 'Members must be 21 years or older (18 with parent/guardian), have a valid government ID, pass a background check, and have no felony convictions.'
+      },
+      {
+        q: 'Can I try the club before joining?',
+        a: 'Yes! Current members can bring you as a guest, or you can attend one of our public events or open house days. Contact us to arrange a visit.'
+      },
+      {
+        q: 'What is included in my membership?',
+        a: 'Full access to all 12 ranges from sunrise to sunset, 7 days a week. Plus discounts on events, classes, and the ability to bring guests.'
+      },
+      {
+        q: 'How do I renew my membership?',
+        a: 'Log into your member dashboard and click "Renew Now." You can pay online via credit card. Renewal notices are sent 60 days before expiration.'
+      },
+      {
+        q: 'Can I get a refund if I move away?',
+        a: 'Membership dues are non-refundable, but you can request to have your membership placed on hold for up to one year in special circumstances.'
+      }
+    ]
+  },
+  {
+    category: 'Visiting & Range Use',
+    questions: [
+      {
+        q: 'What are the range hours?',
+        a: 'All outdoor ranges are open sunrise to sunset, 7 days a week. The indoor air gun range (Range F) hours vary - check the calendar.'
+      },
+      {
+        q: 'Do I need to make a reservation?',
+        a: 'No reservations needed for regular shooting. Just sign in at the clubhouse. During scheduled events, some ranges may be closed to general use.'
+      },
+      {
+        q: 'Can I bring guests?',
+        a: 'Yes! Members can bring up to 4 guests per visit. All guests must sign in and complete a waiver. Guests are limited to 3 visits per year.'
+      },
+      {
+        q: 'What should I bring?',
+        a: 'Eye and ear protection (required), your firearms and ammunition, targets, and your member badge. Water and sunscreen recommended for outdoor ranges.'
+      },
+      {
+        q: 'Is there a Range Safety Officer on duty?',
+        a: 'Not during regular hours - all members are expected to know and follow the range rules. RSOs are present during scheduled matches and events.'
+      },
+      {
+        q: 'What types of firearms are allowed?',
+        a: 'Most firearms are welcome within the caliber restrictions of each range. Check the Range Rules page for specific limitations on each range.'
+      }
+    ]
+  },
+  {
+    category: 'Events & Training',
+    questions: [
+      {
+        q: 'What competitions does the club host?',
+        a: 'We host monthly IDPA, USPSA, Steel Challenge, and 3-Gun matches. Plus silhouette, air gun, and specialty matches throughout the year.'
+      },
+      {
+        q: 'Do I need to be experienced to compete?',
+        a: 'Not at all! Most matches welcome beginners. Arrive early and let the Match Director know you\'re new - someone will help you through it.'
+      },
+      {
+        q: 'What training classes are offered?',
+        a: 'We offer NRA Basic Pistol, Personal Protection, and various member-taught clinics. Check the calendar for upcoming classes.'
+      },
+      {
+        q: 'How do I earn volunteer credits?',
+        a: 'Help with work days, assist at matches, or take on club projects. Log your hours in the member dashboard. Credits can offset dues.'
+      }
+    ]
+  },
+  {
+    category: 'Facilities',
+    questions: [
+      {
+        q: 'Is there a pro shop or ammo for sale?',
+        a: 'We have a small selection of targets, ear/eye protection, and club merchandise. We do not sell firearms or ammunition.'
+      },
+      {
+        q: 'Are there restrooms on site?',
+        a: 'Yes, restrooms are located at the clubhouse. Portable facilities are also available near some ranges during events.'
+      },
+      {
+        q: 'Is food available?',
+        a: 'During major events, food vendors or club BBQ may be available. For regular visits, bring your own food and drinks (no alcohol).'
+      },
+      {
+        q: 'Is the range wheelchair accessible?',
+        a: 'The clubhouse and several ranges have accessible features. Contact us for specific accessibility questions.'
+      }
+    ]
+  }
+];
+---
+
+<Layout title="FAQ" description="Frequently asked questions about Austin Rifle Club membership, ranges, and events">
+  <section class="py-8 md:py-12 bg-gray-50 min-h-screen">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4 text-center">
+        Frequently Asked Questions
+      </h1>
+      <p class="text-gray-600 text-center mb-12 max-w-2xl mx-auto">
+        Find answers to common questions about membership, range use, events, and more.
+      </p>
+
+      <div class="space-y-12">
+        {faqs.map((section) => (
+          <div>
+            <h2 class="text-2xl font-bold text-green-800 mb-6">{section.category}</h2>
+            <div class="space-y-4">
+              {section.questions.map((faq) => (
+                <details class="bg-white rounded-lg shadow-md group">
+                  <summary class="p-4 cursor-pointer list-none flex justify-between items-center font-semibold hover:bg-gray-50 rounded-lg">
+                    {faq.q}
+                    <span class="text-green-600 group-open:rotate-180 transition-transform ml-4">▼</span>
+                  </summary>
+                  <div class="px-4 pb-4 text-gray-600">
+                    {faq.a}
+                  </div>
+                </details>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div class="mt-12 bg-green-50 border border-green-200 rounded-lg p-6 text-center">
+        <h3 class="font-semibold text-green-800 mb-2">Still have questions?</h3>
+        <p class="text-green-700 mb-4">
+          We're happy to help! Contact us and we'll get back to you as soon as possible.
+        </p>
+        <a
+          href="mailto:info@austinrifleclub.org"
+          class="inline-block bg-green-700 hover:bg-green-800 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+        >
+          Contact Us
+        </a>
+      </div>
+    </div>
+  </section>
+</Layout>

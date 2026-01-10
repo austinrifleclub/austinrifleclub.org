@@ -1,0 +1,21 @@
+# robots.txt for Austin Rifle Club
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://austinrifleclub.org/sitemap.xml
+
+# Disallow admin and private areas
+Disallow: /admin/
+Disallow: /dashboard/
+Disallow: /api/
+
+# Allow search engines to crawl public pages
+Allow: /
+Allow: /membership
+Allow: /calendar
+Allow: /ranges
+Allow: /range-status
+Allow: /about
+Allow: /faq
+Allow: /range-rules

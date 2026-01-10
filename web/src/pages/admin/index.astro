@@ -1,0 +1,13 @@
+---
+/**
+ * Admin Dashboard
+ *
+ * Overview of club statistics and recent activity.
+ */
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import AdminDashboard from '../../components/admin/AdminDashboard';
+---
+
+<AdminLayout title="Dashboard" activeNav="Dashboard">
+  <AdminDashboard client:load />
+</AdminLayout>

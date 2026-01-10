@@ -16,7 +16,7 @@ A comprehensive website for a private, non-profit shooting club in Manor, Texas.
 |----------|-------------|
 | [features.md](./features.md) | All user-facing features: membership, events, guests, shop, ranges, content, community |
 | [admin.md](./admin.md) | Admin dashboard, notifications, governance, bylaws, operations runbook |
-| [technical.md](./technical.md) | Tech stack, database schema, validation rules, business rules, security |
+| [technical.md](./technical.md) | Tech stack, database schema, validation, security, **maintainability & support tiers** |
 | [growth.md](./growth.md) | Analytics, SEO, marketing, KPIs, content strategy |
 
 ---
@@ -83,5 +83,6 @@ A comprehensive website for a private, non-profit shooting club in Manor, Texas.
 | Database schema | technical.md | 2. Database |
 | Validation rules | technical.md | 3. Validation |
 | Security | technical.md | 5. Security |
+| **Support tiers** | technical.md | 6. Maintainability |
 | SEO | growth.md | 2. SEO & Marketing |
 | KPIs | growth.md | 3. Success Metrics |

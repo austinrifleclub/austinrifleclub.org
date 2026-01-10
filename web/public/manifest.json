@@ -1,0 +1,45 @@
+{
+  "name": "Austin Rifle Club",
+  "short_name": "ARC",
+  "description": "Austin Rifle Club - Private shooting club in Manor, Texas since 1894",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#166534",
+  "theme_color": "#166534",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Range Status",
+      "short_name": "Status",
+      "description": "Check current range status",
+      "url": "/range-status",
+      "icons": [{ "src": "/logo.svg", "sizes": "96x96" }]
+    },
+    {
+      "name": "Calendar",
+      "short_name": "Events",
+      "description": "View upcoming events",
+      "url": "/calendar",
+      "icons": [{ "src": "/logo.svg", "sizes": "96x96" }]
+    }
+  ],
+  "categories": ["sports", "lifestyle"]
+}

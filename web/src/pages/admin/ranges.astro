@@ -1,0 +1,13 @@
+---
+/**
+ * Admin Ranges Management
+ *
+ * Manage range statuses and information.
+ */
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import RangesManager from '../../components/admin/RangesManager';
+---
+
+<AdminLayout title="Ranges" activeNav="Ranges">
+  <RangesManager client:load />
+</AdminLayout>

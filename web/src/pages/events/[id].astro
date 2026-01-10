@@ -1,0 +1,17 @@
+---
+/**
+ * Event Detail Page
+ *
+ * Shows event details and allows registration.
+ */
+import Layout from '../../layouts/Layout.astro';
+import EventDetail from '../../components/EventDetail';
+---
+
+<Layout title="Event Details" description="View event details and register">
+  <section class="py-8 md:py-12 bg-gray-50 min-h-screen">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <EventDetail client:load eventId={Astro.params.id} />
+    </div>
+  </section>
+</Layout>

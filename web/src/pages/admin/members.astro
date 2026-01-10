@@ -1,0 +1,13 @@
+---
+/**
+ * Admin Members Management
+ *
+ * View and manage club members.
+ */
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import MembersManager from '../../components/admin/MembersManager';
+---
+
+<AdminLayout title="Members" activeNav="Members">
+  <MembersManager client:load />
+</AdminLayout>

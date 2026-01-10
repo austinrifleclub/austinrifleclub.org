@@ -1,0 +1,83 @@
+---
+/**
+ * Range Status Page
+ *
+ * Real-time display of all range statuses.
+ * This is the most-visited page - members check this before driving to the club.
+ *
+ * @see features.md Section 5.2 for requirements
+ */
+import Layout from '../layouts/Layout.astro';
+import RangeStatusDisplay from '../components/RangeStatusDisplay';
+---
+
+<Layout title="Range Status" description="Real-time status of all ranges at Austin Rifle Club">
+  <section class="py-8 md:py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-8">
+        <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+          Range Status
+        </h1>
+        <p class="text-gray-600 max-w-2xl mx-auto">
+          Check the current status of all ranges before your visit.
+          Status updates in real-time as conditions change.
+        </p>
+      </div>
+
+      <RangeStatusDisplay client:load />
+
+      <!-- Range Info -->
+      <div class="mt-12 bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-xl font-semibold mb-4">Status Definitions</h2>
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="flex items-start gap-3">
+            <div class="w-4 h-4 rounded-full bg-green-500 mt-1 flex-shrink-0"></div>
+            <div>
+              <p class="font-medium text-green-700">Open</p>
+              <p class="text-sm text-gray-600">Range available for member use</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-3">
+            <div class="w-4 h-4 rounded-full bg-blue-500 mt-1 flex-shrink-0"></div>
+            <div>
+              <p class="font-medium text-blue-700">Event</p>
+              <p class="text-sm text-gray-600">Scheduled event in progress</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-3">
+            <div class="w-4 h-4 rounded-full bg-red-500 mt-1 flex-shrink-0"></div>
+            <div>
+              <p class="font-medium text-red-700">Closed</p>
+              <p class="text-sm text-gray-600">Range not available</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-3">
+            <div class="w-4 h-4 rounded-full bg-yellow-500 mt-1 flex-shrink-0"></div>
+            <div>
+              <p class="font-medium text-yellow-700">Maintenance</p>
+              <p class="text-sm text-gray-600">Maintenance work in progress</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Weather Notice -->
+      <div class="mt-6 bg-amber-50 border border-amber-200 rounded-lg p-4">
+        <p class="text-amber-800 text-sm">
+          <strong>Weather Note:</strong> Ranges may close unexpectedly due to severe weather.
+          Always check this page before making the drive. During lightning, all outdoor ranges are closed.
+        </p>
+      </div>
+
+      <!-- Contact -->
+      <div class="mt-6 text-center text-sm text-gray-500">
+        <p>
+          Questions about range availability?{' '}
+          <a href="mailto:info@austinrifleclub.org" class="text-green-700 hover:text-green-800 underline">
+            Contact Us
+          </a>
+        </p>
+      </div>
+    </div>
+  </section>
+</Layout>

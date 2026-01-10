@@ -1,0 +1,13 @@
+---
+/**
+ * Member Profile Page
+ *
+ * View and edit member profile information.
+ */
+import Layout from '../../layouts/Layout.astro';
+import ProfileEditor from '../../components/dashboard/ProfileEditor';
+---
+
+<Layout title="My Profile" description="View and update your Austin Rifle Club member profile">
+  <ProfileEditor client:load />
+</Layout>

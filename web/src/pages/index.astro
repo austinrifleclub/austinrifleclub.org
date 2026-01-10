@@ -1,0 +1,196 @@
+---
+/**
+ * Home Page
+ *
+ * Public landing page for Austin Rifle Club
+ */
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Home">
+  <!-- Hero Section -->
+  <section class="bg-green-800 text-white py-16 md:py-24">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid md:grid-cols-2 gap-8 items-center">
+        <div>
+          <h1 class="text-4xl md:text-5xl font-bold mb-4">
+            Austin Rifle Club
+          </h1>
+          <p class="text-xl text-green-100 mb-6">
+            A private, non-profit shooting sports organization serving Central Texas since 1894.
+          </p>
+          <div class="flex flex-wrap gap-4">
+            <a
+              href="/range-status"
+              class="bg-white text-green-800 px-6 py-3 rounded-lg font-semibold hover:bg-green-50 transition-colors"
+            >
+              Check Range Status
+            </a>
+            <a
+              href="/membership"
+              class="border-2 border-white px-6 py-3 rounded-lg font-semibold hover:bg-white hover:text-green-800 transition-colors"
+            >
+              Join the Club
+            </a>
+          </div>
+        </div>
+        <div class="hidden md:block">
+          <img
+            src="/hero-range.jpg"
+            alt="Austin Rifle Club ranges"
+            class="rounded-lg shadow-xl object-cover"
+            width="600"
+            height="400"
+            loading="eager"
+          />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Quick Info Section -->
+  <section class="py-12 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid md:grid-cols-3 gap-8">
+        <!-- Location -->
+        <div class="text-center p-6">
+          <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-6 h-6 text-green-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          </div>
+          <h3 class="font-semibold text-lg mb-2">Location</h3>
+          <p class="text-gray-600">
+            16312 Littig Rd<br />
+            Manor, TX 78653
+          </p>
+          <a
+            href="https://maps.google.com/?q=16312+Littig+Rd+Manor+TX+78653"
+            target="_blank"
+            rel="noopener"
+            class="text-green-700 hover:text-green-800 text-sm mt-2 inline-block"
+          >
+            Get Directions &rarr;
+          </a>
+        </div>
+
+        <!-- Hours -->
+        <div class="text-center p-6">
+          <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-6 h-6 text-green-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h3 class="font-semibold text-lg mb-2">Range Hours</h3>
+          <p class="text-gray-600">
+            Sunrise to Sunset<br />
+            7 Days a Week
+          </p>
+          <a href="/range-status" class="text-green-700 hover:text-green-800 text-sm mt-2 inline-block">
+            Check Today's Status &rarr;
+          </a>
+        </div>
+
+        <!-- Members -->
+        <div class="text-center p-6">
+          <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-6 h-6 text-green-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+          </div>
+          <h3 class="font-semibold text-lg mb-2">~1,500 Members</h3>
+          <p class="text-gray-600">
+            Active shooting sports<br />
+            community since 1894
+          </p>
+          <a href="/membership" class="text-green-700 hover:text-green-800 text-sm mt-2 inline-block">
+            Become a Member &rarr;
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Ranges Overview -->
+  <section class="py-16 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-3xl font-bold text-center mb-12">Our Ranges</h2>
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="bg-white rounded-lg shadow-md p-6">
+          <h3 class="font-semibold text-lg mb-2">Pistol Ranges</h3>
+          <p class="text-gray-600 text-sm mb-3">
+            25/50 yard ranges for handgun practice and competition.
+          </p>
+          <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">Ranges A, B</span>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6">
+          <h3 class="font-semibold text-lg mb-2">Rifle Ranges</h3>
+          <p class="text-gray-600 text-sm mb-3">
+            100/200 yard benchrest and high power rifle ranges.
+          </p>
+          <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">Range C</span>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6">
+          <h3 class="font-semibold text-lg mb-2">Silhouette</h3>
+          <p class="text-gray-600 text-sm mb-3">
+            .22 silhouette and pistol silhouette facilities.
+          </p>
+          <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">Ranges D, E</span>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6">
+          <h3 class="font-semibold text-lg mb-2">Action Bays</h3>
+          <p class="text-gray-600 text-sm mb-3">
+            IDPA/USPSA action shooting bays with steel targets.
+          </p>
+          <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">Ranges H-L</span>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6">
+          <h3 class="font-semibold text-lg mb-2">Air Gun Range</h3>
+          <p class="text-gray-600 text-sm mb-3">
+            Indoor 10-meter air rifle and pistol range.
+          </p>
+          <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">Range F</span>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6">
+          <h3 class="font-semibold text-lg mb-2">Education Center</h3>
+          <p class="text-gray-600 text-sm mb-3">
+            Classroom and training facility for courses.
+          </p>
+          <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">Range G</span>
+        </div>
+      </div>
+
+      <div class="text-center mt-8">
+        <a
+          href="/ranges"
+          class="text-green-700 hover:text-green-800 font-medium"
+        >
+          View All Range Details &rarr;
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="py-16 bg-green-800 text-white">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="text-3xl font-bold mb-4">Ready to Join?</h2>
+      <p class="text-xl text-green-100 mb-8">
+        Become part of Central Texas's premier shooting sports community.
+        Annual membership starts at $150.
+      </p>
+      <a
+        href="/membership"
+        class="inline-block bg-white text-green-800 px-8 py-4 rounded-lg font-semibold text-lg hover:bg-green-50 transition-colors"
+      >
+        Start Your Application
+      </a>
+    </div>
+  </section>
+</Layout>

@@ -1,0 +1,644 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Austin Rifle Club API",
+    "description": "API for Austin Rifle Club member portal, range status, events, and administration.",
+    "version": "1.0.0",
+    "contact": {
+      "email": "info@austinrifleclub.org"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://austinrifleclub.org/api",
+      "description": "Production"
+    },
+    {
+      "url": "http://localhost:8787/api",
+      "description": "Development"
+    }
+  ],
+  "tags": [
+    { "name": "Health", "description": "Health check endpoints" },
+    { "name": "Range Status", "description": "Range availability and status" },
+    { "name": "Events", "description": "Club events and calendar" },
+    { "name": "Members", "description": "Member management" },
+    { "name": "Payments", "description": "Stripe payment integration" },
+    { "name": "Applications", "description": "Membership applications" },
+    { "name": "Guests", "description": "Guest sign-in system" }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "tags": ["Health"],
+        "summary": "Basic health check",
+        "responses": {
+          "200": {
+            "description": "Service is healthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": { "type": "string", "example": "ok" },
+                    "timestamp": { "type": "string", "format": "date-time" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health/ready": {
+      "get": {
+        "tags": ["Health"],
+        "summary": "Readiness check including database",
+        "responses": {
+          "200": {
+            "description": "Service and database are ready",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": { "type": "string", "example": "ready" },
+                    "database": { "type": "string", "example": "connected" },
+                    "timestamp": { "type": "string", "format": "date-time" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/range-status": {
+      "get": {
+        "tags": ["Range Status"],
+        "summary": "Get status of all ranges",
+        "description": "Returns current status of all ranges with any linked events. Public endpoint.",
+        "responses": {
+          "200": {
+            "description": "Range status list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ranges": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/RangeStatus" }
+                    },
+                    "lastUpdated": { "type": "string", "format": "date-time" },
+                    "weather": { "$ref": "#/components/schemas/Weather" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/range-status/{id}": {
+      "get": {
+        "tags": ["Range Status"],
+        "summary": "Get status of a specific range",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Range status" },
+          "404": { "description": "Range not found" }
+        }
+      },
+      "patch": {
+        "tags": ["Range Status"],
+        "summary": "Update range status (admin only)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": { "type": "string", "enum": ["open", "closed", "event", "maintenance"] },
+                  "statusNote": { "type": "string" },
+                  "expiresAt": { "type": "string", "format": "date-time" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Updated range status" },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Admin access required" },
+          "404": { "description": "Range not found" }
+        }
+      }
+    },
+    "/range-status/{id}/close": {
+      "post": {
+        "tags": ["Range Status"],
+        "summary": "Quick close a range (admin only)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["reason"],
+                "properties": {
+                  "reason": { "type": "string" },
+                  "duration": { "type": "integer", "description": "Duration in minutes" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Range closed" }
+        }
+      }
+    },
+    "/range-status/{id}/open": {
+      "post": {
+        "tags": ["Range Status"],
+        "summary": "Quick open a range (admin only)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Range opened" }
+        }
+      }
+    },
+    "/events": {
+      "get": {
+        "tags": ["Events"],
+        "summary": "List events",
+        "description": "Returns published events. Non-authenticated users see only public events.",
+        "parameters": [
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1 } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 20 } },
+          { "name": "start", "in": "query", "schema": { "type": "string", "format": "date" } },
+          { "name": "end", "in": "query", "schema": { "type": "string", "format": "date" } },
+          { "name": "type", "in": "query", "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Event list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "events": { "type": "array", "items": { "$ref": "#/components/schemas/Event" } },
+                    "pagination": { "$ref": "#/components/schemas/Pagination" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Events"],
+        "summary": "Create event (admin only)",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CreateEvent" }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Event created" }
+        }
+      }
+    },
+    "/events/{id}": {
+      "get": {
+        "tags": ["Events"],
+        "summary": "Get event details",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Event details" },
+          "404": { "description": "Event not found" }
+        }
+      },
+      "patch": {
+        "tags": ["Events"],
+        "summary": "Update event (admin only)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Event updated" }
+        }
+      }
+    },
+    "/events/{id}/register": {
+      "post": {
+        "tags": ["Events"],
+        "summary": "Register for event (member only)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "division": { "type": "string" },
+                  "classification": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Registration confirmed or waitlisted" },
+          "400": { "description": "Registration not open or deadline passed" },
+          "409": { "description": "Already registered" }
+        }
+      },
+      "delete": {
+        "tags": ["Events"],
+        "summary": "Cancel event registration (member only)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Registration cancelled with refund info" },
+          "404": { "description": "Not registered" }
+        }
+      }
+    },
+    "/events/calendar.ics": {
+      "get": {
+        "tags": ["Events"],
+        "summary": "Export events as iCal feed",
+        "responses": {
+          "200": {
+            "description": "iCal calendar file",
+            "content": {
+              "text/calendar": {}
+            }
+          }
+        }
+      }
+    },
+    "/members/me": {
+      "get": {
+        "tags": ["Members"],
+        "summary": "Get current member profile",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Member profile with related data",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/MemberProfile" }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": ["Members"],
+        "summary": "Update current member profile",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UpdateMember" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Profile updated" }
+        }
+      }
+    },
+    "/members/me/referral-code": {
+      "get": {
+        "tags": ["Members"],
+        "summary": "Get or generate referral code",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Referral code and stats",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": { "type": "string" },
+                    "referralCount": { "type": "integer" },
+                    "referralUrl": { "type": "string", "format": "uri" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/members/me/payments": {
+      "get": {
+        "tags": ["Members"],
+        "summary": "Get payment history",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Payment history" }
+        }
+      }
+    },
+    "/members/me/volunteer-hours": {
+      "get": {
+        "tags": ["Members"],
+        "summary": "Get volunteer hours and credits",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Volunteer hours by fiscal year" }
+        }
+      }
+    },
+    "/members": {
+      "get": {
+        "tags": ["Members"],
+        "summary": "List all members (admin only)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "page", "in": "query", "schema": { "type": "integer" } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer" } },
+          { "name": "status", "in": "query", "schema": { "type": "string" } },
+          { "name": "type", "in": "query", "schema": { "type": "string" } },
+          { "name": "search", "in": "query", "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Paginated member list" }
+        }
+      }
+    },
+    "/payments/checkout/membership": {
+      "post": {
+        "tags": ["Payments"],
+        "summary": "Create membership checkout session",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["membershipType"],
+                "properties": {
+                  "membershipType": {
+                    "type": "string",
+                    "enum": ["individual", "family", "life"]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Checkout session created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "sessionId": { "type": "string" },
+                    "url": { "type": "string", "format": "uri" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/payments/checkout/event/{eventId}": {
+      "post": {
+        "tags": ["Payments"],
+        "summary": "Create event registration checkout session",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "eventId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Checkout session created" }
+        }
+      }
+    },
+    "/payments/webhook": {
+      "post": {
+        "tags": ["Payments"],
+        "summary": "Stripe webhook endpoint",
+        "description": "Handles Stripe checkout.session.completed and other events",
+        "responses": {
+          "200": { "description": "Webhook processed" }
+        }
+      }
+    },
+    "/applications": {
+      "get": {
+        "tags": ["Applications"],
+        "summary": "List applications (admin only)",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Application list" }
+        }
+      },
+      "post": {
+        "tags": ["Applications"],
+        "summary": "Submit membership application",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CreateApplication" }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Application submitted" }
+        }
+      }
+    },
+    "/guests/sign-in": {
+      "post": {
+        "tags": ["Guests"],
+        "summary": "Sign in a guest (member only)",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["firstName", "lastName"],
+                "properties": {
+                  "firstName": { "type": "string" },
+                  "lastName": { "type": "string" },
+                  "phone": { "type": "string" },
+                  "email": { "type": "string", "format": "email" },
+                  "waiverSigned": { "type": "boolean" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Guest signed in" },
+          "400": { "description": "Guest limit reached" }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    },
+    "schemas": {
+      "RangeStatus": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "status": { "type": "string", "enum": ["open", "closed", "event", "maintenance"] },
+          "statusNote": { "type": "string", "nullable": true },
+          "expiresAt": { "type": "string", "format": "date-time", "nullable": true },
+          "linkedEvent": {
+            "type": "object",
+            "nullable": true,
+            "properties": {
+              "id": { "type": "string" },
+              "title": { "type": "string" },
+              "startTime": { "type": "string", "format": "date-time" },
+              "endTime": { "type": "string", "format": "date-time" }
+            }
+          },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Weather": {
+        "type": "object",
+        "properties": {
+          "temp": { "type": "number", "nullable": true },
+          "conditions": { "type": "string", "nullable": true },
+          "windSpeed": { "type": "number", "nullable": true },
+          "source": { "type": "string" }
+        }
+      },
+      "Event": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "description": { "type": "string" },
+          "eventType": { "type": "string" },
+          "startTime": { "type": "string", "format": "date-time" },
+          "endTime": { "type": "string", "format": "date-time" },
+          "location": { "type": "string" },
+          "maxParticipants": { "type": "integer", "nullable": true },
+          "cost": { "type": "number", "nullable": true },
+          "isPublic": { "type": "boolean" },
+          "registrationCount": { "type": "integer" },
+          "spotsRemaining": { "type": "integer", "nullable": true }
+        }
+      },
+      "CreateEvent": {
+        "type": "object",
+        "required": ["title", "startTime", "endTime"],
+        "properties": {
+          "title": { "type": "string" },
+          "description": { "type": "string" },
+          "eventType": { "type": "string" },
+          "startTime": { "type": "string", "format": "date-time" },
+          "endTime": { "type": "string", "format": "date-time" },
+          "location": { "type": "string" },
+          "maxParticipants": { "type": "integer" },
+          "cost": { "type": "number" },
+          "isPublic": { "type": "boolean" },
+          "rangeIds": { "type": "array", "items": { "type": "string" } }
+        }
+      },
+      "MemberProfile": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "email": { "type": "string", "format": "email" },
+          "firstName": { "type": "string" },
+          "lastName": { "type": "string" },
+          "badgeNumber": { "type": "string" },
+          "membershipType": { "type": "string" },
+          "status": { "type": "string" },
+          "expirationDate": { "type": "string", "format": "date" },
+          "volunteerCreditBalance": { "type": "number" },
+          "certifications": { "type": "array", "items": { "type": "object" } },
+          "familyMembers": { "type": "array", "items": { "type": "object" } },
+          "duesCurrent": { "type": "boolean" },
+          "inGracePeriod": { "type": "boolean" }
+        }
+      },
+      "UpdateMember": {
+        "type": "object",
+        "properties": {
+          "phone": { "type": "string" },
+          "address": { "type": "string" },
+          "city": { "type": "string" },
+          "state": { "type": "string" },
+          "zip": { "type": "string" },
+          "emergencyContact": { "type": "string" },
+          "emergencyPhone": { "type": "string" }
+        }
+      },
+      "CreateApplication": {
+        "type": "object",
+        "required": ["firstName", "lastName", "email", "phone"],
+        "properties": {
+          "firstName": { "type": "string" },
+          "lastName": { "type": "string" },
+          "email": { "type": "string", "format": "email" },
+          "phone": { "type": "string" },
+          "address": { "type": "string" },
+          "city": { "type": "string" },
+          "state": { "type": "string" },
+          "zip": { "type": "string" },
+          "membershipType": { "type": "string" },
+          "referredBy": { "type": "string" },
+          "shootingInterests": { "type": "array", "items": { "type": "string" } }
+        }
+      },
+      "Pagination": {
+        "type": "object",
+        "properties": {
+          "page": { "type": "integer" },
+          "limit": { "type": "integer" },
+          "total": { "type": "integer" },
+          "totalPages": { "type": "integer" }
+        }
+      }
+    }
+  }
+}

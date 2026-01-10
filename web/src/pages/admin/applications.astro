@@ -1,0 +1,13 @@
+---
+/**
+ * Admin Applications Management
+ *
+ * Review and process membership applications.
+ */
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import ApplicationsManager from '../../components/admin/ApplicationsManager';
+---
+
+<AdminLayout title="Applications" activeNav="Applications">
+  <ApplicationsManager client:load />
+</AdminLayout>

@@ -1,0 +1,13 @@
+---
+/**
+ * Admin Events Management
+ *
+ * Create, edit, and manage club events.
+ */
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import EventsManager from '../../components/admin/EventsManager';
+---
+
+<AdminLayout title="Events" activeNav="Events">
+  <EventsManager client:load />
+</AdminLayout>

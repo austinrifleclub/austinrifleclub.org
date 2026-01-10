@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Offline | Austin Rifle Club</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #f9fafb;
+      color: #374151;
+      padding: 20px;
+      text-align: center;
+    }
+    .logo {
+      width: 80px;
+      height: 80px;
+      margin-bottom: 24px;
+    }
+    h1 {
+      font-size: 24px;
+      color: #166534;
+      margin-bottom: 12px;
+    }
+    p {
+      color: #6b7280;
+      margin-bottom: 24px;
+      max-width: 400px;
+    }
+    button {
+      background: #166534;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #14532d;
+    }
+    .info {
+      margin-top: 40px;
+      padding: 20px;
+      background: #ecfdf5;
+      border-radius: 8px;
+      max-width: 400px;
+    }
+    .info h2 {
+      font-size: 14px;
+      color: #166534;
+      margin-bottom: 8px;
+    }
+    .info p {
+      font-size: 14px;
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+  <svg class="logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="50" cy="50" r="45" fill="#166534"/>
+    <text x="50" y="58" text-anchor="middle" fill="white" font-size="24" font-weight="bold">ARC</text>
+  </svg>
+
+  <h1>You're Offline</h1>
+  <p>It looks like you've lost your internet connection. Some features may not be available.</p>
+
+  <button onclick="window.location.reload()">Try Again</button>
+
+  <div class="info">
+    <h2>Club Contact</h2>
+    <p>Austin Rifle Club<br>16312 Littig Rd, Manor, TX 78653</p>
+  </div>
+
+  <script>
+    // Auto-reload when back online
+    window.addEventListener('online', () => {
+      window.location.reload();
+    });
+  </script>
+</body>
+</html>

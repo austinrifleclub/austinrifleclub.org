@@ -1,0 +1,13 @@
+---
+/**
+ * Admin Settings
+ *
+ * Club-wide settings and configuration.
+ */
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import SettingsManager from '../../components/admin/SettingsManager';
+---
+
+<AdminLayout title="Settings" activeNav="Settings">
+  <SettingsManager client:load />
+</AdminLayout>

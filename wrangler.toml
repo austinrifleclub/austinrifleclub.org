@@ -1,6 +1,7 @@
 name = "austinrifleclub-api"
 main = "src/index.ts"
 compatibility_date = "2024-12-01"
+compatibility_flags = ["nodejs_compat"]
 
 # D1 Database binding
 [[d1_databases]]
@@ -8,7 +9,7 @@ binding = "DB"
 database_name = "austinrifleclub-db"
 database_id = "placeholder-id"  # Replace with actual D1 database ID after creation
 
-# KV Namespace binding (for caching)
+# KV Namespace binding (for rate limiting and caching)
 [[kv_namespaces]]
 binding = "KV"
 id = "placeholder-id"  # Replace with actual KV namespace ID after creation
@@ -18,10 +19,67 @@ id = "placeholder-id"  # Replace with actual KV namespace ID after creation
 binding = "R2"
 bucket_name = "austinrifleclub-files"
 
-# Environment variables (secrets should be set via wrangler secret)
+# Environment variables (non-sensitive)
 [vars]
 BETTER_AUTH_URL = "http://localhost:8787"
 
 # Local development settings
 [dev]
 port = 8787
+local_protocol = "http"
+
+# =============================================================================
+# PRODUCTION ENVIRONMENT
+# =============================================================================
+[env.production]
+name = "austinrifleclub-api"
+workers_dev = false
+routes = [
+  { pattern = "austinrifleclub.org/api/*", zone_name = "austinrifleclub.org" },
+  { pattern = "austinrifleclub.org/health/*", zone_name = "austinrifleclub.org" }
+]
+
+# Production D1 Database
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "austinrifleclub-db-prod"
+database_id = "REPLACE_WITH_PROD_D1_ID"
+
+# Production KV Namespace
+[[env.production.kv_namespaces]]
+binding = "KV"
+id = "REPLACE_WITH_PROD_KV_ID"
+
+# Production R2 Bucket
+[[env.production.r2_buckets]]
+binding = "R2"
+bucket_name = "austinrifleclub-files-prod"
+
+[env.production.vars]
+BETTER_AUTH_URL = "https://austinrifleclub.org"
+
+# =============================================================================
+# STAGING ENVIRONMENT
+# =============================================================================
+[env.staging]
+name = "austinrifleclub-api-staging"
+workers_dev = true
+
+# Staging D1 Database
+[[env.staging.d1_databases]]
+binding = "DB"
+database_name = "austinrifleclub-db-staging"
+database_id = "REPLACE_WITH_STAGING_D1_ID"
+
+# Staging KV Namespace
+[[env.staging.kv_namespaces]]
+binding = "KV"
+id = "REPLACE_WITH_STAGING_KV_ID"
+
+# Staging R2 Bucket
+[[env.staging.r2_buckets]]
+binding = "R2"
+bucket_name = "austinrifleclub-files-staging"
+
+[env.staging.vars]
+BETTER_AUTH_URL = "https://staging.austinrifleclub.org"

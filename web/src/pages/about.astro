@@ -1,0 +1,222 @@
+---
+/**
+ * About Page
+ *
+ * History, mission, and governance information.
+ */
+import Layout from '../layouts/Layout.astro';
+
+const boardMembers = [
+  { position: 'President', name: 'TBD' },
+  { position: 'Vice President', name: 'TBD' },
+  { position: 'Secretary', name: 'TBD' },
+  { position: 'Treasurer', name: 'TBD' },
+  { position: 'Range Master', name: 'TBD' },
+];
+
+const timeline = [
+  { year: '1894', event: 'Austin Rifle Club founded as a shooting sports organization' },
+  { year: '1920s', event: 'Club relocates to current Manor location' },
+  { year: '1950s', event: 'Major range expansion and facility improvements' },
+  { year: '1980s', event: 'Action shooting bays added for IPSC competition' },
+  { year: '2000s', event: 'Indoor air gun range and education center built' },
+  { year: '2020s', event: 'Technology modernization and facility upgrades' },
+];
+---
+
+<Layout title="About" description="Learn about Austin Rifle Club's history, mission, and leadership">
+  <!-- Hero -->
+  <section class="bg-green-800 text-white py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h1 class="text-3xl md:text-4xl font-bold mb-4">
+        About Austin Rifle Club
+      </h1>
+      <p class="text-xl text-green-100 max-w-2xl mx-auto">
+        Promoting safe and responsible shooting sports in Central Texas since 1894.
+      </p>
+    </div>
+  </section>
+
+  <!-- Mission -->
+  <section class="py-12 bg-white">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-2xl font-bold text-center mb-8">Our Mission</h2>
+      <div class="prose prose-lg max-w-none text-gray-600">
+        <p class="text-center">
+          Austin Rifle Club is a private, non-profit corporation dedicated to promoting
+          the safe and responsible use of firearms through organized shooting sports,
+          education, and community service.
+        </p>
+        <div class="grid md:grid-cols-3 gap-6 mt-8">
+          <div class="text-center">
+            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <span class="text-2xl">🎯</span>
+            </div>
+            <h3 class="font-semibold mb-2">Shooting Sports</h3>
+            <p class="text-sm">
+              Host competitive matches and provide facilities for recreational shooting.
+            </p>
+          </div>
+          <div class="text-center">
+            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <span class="text-2xl">📚</span>
+            </div>
+            <h3 class="font-semibold mb-2">Education</h3>
+            <p class="text-sm">
+              Offer training programs and safety courses for shooters of all skill levels.
+            </p>
+          </div>
+          <div class="text-center">
+            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <span class="text-2xl">🤝</span>
+            </div>
+            <h3 class="font-semibold mb-2">Community</h3>
+            <p class="text-sm">
+              Foster a welcoming environment for shooting enthusiasts to connect.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- History -->
+  <section class="py-12 bg-gray-50">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-2xl font-bold text-center mb-8">Our History</h2>
+      <div class="relative">
+        <div class="absolute left-4 md:left-1/2 top-0 bottom-0 w-0.5 bg-green-200 transform md:-translate-x-1/2"></div>
+        <div class="space-y-8">
+          {timeline.map((item, index) => (
+            <div class={`relative flex items-start ${index % 2 === 0 ? 'md:flex-row-reverse' : ''}`}>
+              <div class="flex-1 md:w-1/2"></div>
+              <div class="absolute left-4 md:left-1/2 w-3 h-3 bg-green-600 rounded-full transform -translate-x-1/2 mt-1.5"></div>
+              <div class={`flex-1 ml-10 md:ml-0 ${index % 2 === 0 ? 'md:pr-8 md:text-right' : 'md:pl-8'}`}>
+                <span class="text-green-700 font-bold">{item.year}</span>
+                <p class="text-gray-600">{item.event}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Governance -->
+  <section class="py-12 bg-white">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-2xl font-bold text-center mb-8">Club Governance</h2>
+
+      <div class="grid md:grid-cols-2 gap-8">
+        <div>
+          <h3 class="font-semibold text-lg mb-4 text-green-800">Board of Directors</h3>
+          <p class="text-gray-600 text-sm mb-4">
+            The club is governed by an elected Board of Directors who serve two-year terms.
+            Elections are held annually at the membership meeting.
+          </p>
+          <div class="bg-gray-50 rounded-lg p-4">
+            <ul class="space-y-2">
+              {boardMembers.map((member) => (
+                <li class="flex justify-between text-sm">
+                  <span class="font-medium">{member.position}</span>
+                  <span class="text-gray-600">{member.name}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        <div>
+          <h3 class="font-semibold text-lg mb-4 text-green-800">Non-Profit Status</h3>
+          <p class="text-gray-600 text-sm mb-4">
+            Austin Rifle Club is a Texas Non-Profit Corporation organized for the purpose
+            of promoting shooting sports and firearms safety education.
+          </p>
+          <div class="bg-gray-50 rounded-lg p-4 text-sm">
+            <p><strong>Charter Number:</strong> 52790</p>
+            <p><strong>Incorporated:</strong> State of Texas</p>
+            <p class="mt-2 text-gray-500">
+              The club is member-owned and operated. All revenue goes directly to
+              maintaining and improving our facilities.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Affiliations -->
+  <section class="py-12 bg-gray-50">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-2xl font-bold text-center mb-8">Affiliations</h2>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+        <div class="bg-white rounded-lg p-4 shadow-sm">
+          <p class="font-semibold">NRA</p>
+          <p class="text-xs text-gray-600">National Rifle Association</p>
+        </div>
+        <div class="bg-white rounded-lg p-4 shadow-sm">
+          <p class="font-semibold">TSRA</p>
+          <p class="text-xs text-gray-600">Texas State Rifle Association</p>
+        </div>
+        <div class="bg-white rounded-lg p-4 shadow-sm">
+          <p class="font-semibold">USPSA</p>
+          <p class="text-xs text-gray-600">US Practical Shooting Assn.</p>
+        </div>
+        <div class="bg-white rounded-lg p-4 shadow-sm">
+          <p class="font-semibold">IDPA</p>
+          <p class="text-xs text-gray-600">Intl. Defensive Pistol Assn.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact -->
+  <section class="py-12 bg-white">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-2xl font-bold text-center mb-8">Contact Us</h2>
+      <div class="grid md:grid-cols-2 gap-8">
+        <div>
+          <h3 class="font-semibold mb-3">Mailing Address</h3>
+          <p class="text-gray-600">
+            Austin Rifle Club<br />
+            PO Box 5432<br />
+            Austin, TX 78763
+          </p>
+        </div>
+        <div>
+          <h3 class="font-semibold mb-3">Range Location</h3>
+          <p class="text-gray-600">
+            16312 Littig Rd<br />
+            Manor, TX 78653
+          </p>
+          <a
+            href="https://maps.google.com/?q=16312+Littig+Rd+Manor+TX+78653"
+            target="_blank"
+            rel="noopener"
+            class="text-green-700 hover:text-green-800 text-sm mt-2 inline-block"
+          >
+            Get Directions →
+          </a>
+        </div>
+        <div>
+          <h3 class="font-semibold mb-3">Email</h3>
+          <p>
+            <a href="mailto:info@austinrifleclub.org" class="text-green-700 hover:text-green-800">
+              info@austinrifleclub.org
+            </a>
+          </p>
+        </div>
+        <div>
+          <h3 class="font-semibold mb-3">Range Hours</h3>
+          <p class="text-gray-600">
+            Sunrise to Sunset<br />
+            7 Days a Week
+          </p>
+          <a href="/range-status" class="text-green-700 hover:text-green-800 text-sm mt-2 inline-block">
+            Check Range Status →
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+</Layout>

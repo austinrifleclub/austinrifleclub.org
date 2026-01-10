@@ -33,16 +33,38 @@ Member lifecycle from application through life membership.
 
 ## 1.2 Application Process
 
+> **Current Process (WordPress site):** Email membership@austinrifleclub.org → receive links → attend Safety Eval + Orientation → submit docs at orientation → BOD vote → badge issued (~4 weeks total)
+
+### New System (Planned)
+
 | Step | What Happens | System Support |
 |------|--------------|----------------|
 | 1. Start | Enter name, email, create password | Account creation |
 | 2. Form | Address, phone, emergency contact, referral source | Profile form |
 | 3. Documents | Government ID, background check consent | File upload (10MB, JPG/PNG/PDF) |
-| 4. Payment | $200 initiation fee | Stripe checkout |
+| 4. Payment | $200 initiation + prorated dues | Stripe checkout |
 | 5. Safety Eval | Pick date, attend in person | Calendar booking |
 | 6. Orientation | Pick date, attend (~2 hours) | Calendar booking |
 | 7. BOD Vote | 3/4 majority required | Vote recording |
 | 8. Approved | Badge issued, full access | Auto-activation |
+
+### Probationary Period
+
+All new members must:
+- Complete 6 months probationary period
+- Attend 3 work days (2nd Saturday, 8am-noon)
+- During probation: no guests, no voting rights
+
+### Background Check
+
+| Requirement | Details |
+|-------------|---------|
+| Fee | $15 (paid at orientation) |
+| Waived if | Texas LTC holder OR sworn LEO credentials |
+| Form | Criminal Background Check consent form |
+| Processing | 3-5 days |
+
+> Texas LTC satisfies both ID requirement AND background check requirement.
 
 ### Application Status Values
 
@@ -162,6 +184,26 @@ Initiation fee ($200) is never prorated.
 | History | Payments, events, matches, guests, volunteer hours |
 | Documents | Download member card, access member-only docs |
 
+### Profile Fields (from current system)
+
+| Field | Required | Editable | Notes |
+|-------|----------|----------|-------|
+| Username (Badge #) | Yes | No | Format: M#### |
+| Email Address | Yes | Yes | Primary contact |
+| Primary Phone | Yes | Yes | 10-digit |
+| Street Address | Yes | Yes | |
+| City | Yes | Yes | |
+| State | Yes | Yes | Dropdown, default TX |
+| ZIP Code | Yes | Yes | 5 or 9 digit |
+| Work Phone | No | Yes | |
+| Cell/Alternate Phone | No | Yes | |
+| Vehicle Description | Yes | Yes | Year/Color/Make/Model |
+| License Plate | Yes | Yes | For gate access records |
+| Associate Member Badge Name | No | Yes (if applicable) | Family membership |
+| Junior #1-8 Badge Names | No | Yes (if applicable) | Up to 8 juniors |
+
+> Vehicle info is mandatory for security and gate access logging.
+
 ## 1.8 Digital Member Card
 
 | Field | Display |
@@ -172,6 +214,17 @@ Initiation fee ($200) is never prorated.
 | Photo | If uploaded |
 | Expiration | Date or "Life Member" |
 | QR code | For verification |
+
+### Physical Badge Colors (Current System)
+
+| Color | Meaning |
+|-------|---------|
+| White | Annual Member |
+| Gold | Life Member |
+| Orange Border | Steel Certified |
+| Blue Top Half | Board Member |
+
+> Replacement badge: $20 via Stripe checkout
 
 ### Wallet Pass Specification
 
@@ -288,17 +341,30 @@ Matches, classes, orientations, work days, and all scheduled activities.
 
 ## 2.1 Event Types
 
-| Type | Color | Visibility | Registration |
-|------|-------|------------|--------------|
-| Match | Blue | Public (most) | Required |
-| Class | Green | Some public | Required |
-| Orientation | Orange | Members only | Required |
-| Safety Eval | Orange | Prospects only | Required |
-| Work Day | Yellow | Members only | Optional |
-| Board Meeting | Gray | BOD only | Invite |
-| Membership Meeting | Gray | Members only | Optional |
-| Private Event | Red | Invited only | By reservation |
-| Range Closure | Black | Public | N/A |
+> **Current calendar categories** (from WordPress site, Jan 2026)
+
+| Type | Color | Visibility | Registration | Examples |
+|------|-------|------------|--------------|----------|
+| Match | Blue | Public | Required | USPSA, Steel Challenge, Benchrest |
+| Class | Green | Some public | Required | Pistol Skills, Hunter's Ed, RSO Training |
+| ARC Education | Cyan | Members | Required | NMSE, NMO Class |
+| ARC Event | Purple | Members | Optional | Swap Meet, Annual Meeting |
+| ARC Meeting | Gray | Members/BOD | Optional | BOD Meeting |
+| Organized Practice | Teal | Members | Optional | Advanced Tactical, Junior Muzzle Loading |
+| Work Day | Yellow | Members | Optional | 2nd Saturday monthly, all ranges closed 8am-noon |
+| Youth Event | Orange | Members | Required | 4H Practice |
+| Range Unavailable | Red | Public | N/A | Construction, closures |
+
+### Legacy Types (Keep for compatibility)
+
+| Type | Maps To |
+|------|---------|
+| Orientation | ARC Education |
+| Safety Eval | ARC Education |
+| Board Meeting | ARC Meeting |
+| Membership Meeting | ARC Event |
+| Private Event | Range Unavailable |
+| Range Closure | Range Unavailable |
 
 ## 2.2 Event Data
 
@@ -620,18 +686,23 @@ Range status, reservations, and equipment rentals.
 
 ## 5.1 Range Inventory
 
-| Range | Type | Distance |
-|-------|------|----------|
-| A, B | Pistol | 25 yards |
-| C, D | Rifle | 100 yards |
-| E, F | Rifle/Action | 200 yards |
-| G | Multi-use | Variable |
-| H | Steel/Action | 50 yards |
-| I, J | Shotgun | Skeet/Trap/5-Stand |
-| K | Long Range | 600 yards |
-| L | Long Range | 1000 yards |
+> **Note:** Updated based on current site (Jan 2026). Verify with facilities director.
+
+| Range | Type | Distance | Access |
+|-------|------|----------|--------|
+| A | Bullseye Pistol | 25/50 yards | General - fixed positions, rifle sighting |
+| B | Pistol/22 Rimfire | 7-17 yards | General - no movement |
+| C | Centerfire Rifle | 100/200 yards | General - bench/3-position, CMP Highpower |
+| D | Silhouette (22LR) | 40-100 meters | General |
+| E | Silhouette (Centerfire) | 40-100 meters | General - velocity rules for steel |
+| F | Indoor Air Gun | 10 meters | Restricted - Education Building |
+| G | LTC Education | Variable | Restricted - not general membership |
+| H-K | Action Bays | 10-25 yards | General - pistol/PCC/shotgun birdshot |
+| L | Long Bay | 10-35 yards | General - all firearms, fixed position |
 
 ## 5.2 Range Status
+
+### Status Types
 
 | Status | Color | Meaning |
 |--------|-------|---------|
@@ -640,7 +711,92 @@ Range status, reservations, and equipment rentals.
 | Reserved | Orange | Private event/match |
 | Maintenance | Yellow | Work in progress |
 
-**Features:** Real-time status on website, admin updates from phone, weather widget, sunrise/sunset.
+### Real-Time Status Display
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Range Status                        Updated 2 min ago 🔄    │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  🌡️ 72°F  💨 8mph SW  ☀️ Sunny                             │
+│  🌅 Sunrise 7:12 AM  🌇 Sunset 5:48 PM                      │
+│                                                             │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │ A  Pistol 25/50yd        🟢 Open                    │   │
+│  │ B  Pistol 7-17yd         🟢 Open                    │   │
+│  │ C  Rifle 100/200yd       🟡 Match until 2pm         │   │
+│  │ D  Silhouette 22LR       🟢 Open                    │   │
+│  │ E  Silhouette CF         🟢 Open                    │   │
+│  │ F  Air Gun (Ed Bldg)     🔴 Restricted              │   │
+│  │ G  LTC Education         🔴 Restricted              │   │
+│  │ H  Action Bay            🟡 USPSA Setup             │   │
+│  │ I  Action Bay            🟡 USPSA Setup             │   │
+│  │ J  Action Bay            🟡 USPSA Setup             │   │
+│  │ K  Action Bay            🟡 USPSA Setup             │   │
+│  │ L  Long Bay              🟢 Open                    │   │
+│  └─────────────────────────────────────────────────────┘   │
+│                                                             │
+│  🟢 Open  🟡 Event/Limited  🔴 Closed  ⚫ Maintenance      │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Admin Update Interface (Mobile-Friendly)
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Update Range Status                              [Cancel]   │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  Range:  [C - Rifle 100/200yd     ▼]                       │
+│                                                             │
+│  Status:                                                    │
+│  ○ 🟢 Open                                                 │
+│  ● 🟡 Event/Limited                                        │
+│  ○ 🔴 Closed                                               │
+│  ○ ⚫ Maintenance                                          │
+│                                                             │
+│  Note (optional):                                           │
+│  [High Power Match until 2pm________________]               │
+│                                                             │
+│  Duration:                                                  │
+│  ○ Until I change it                                        │
+│  ● Until: [2:00 PM today    ▼]                             │
+│  ○ Sync with calendar event                                 │
+│                                                             │
+│  ☐ Send SMS notification to members                        │
+│                                                             │
+│                                    [Update Status]          │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Auto-Sync with Calendar
+
+- Events on calendar automatically update range status
+- Manual override always takes priority
+- Status auto-reverts to "Open" when event/duration ends
+
+### Notifications
+
+| Trigger | Recipients | Channel |
+|---------|------------|---------|
+| Range closed unexpectedly | Opted-in members | SMS |
+| All ranges closed | All members | SMS + Email |
+| Weather closure | All members | SMS + Email |
+
+### Data Model
+
+```typescript
+interface RangeStatus {
+  rangeId: string;                    // 'A', 'B', etc.
+  status: 'open' | 'event' | 'closed' | 'maintenance';
+  note: string | null;                // "High Power Match"
+  expiresAt: Date | null;             // auto-revert time
+  calendarEventId: string | null;     // if synced to event
+  updatedBy: string;                  // member ID
+  updatedAt: Date;
+}
+```
 
 ## 5.3 Reservations
 
@@ -689,6 +845,46 @@ Range status, reservations, and equipment rentals.
 | Wind speed/direction | Weather API |
 | Sunrise/sunset | Calculated |
 | Heat index, UV index | Weather API |
+
+> **Current:** Weather Underground station KTXMANOR90 (linked from member area)
+
+## 5.7 Range Cameras
+
+Members-only live camera feeds for range status visibility.
+
+| Feature | Description |
+|---------|-------------|
+| Access | Members only (member area) |
+| Ranges covered | TBD - verify with facilities |
+| Purpose | Check range occupancy before driving to range |
+| Privacy | No recording/archiving by members |
+
+## 5.8 Work Days
+
+| Detail | Value |
+|--------|-------|
+| Schedule | 2nd Saturday of each month |
+| Time | 8:00 AM - 12:00 Noon |
+| Range Status | All ranges closed during work day |
+| Requirement | New members must attend 3 work days |
+| Credit | Counts toward probationary completion |
+| Alternatives | Contact Dir. of Facilities for other options |
+
+## 5.9 Infrastructure Penalties
+
+### Baffle Pole Damage
+
+Penalties for shooting baffle supports or other club infrastructure:
+
+| Penalty | Application |
+|---------|-------------|
+| Minimum $250 fine | Per incident |
+| 3-6 month suspension | From range and club activities |
+| Probationary status | 3-6 months |
+| Retake NMO | Required retraining |
+| Permanent expulsion | For intentional/repeated damage |
+
+> Severity depends on nature of infraction: accidental vs intentional, minor vs major damage.
 
 ---
 
@@ -1120,11 +1316,35 @@ Match points, volunteer hours, referrals, visit streak, forum reputation.
 
 Unique referral link per member. Credits for shop or dues.
 
-## 7.8 Donations & Sponsorships
+## 7.8 Help Wanted Board
+
+Member-visible list of volunteer projects needing assistance.
+
+| Field | Description |
+|-------|-------------|
+| Project Name | Short title |
+| Description | What needs to be done |
+| Contact | Board member or project lead (name + email) |
+| Work Day Credit | Whether hours count toward credit |
+| Skills Needed | Optional: specific expertise required |
+| Status | Open, In Progress, Completed |
+
+### Current Projects (Example from site)
+
+| Project | Description | Contact |
+|---------|-------------|---------|
+| Utility Locating | Locate buried data lines on action bays | Dir. of Technology |
+| Financial Audit | Audit finances and operations | Treasurer |
+| Range Signage | CNC milled wood signs, 6in letters | Dir. of Facilities |
+| Ed Building Repairs | Door realignment, window replacement | Dir. of Technology |
+
+## 7.9 Donations & Sponsorships
 
 ### Individual
 
 One-time, monthly, sponsor a junior, scholarship fund, range improvement.
+
+> **Current:** Stripe checkout with custom amount field. Donations are NOT credited toward events/dues.
 
 ### Corporate Tiers
 
@@ -1137,7 +1357,7 @@ One-time, monthly, sponsor a junior, scholarship fund, range improvement.
 
 Automatic tax receipts. Non-profit: Texas Charter #52790.
 
-## 7.9 Mobile PWA
+## 7.10 Mobile PWA
 
 - Install on home screen
 - Works offline (member card, cached calendar/docs)
@@ -1154,6 +1374,98 @@ Screen-by-screen flows for key features.
 
 ## 8.1 Membership Application Flow
 
+### Design Principles
+
+| Principle | Implementation |
+|-----------|----------------|
+| Mobile-first | All screens optimized for 375px width, thumb-friendly buttons |
+| Progress saving | Auto-save after each field, resume from any device |
+| No account required to start | Email only until payment step |
+| Fast path for LTC holders | Skip background check, reduce steps |
+| Clear expectations | Show time estimate and upcoming steps at each screen |
+
+### Application Data Model
+
+```typescript
+interface Application {
+  id: string;
+  email: string;
+  status: ApplicationStatus;
+  step: 'info' | 'type' | 'documents' | 'payment' | 'schedule' | 'complete';
+
+  // Personal info
+  firstName: string;
+  lastName: string;
+  phone: string;
+  dateOfBirth: Date;
+  address: Address;
+  emergencyContact: EmergencyContact;
+  referralSource: string;
+
+  // Membership selection
+  membershipType: 'individual' | 'family' | 'veteran' | 'senior';
+  familyMembers?: FamilyMember[];  // If family type
+
+  // Documents
+  governmentIdUrl: string | null;
+  hasTexasLTC: boolean;            // If true, skip background check
+  ltcNumber: string | null;        // Verified against Texas DPS
+  backgroundCheckConsentUrl: string | null;
+  veteranDocUrl: string | null;    // If veteran type
+
+  // Payment
+  stripePaymentIntentId: string | null;
+  paidAt: Date | null;
+  amountPaid: number;              // Cents
+
+  // Scheduling
+  safetyEvalEventId: string | null;
+  orientationEventId: string | null;
+
+  // Tracking
+  createdAt: Date;
+  updatedAt: Date;
+  expiresAt: Date;                 // 180 days from creation
+  lastStepCompletedAt: Date;
+  resumeToken: string;             // For email resume links
+}
+
+type ApplicationStatus =
+  | 'draft'              // Started, not submitted
+  | 'submitted'          // Info complete, awaiting documents
+  | 'documents_pending'  // Documents uploaded, under review
+  | 'documents_approved' // Ready for payment
+  | 'paid'               // Payment received
+  | 'safety_scheduled'   // Safety eval scheduled
+  | 'safety_complete'    // Safety eval passed
+  | 'orientation_scheduled'
+  | 'orientation_complete'
+  | 'pending_vote'       // Awaiting BOD vote
+  | 'approved'           // Approved, member created
+  | 'rejected'           // BOD rejected
+  | 'expired';           // Timed out
+```
+
+### Notification Schedule
+
+| Trigger | Channel | Message |
+|---------|---------|---------|
+| Account created | Email | Welcome + verify email link |
+| Application started | Email | "Continue your application" (if abandoned 24hr) |
+| Documents uploaded | Email | "Documents received, under review" |
+| Documents approved | Email + SMS | "Ready for payment" |
+| Payment received | Email | Receipt + next steps |
+| Safety eval scheduled | Email + SMS | Confirmation + calendar invite |
+| 24hr before safety eval | SMS | Reminder with address |
+| Safety eval complete | Email | "Schedule your orientation" |
+| Orientation scheduled | Email + SMS | Confirmation + calendar invite |
+| 24hr before orientation | SMS | Reminder + what to bring |
+| Orientation complete | Email | "Pending board approval" |
+| Approved | Email + SMS | Welcome! Badge info, next steps |
+| Rejected | Email | Explanation + refund info |
+| Application expiring (7 days) | Email + SMS | Warning + resume link |
+| Application expired | Email | Expired notice + refund info |
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │ Screen 1: Start Application                                 │
@@ -1161,13 +1473,31 @@ Screen-by-screen flows for key features.
 │                                                             │
 │  Join Austin Rifle Club                                     │
 │                                                             │
+│  ⏱️ Takes about 10 minutes • Save & resume anytime          │
+│                                                             │
 │  Email:        [_______________________]                    │
-│  Password:     [_______________________]                    │
-│  Confirm:      [_______________________]                    │
 │                                                             │
-│  [Create Account & Start Application]                       │
+│  [Continue →]                                               │
 │                                                             │
-│  Already have an account? [Log in]                          │
+│  Already started? [Resume Application]                      │
+│  Already a member? [Log in]                                 │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+           ↓
+┌─────────────────────────────────────────────────────────────┐
+│ Screen 1b: Email Verification                               │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  Check Your Email                                           │
+│                                                             │
+│  We sent a verification code to:                            │
+│  john@example.com                                           │
+│                                                             │
+│  Enter code:   [______]                                     │
+│                                                             │
+│  [Verify & Continue]                                        │
+│                                                             │
+│  Didn't get it? [Resend]  [Change email]                   │
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
            ↓
@@ -1217,20 +1547,54 @@ Screen-by-screen flows for key features.
 │  Step 3 of 5: Required Documents                            │
 │  ████████████░░░░░░░░ 60%                                   │
 │                                                             │
+│  ┌─────────────────────────────────────────────────┐        │
+│  │ 🎯 Have a Texas LTC?                            │        │
+│  │                                                 │        │
+│  │ Your LTC serves as both ID and background      │        │
+│  │ check—skip straight to payment!                │        │
+│  │                                                 │        │
+│  │ [Yes, I have a Texas LTC]  [No, continue]      │        │
+│  └─────────────────────────────────────────────────┘        │
+│                                                             │
+│  ─────────────────────────────────────────────────────      │
+│                                                             │
 │  Government ID (driver's license, passport, or state ID)    │
 │  ┌─────────────────────────────────────────┐                │
-│  │  [Upload File]  or drag and drop        │                │
+│  │  📷 [Take Photo]  or  📁 [Upload File]  │                │
 │  │  JPG, PNG, or PDF up to 10MB            │                │
 │  └─────────────────────────────────────────┘                │
 │  ✓ drivers_license.jpg uploaded                             │
 │                                                             │
-│  Background Check Consent Form                              │
+│  Background Check Consent Form ($15 fee at orientation)     │
 │  ┌─────────────────────────────────────────┐                │
 │  │  [Upload File]  or drag and drop        │                │
-│  │  Download blank form: [PDF]             │                │
+│  │  📄 [Download blank form PDF]           │                │
 │  └─────────────────────────────────────────┘                │
 │                                                             │
 │                              [Back]  [Continue]             │
+└─────────────────────────────────────────────────────────────┘
+
+           ↓ (if Texas LTC selected)
+
+┌─────────────────────────────────────────────────────────────┐
+│ Screen 4b: Texas LTC Verification                           │
+├─────────────────────────────────────────────────────────────┤
+│  Step 3 of 5: Verify LTC                                    │
+│  ████████████░░░░░░░░ 60%                                   │
+│                                                             │
+│  Your Texas LTC satisfies both the ID and background        │
+│  check requirements. Just enter your LTC number:            │
+│                                                             │
+│  LTC Number:  [_______________________]                     │
+│               Format: 12345678                              │
+│                                                             │
+│  ☐ I confirm this is my valid Texas LTC                    │
+│                                                             │
+│  [Verify LTC & Continue →]                                  │
+│                                                             │
+│  ℹ️ We verify LTC status with Texas DPS. This takes a few  │
+│     seconds and does not affect your LTC status.            │
+│                                                             │
 └─────────────────────────────────────────────────────────────┘
            ↓
 ┌─────────────────────────────────────────────────────────────┐
@@ -1298,6 +1662,122 @@ Screen-by-screen flows for key features.
 ```
 
 ## 8.2 Guest Sign-In Flow
+
+### Design Principles
+
+| Principle | Implementation |
+|-----------|----------------|
+| Mobile-optimized | Large touch targets, works one-handed at the range |
+| Offline-capable | Cache waiver, queue sign-ins for sync when online |
+| Fast repeat entry | Saved guests with one-tap sign-in |
+| Self-service option | QR code on member card for guest self-waiver |
+| Clear visit tracking | Member sees remaining visits at sign-in |
+
+### Guest Visit Data Model
+
+```typescript
+interface GuestVisit {
+  id: string;
+  guestId: string;                // Links to Guest record
+  hostMemberId: string;           // Member who signed them in
+  signedInAt: Date;
+  signedOutAt: Date | null;       // Optional sign-out
+
+  // Waiver
+  waiverSignatureUrl: string;     // Base64 image stored in R2
+  waiverAgreedAt: Date;
+  waiverIpAddress: string;
+  waiverUserAgent: string;
+
+  // Offline support
+  syncedAt: Date | null;          // null = pending sync
+  offlineId: string | null;       // Client-generated ID for offline
+}
+
+interface Guest {
+  id: string;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  createdByMemberId: string;      // Member who first added them
+
+  // Visit tracking
+  visitCount: number;             // Current calendar year
+  lastVisitAt: Date | null;
+  convertedToMemberId: string | null;  // If they became a member
+
+  // Status
+  status: 'active' | 'should_join' | 'limit_reached' | 'banned';
+  bannedAt: Date | null;
+  bannedReason: string | null;
+}
+```
+
+### Self-Service QR Flow (Alternative)
+
+Members can let guests sign their own waiver:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Member shows QR code on their digital member card           │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│           ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓                                │
+│           ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓                                │
+│           ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓                                │
+│           ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓                                │
+│                                                             │
+│  "Have your guest scan this to sign the waiver"             │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+           ↓ Guest scans with phone camera
+┌─────────────────────────────────────────────────────────────┐
+│ Guest's Phone: Waiver Page                                  │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  [ARC Logo]                                                 │
+│                                                             │
+│  Guest Waiver for Austin Rifle Club                         │
+│  Host: John Smith (Member #1234)                            │
+│                                                             │
+│  Your name:  [_______________________]                      │
+│  Email:      [_______________________] (optional)           │
+│                                                             │
+│  ┌─────────────────────────────────────────────────┐        │
+│  │ RELEASE AND WAIVER OF LIABILITY                 │        │
+│  │ [waiver text...]                                │ ▼       │
+│  └─────────────────────────────────────────────────┘        │
+│                                                             │
+│  Sign below:                                                │
+│  ┌─────────────────────────────────────────────────┐        │
+│  │         [Sign here with finger]                 │        │
+│  └─────────────────────────────────────────────────┘        │
+│                                                             │
+│  ☐ I have read and agree to the waiver terms               │
+│                                                             │
+│  [Complete Sign-In]                                         │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+           ↓
+┌─────────────────────────────────────────────────────────────┐
+│ Guest's Phone: Confirmation                                 │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│              ✓ You're Signed In!                           │
+│                                                             │
+│  Welcome to Austin Rifle Club                               │
+│                                                             │
+│  ⚠️ Stay with your host (John Smith) at all times          │
+│                                                             │
+│  Visit #2 of 3 allowed per year                            │
+│                                                             │
+│  Interested in joining?                                     │
+│  [Learn About Membership]                                   │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Member-Initiated Flow
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -1381,6 +1861,40 @@ Screen-by-screen flows for key features.
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
 ```
+
+### Offline Mode
+
+When at the range with poor connectivity:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ 📶 Offline Mode                                             │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  ⚠️ No internet connection                                  │
+│                                                             │
+│  Guest sign-ins are saved locally and will sync             │
+│  when you're back online.                                   │
+│                                                             │
+│  Pending sign-ins: 2                                        │
+│  • Mike Johnson (signed in 10:15 AM)                        │
+│  • Sarah Williams (signed in 10:32 AM)                      │
+│                                                             │
+│  ✓ Waivers are legally valid even when signed offline       │
+│                                                             │
+│  [Continue Signing In Guests]                               │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Offline Sync Behavior:**
+
+| Scenario | Behavior |
+|----------|----------|
+| Sign-in while offline | Saved locally with timestamp, waiver stored |
+| Connection restored | Auto-sync in background, no user action needed |
+| Guest at visit limit | Warning shown based on cached data, admin notified to verify |
+| Sync conflict | Server record wins, admin notified |
 
 ## 8.3 Event Registration Flow
 
@@ -1534,6 +2048,97 @@ Screen-by-screen flows for key features.
 
 ## 8.5 Dues Renewal Flow
 
+### Design Principles
+
+| Principle | Implementation |
+|-----------|----------------|
+| Early incentive | Allow renewal 90 days early, no penalty |
+| Frictionless payment | One-click with saved card |
+| Auto-renewal option | Opt-in, with clear controls |
+| Life progress gamification | Show years toward life membership |
+| Grace period clarity | Clear countdown during 60-day grace |
+
+### Renewal Data Model
+
+```typescript
+interface MembershipRenewal {
+  id: string;
+  memberId: string;
+  renewalYear: number;           // Fiscal year (e.g., 2026 = Apr 2025-Mar 2026)
+
+  // Timing
+  dueDate: Date;                 // March 31 of current fiscal year
+  renewedAt: Date | null;
+  gracePeriodEndsAt: Date;       // 60 days after due date
+
+  // Payment
+  amount: number;                // Cents
+  volunteerCreditsApplied: number;
+  stripePaymentIntentId: string | null;
+
+  // Auto-renewal
+  autoRenewEnabled: boolean;
+  autoRenewAttemptedAt: Date | null;
+  autoRenewFailedReason: string | null;
+
+  // Type changes
+  previousType: MembershipType;
+  newType: MembershipType;
+}
+
+interface LifeMembershipProgress {
+  memberId: string;
+  continuousYears: number;       // Resets if lapsed 60+ days
+  yearsRequired: number;         // 25 for life status
+  prepaidYears: number;          // Can prepay up to 6 years
+  estimatedLifeDate: Date;       // Based on current trajectory
+  joinedBefore2011: boolean;     // Affects life member dues
+}
+```
+
+### Reminder Schedule
+
+| Days Before | Channel | Message |
+|-------------|---------|---------|
+| 90 | Email | "Early renewal now open" |
+| 60 | Email | "Renewal reminder" + dashboard banner |
+| 30 | Email + Banner | "30 days until expiration" |
+| 14 | Email | "2 weeks left" |
+| 7 | Email + SMS | "Urgent: 1 week left" |
+| 3 | Email + SMS | "Final reminder" |
+| 0 (expired) | Email + SMS | "Membership expired, 60-day grace period" |
+| -30 | Email + SMS | "30 days left to renew without reapplying" |
+| -55 | Email + SMS | "Final warning: 5 days to avoid termination" |
+| -60 | Email | "Membership terminated, must reapply" |
+
+### Auto-Renewal Flow
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Auto-Renewal Settings (Account → Billing)                   │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  Auto-Renewal                                               │
+│                                                             │
+│  ☑️ Automatically renew my membership each year             │
+│                                                             │
+│  Card on file: Visa ****4242  [Update Card]                 │
+│                                                             │
+│  Next auto-renewal: March 15, 2026                          │
+│  Amount: $150.00 (Individual)                               │
+│                                                             │
+│  ℹ️ We'll email you 7 days before charging your card.       │
+│     You can cancel anytime before then.                     │
+│                                                             │
+│  ─────────────────────────────────────────────────────      │
+│  Volunteer Credits: $75.00                                  │
+│  ☐ Apply credits to auto-renewal (pay only $75.00)         │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Manual Renewal Flow
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │ Screen 1: Dashboard Banner (30 days before)                 │
@@ -1580,14 +2185,105 @@ Screen-by-screen flows for key features.
 │                                                             │
 │  Your membership is now valid through March 31, 2026.       │
 │                                                             │
-│  19 years until Life Member eligibility! 🎯                 │
+│  ─────────────────────────────────────────────────────      │
+│  🎯 Life Membership Progress                                │
+│                                                             │
+│  ██████░░░░░░░░░░░░░░░░░░░  6 of 25 years                  │
+│                                                             │
+│  ✓ 6 years continuous membership                            │
+│  ○ 19 years remaining                                       │
+│  📅 Estimated life status: March 2044                       │
+│                                                             │
+│  💡 Tip: You can prepay up to 6 years to reach life         │
+│     status sooner! [Learn More]                             │
+│                                                             │
+│  ─────────────────────────────────────────────────────      │
 │                                                             │
 │  Receipt sent to john@example.com                           │
 │                                                             │
 │  Your digital member card has been updated.                 │
 │  [Update Apple Wallet]  [Update Google Wallet]              │
 │                                                             │
+│  ─────────────────────────────────────────────────────      │
+│  ☐ Enable auto-renewal for next year                       │
+│    Never miss a renewal—we'll charge your card              │
+│    automatically each March.                                │
+│                                                             │
 │                    [Return to Dashboard]                    │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Grace Period Renewal
+
+Members who have lapsed but are within the 60-day grace period see:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Screen: Grace Period Renewal                                │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  ⚠️ Your membership has expired                             │
+│                                                             │
+│  Expired: March 31, 2025 (15 days ago)                      │
+│  Grace period ends: May 30, 2025 (45 days remaining)        │
+│                                                             │
+│  ████████████████████████░░░░░░░░░░  45/60 days left       │
+│                                                             │
+│  Renew now to:                                              │
+│  ✓ Keep your continuous membership streak (6 years)         │
+│  ✓ Maintain life membership progress                        │
+│  ✓ Avoid the $200 initiation fee for reapplying             │
+│                                                             │
+│  ─────────────────────────────────────────────────────      │
+│                                                             │
+│  Renewal: $150.00                                           │
+│  Late fee: $0.00 (waived during grace period)               │
+│                                                             │
+│  Card on file: Visa ****4242  [Change]                      │
+│                                                             │
+│                              [Renew Now - $150.00]          │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Family Upgrade Flow
+
+When a member wants to add family during renewal:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Screen: Upgrade to Family Membership                        │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  Upgrade to Family Membership                               │
+│                                                             │
+│  Family membership includes:                                │
+│  ✓ Your spouse (full member privileges)                     │
+│  ✓ All children under 21 (accompanied access)               │
+│  ✓ One annual dues payment for everyone                     │
+│                                                             │
+│  ─────────────────────────────────────────────────────      │
+│  Add Family Members                                         │
+│                                                             │
+│  Spouse                                                     │
+│  Name:   [_______________________]                          │
+│  Email:  [_______________________] (for their own login)    │
+│                                                             │
+│  Juniors (under 21)                                         │
+│  ┌─────────────────────────────────────────────────┐        │
+│  │ Name              │ Age  │ [Remove]             │        │
+│  │ Emma Smith        │ 16   │ [Remove]             │        │
+│  │ Jack Smith        │ 14   │ [Remove]             │        │
+│  └─────────────────────────────────────────────────┘        │
+│  [+ Add Junior]                                             │
+│                                                             │
+│  ─────────────────────────────────────────────────────      │
+│  Current: Individual          $150/year                     │
+│  Upgrade: Family              $200/year                     │
+│  Difference:                  +$50/year                     │
+│                                                             │
+│                    [Cancel]  [Upgrade for $200.00]          │
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
 ```

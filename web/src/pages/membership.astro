@@ -1,0 +1,304 @@
+---
+/**
+ * Membership Information Page
+ *
+ * Information about membership types, benefits, and how to join.
+ */
+import Layout from '../layouts/Layout.astro';
+
+const membershipTypes = [
+  {
+    name: 'Individual',
+    price: 150,
+    description: 'Full membership for a single adult.',
+    features: [
+      'Access to all ranges',
+      'Sunrise to sunset, 7 days/week',
+      'Bring up to 4 guests per visit',
+      'Vote in club elections',
+      'Discounts on events & classes',
+    ],
+  },
+  {
+    name: 'Family',
+    price: 200,
+    description: 'Covers member, spouse, and dependents under 21.',
+    features: [
+      'All individual benefits',
+      'Spouse included at no extra cost',
+      'Dependents under 21 included',
+      'Each adult gets own badge',
+      'Best value for families',
+    ],
+    popular: true,
+  },
+  {
+    name: 'Life Member',
+    price: 1500,
+    description: 'One-time payment for lifetime membership.',
+    features: [
+      'All individual benefits',
+      'Never pay dues again',
+      'Life member recognition',
+      'Priority for special events',
+      'Support club long-term',
+    ],
+  },
+];
+
+const requirements = [
+  'Must be 21 years or older (18 with parent)',
+  'Valid government-issued ID',
+  'No felony convictions',
+  'Complete new member orientation',
+  'Pass background check',
+];
+
+const benefits = [
+  {
+    title: 'Premium Facilities',
+    description: '12 ranges including pistol, rifle, action bays, and indoor air gun.',
+    icon: '🎯',
+  },
+  {
+    title: 'Year-Round Access',
+    description: 'Sunrise to sunset, 7 days a week. Your schedule, your time.',
+    icon: '🌅',
+  },
+  {
+    title: 'Events & Competitions',
+    description: 'IDPA, USPSA, silhouette, and more. Compete or just watch.',
+    icon: '🏆',
+  },
+  {
+    title: 'Training & Classes',
+    description: 'NRA courses, CCW classes, and member-taught skills clinics.',
+    icon: '📚',
+  },
+  {
+    title: 'Community',
+    description: 'Join 1,500+ members who share your passion for shooting sports.',
+    icon: '👥',
+  },
+  {
+    title: '130 Years Strong',
+    description: "Founded in 1894, we're one of Texas' oldest shooting clubs.",
+    icon: '🏛️',
+  },
+];
+---
+
+<Layout title="Membership" description="Join Austin Rifle Club - Central Texas's premier shooting sports organization">
+  <!-- Hero -->
+  <section class="bg-green-800 text-white py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h1 class="text-3xl md:text-4xl font-bold mb-4">
+        Join Austin Rifle Club
+      </h1>
+      <p class="text-xl text-green-100 max-w-2xl mx-auto">
+        Become part of Central Texas's premier shooting sports community.
+        Annual membership starting at just $150.
+      </p>
+    </div>
+  </section>
+
+  <!-- Membership Types -->
+  <section class="py-12 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-2xl font-bold text-center mb-8">Membership Options</h2>
+
+      <div class="grid md:grid-cols-3 gap-6">
+        {membershipTypes.map((type) => (
+          <div class={`bg-white rounded-lg shadow-md overflow-hidden ${type.popular ? 'ring-2 ring-green-500' : ''}`}>
+            {type.popular && (
+              <div class="bg-green-500 text-white text-center py-1 text-sm font-medium">
+                Most Popular
+              </div>
+            )}
+            <div class="p-6">
+              <h3 class="text-xl font-bold mb-2">{type.name}</h3>
+              <div class="mb-4">
+                <span class="text-3xl font-bold">${type.price}</span>
+                {type.name !== 'Life Member' && <span class="text-gray-600">/year</span>}
+              </div>
+              <p class="text-gray-600 text-sm mb-4">{type.description}</p>
+              <ul class="space-y-2 mb-6">
+                {type.features.map((feature) => (
+                  <li class="flex items-start gap-2 text-sm">
+                    <span class="text-green-600 mt-0.5">✓</span>
+                    <span>{feature}</span>
+                  </li>
+                ))}
+              </ul>
+              <a
+                href="/apply"
+                class={`block text-center py-2 px-4 rounded-lg font-medium transition-colors ${
+                  type.popular
+                    ? 'bg-green-700 hover:bg-green-800 text-white'
+                    : 'bg-gray-100 hover:bg-gray-200 text-gray-800'
+                }`}
+              >
+                Apply Now
+              </a>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <p class="text-center text-gray-500 text-sm mt-6">
+        Dues are prorated for new members joining mid-year.
+        Our fiscal year runs April 1 - March 31.
+      </p>
+    </div>
+  </section>
+
+  <!-- Benefits -->
+  <section class="py-12 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-2xl font-bold text-center mb-8">Member Benefits</h2>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {benefits.map((benefit) => (
+          <div class="text-center p-6">
+            <div class="text-4xl mb-3">{benefit.icon}</div>
+            <h3 class="font-semibold text-lg mb-2">{benefit.title}</h3>
+            <p class="text-gray-600 text-sm">{benefit.description}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Requirements -->
+  <section class="py-12 bg-gray-50">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-2xl font-bold text-center mb-8">Membership Requirements</h2>
+
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <ul class="space-y-3">
+          {requirements.map((req) => (
+            <li class="flex items-center gap-3">
+              <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <span class="text-green-600 text-sm">✓</span>
+              </div>
+              <span>{req}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Application Process -->
+  <section class="py-12 bg-white">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-2xl font-bold text-center mb-8">How to Join</h2>
+
+      <div class="grid md:grid-cols-4 gap-6">
+        <div class="text-center">
+          <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+            <span class="text-green-800 font-bold">1</span>
+          </div>
+          <h3 class="font-semibold mb-1">Apply Online</h3>
+          <p class="text-gray-600 text-sm">Complete the membership application form</p>
+        </div>
+        <div class="text-center">
+          <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+            <span class="text-green-800 font-bold">2</span>
+          </div>
+          <h3 class="font-semibold mb-1">Pay Dues</h3>
+          <p class="text-gray-600 text-sm">Secure online payment via Stripe</p>
+        </div>
+        <div class="text-center">
+          <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+            <span class="text-green-800 font-bold">3</span>
+          </div>
+          <h3 class="font-semibold mb-1">Orientation</h3>
+          <p class="text-gray-600 text-sm">Complete new member orientation</p>
+        </div>
+        <div class="text-center">
+          <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+            <span class="text-green-800 font-bold">4</span>
+          </div>
+          <h3 class="font-semibold mb-1">Get Your Badge</h3>
+          <p class="text-gray-600 text-sm">Pick up your badge and start shooting</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="py-12 bg-green-800 text-white">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="text-2xl font-bold mb-4">Ready to Join?</h2>
+      <p class="text-green-100 mb-6">
+        Start your application today. The process takes about 10 minutes.
+      </p>
+      <a
+        href="/apply"
+        class="inline-block bg-white text-green-800 px-8 py-3 rounded-lg font-semibold hover:bg-green-50 transition-colors"
+      >
+        Start Your Application
+      </a>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="py-12 bg-gray-50">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-2xl font-bold text-center mb-8">Frequently Asked Questions</h2>
+
+      <div class="space-y-4">
+        <details class="bg-white rounded-lg shadow-md p-4 group">
+          <summary class="font-semibold cursor-pointer list-none flex justify-between items-center">
+            Can I try the club before joining?
+            <span class="text-green-600 group-open:rotate-180 transition-transform">▼</span>
+          </summary>
+          <p class="mt-3 text-gray-600">
+            Yes! Current members can bring guests. If you don't know a member, contact us and
+            we can arrange a visit during one of our public events or open house days.
+          </p>
+        </details>
+
+        <details class="bg-white rounded-lg shadow-md p-4 group">
+          <summary class="font-semibold cursor-pointer list-none flex justify-between items-center">
+            How long does the application process take?
+            <span class="text-green-600 group-open:rotate-180 transition-transform">▼</span>
+          </summary>
+          <p class="mt-3 text-gray-600">
+            Most applications are processed within 5-7 business days. Once approved, you'll
+            need to complete orientation before receiving your badge.
+          </p>
+        </details>
+
+        <details class="bg-white rounded-lg shadow-md p-4 group">
+          <summary class="font-semibold cursor-pointer list-none flex justify-between items-center">
+            Are there work requirements?
+            <span class="text-green-600 group-open:rotate-180 transition-transform">▼</span>
+          </summary>
+          <p class="mt-3 text-gray-600">
+            There are no mandatory work requirements. However, members who volunteer receive
+            credit toward their annual dues. Many find this a great way to meet other members.
+          </p>
+        </details>
+
+        <details class="bg-white rounded-lg shadow-md p-4 group">
+          <summary class="font-semibold cursor-pointer list-none flex justify-between items-center">
+            Can I bring guests?
+            <span class="text-green-600 group-open:rotate-180 transition-transform">▼</span>
+          </summary>
+          <p class="mt-3 text-gray-600">
+            Yes, members can bring up to 4 guests per visit. Guests must sign in, complete a
+            waiver, and be accompanied by the member at all times.
+          </p>
+        </details>
+      </div>
+
+      <div class="text-center mt-8">
+        <a href="/faq" class="text-green-700 hover:text-green-800 font-medium">
+          View All FAQs →
+        </a>
+      </div>
+    </div>
+  </section>
+</Layout>

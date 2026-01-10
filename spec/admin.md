@@ -281,18 +281,25 @@ Official governance structure and bylaws-driven requirements.
 
 ## 3.2 Board of Directors (10 Positions)
 
-| Position | Elected | Term | Primary Responsibilities |
-|----------|---------|------|-------------------------|
-| President | Even years | 2 years | Executive authority, final approval |
-| Vice President | Odd years | 2 years | Backup to President |
-| Secretary | Odd years | 2 years | Minutes, notices, records |
-| Treasurer | Even years | 2 years | Finances, dues, reporting |
-| Dir. Range Safety | Even years | 2 years | Safety rules, RSO program |
-| Dir. Site Construction | Odd years | 2 years | Capital projects, facilities |
-| Dir. Education | Odd years | 2 years | Classes, certifications |
-| Dir. Memberships | Even years | 2 years | Applications, renewals |
-| Dir. Business Operations | Even years | 2 years | Shop, sponsors, contracts |
-| Dir. Maintenance | Odd years | 2 years | Work days, equipment |
+> **Current Board (Jan 2026):** See member area → Board Members for contact info
+
+| Position | Email Alias | Primary Responsibilities |
+|----------|-------------|-------------------------|
+| President | president@ | Executive authority, final approval |
+| Vice President | vp@ | Backup to President |
+| Secretary | secretary@ | Minutes, notices, records |
+| Treasurer | treasurer@ | Finances, dues, reporting |
+| Dir. of Range Safety | safety@ | Safety rules, RSO program, incidents |
+| Dir. of Facilities | facilities@ | Range maintenance, work days (de facto: Dir. Range Maintenance) |
+| Dir. of Membership | membership@ | Applications, renewals, badges |
+| Dir. of Business Operations | operations@ | Shop, sponsors, contracts |
+| Dir. of Technology | admin@ | Website, systems, badges (de facto: Dir. Range Construction) |
+| Dir. of Education | education@ | Classes, certifications, orientation, loaner firearms |
+
+### Election Schedule
+
+- **Even years:** President, Treasurer, Dir. Range Safety, Dir. Membership, Dir. Business Operations
+- **Odd years:** Vice President, Secretary, Dir. Facilities, Dir. Education, Dir. Technology
 
 ### Eligibility
 

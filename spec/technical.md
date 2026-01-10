@@ -477,3 +477,248 @@ All logged: Login/logout, password changes, profile updates, payments, admin act
 | Correction | Self-service or admin request |
 | Deletion | Request (30-day response) |
 | Portability | Export as JSON/CSV |
+
+---
+
+# 6. Maintainability & Support Model
+
+The board consists of volunteer members who are not software developers. This system must be maintainable without requiring a full-time technical staff, while still being a modern, custom solution that avoids the limitations of WordPress.
+
+## 6.1 Support Tiers
+
+| Tier | Who Handles | Tools | Response Time |
+|------|-------------|-------|---------------|
+| **Tier 1: Self-Service** | Board member | Admin UI | Immediate |
+| **Tier 2: AI-Assisted** | Board member + AI | GitHub Copilot, Claude | Hours |
+| **Tier 3: Developer** | Hired contractor | Full codebase access | Days/weeks |
+
+### Tier 1: Self-Service (90% of needs)
+
+Everything a board member routinely does should be possible through the admin UI with no code changes.
+
+| Task | Solution |
+|------|----------|
+| Update range status | Admin → Range Status |
+| Post announcement | Admin → Announcements |
+| Approve application | Admin → Applications → Vote |
+| Change dues pricing | Admin → Settings → Membership |
+| Add event | Admin → Events → Create |
+| Issue refund | Admin → Payments → Refund |
+| Update board member | Admin → Governance → Board |
+| Change email templates | Admin → Settings → Notifications |
+| Update range rules PDF | Admin → Documents → Upload |
+| Modify shop inventory | Admin → Shop → Products |
+
+**Design principle:** If a board member asks "how do I change X?" and the answer requires code, that's a bug in the admin UI.
+
+### Tier 2: AI-Assisted (8% of needs)
+
+For changes that require touching code but are straightforward enough for AI to handle with guidance.
+
+| Task | Example | AI Capability |
+|------|---------|---------------|
+| Update static content | Change About page text | High |
+| Adjust validation rules | Change password min length | High |
+| Modify email copy | Tweak welcome email wording | High |
+| Add form field | Add "How did you hear about us?" option | Medium |
+| Change business rule | Adjust proration formula | Medium |
+| Fix simple bug | Button not working | Medium |
+
+**How it works:**
+
+1. Board member opens GitHub Codespaces or local VS Code
+2. Describes problem to GitHub Copilot / Claude
+3. AI suggests changes with explanation
+4. Board member reviews diff, commits if it looks right
+5. Automatic deployment via Cloudflare
+
+**Requirements for Tier 2 to work:**
+
+- Clean, well-typed TypeScript (AI understands it better)
+- Descriptive variable/function names
+- Inline comments explaining "why" for business logic
+- Small, focused files (< 300 lines)
+- Comprehensive test coverage (AI can verify changes don't break things)
+- Clear error messages that explain what went wrong
+
+### Tier 3: Developer (2% of needs)
+
+For significant new features, complex bugs, or architectural changes. Hire a contractor or agency.
+
+| Task | Example | Why Tier 3 |
+|------|---------|-----------|
+| New feature | Add forum system | Significant new code |
+| Integration | Connect to new payment processor | Security-sensitive |
+| Performance | Optimize slow queries | Requires profiling |
+| Security issue | Fix vulnerability | Requires expertise |
+| Major refactor | Restructure database | High risk |
+| Upgrade | Major framework version bump | Breaking changes |
+
+**Why this works:**
+
+| Factor | Benefit |
+|--------|---------|
+| Standard stack | React/TypeScript/Hono—any agency knows this |
+| No vendor lock-in | Not tied to WordPress plugins or proprietary systems |
+| Clean codebase | New developer can understand it quickly |
+| Good documentation | This spec + inline docs + README |
+| Type safety | Compiler catches errors before deployment |
+| Test coverage | Confidence that changes don't break things |
+
+**Finding a contractor:**
+
+- Any React/TypeScript development agency
+- Cloudflare Workers experience helpful but not required
+- Budget: $100-200/hr for US-based, $50-100/hr for international
+- For small fixes: 2-4 hours. For features: 20-40 hours.
+
+## 6.2 Design Principles for Maintainability
+
+### Code Organization
+
+```
+src/
+├── routes/           # API endpoints (one file per resource)
+├── db/
+│   └── schema.ts     # All tables in one file, well-commented
+├── lib/
+│   ├── auth.ts       # Authentication logic
+│   ├── email.ts      # Email sending
+│   ├── stripe.ts     # Payment processing
+│   └── validation.ts # Zod schemas
+├── middleware/       # Auth, rate limiting, etc.
+└── index.ts          # App entry point
+```
+
+### Naming Conventions
+
+| Type | Convention | Example |
+|------|------------|---------|
+| Files | kebab-case | `guest-visits.ts` |
+| Functions | camelCase, verb-first | `createApplication()` |
+| Types | PascalCase | `MembershipType` |
+| Database tables | snake_case | `guest_visits` |
+| Constants | SCREAMING_SNAKE | `MAX_GUESTS_PER_VISIT` |
+
+### Documentation Requirements
+
+| Location | What to Document |
+|----------|------------------|
+| README.md | Setup, deployment, common tasks |
+| Code comments | Business logic ("why"), not obvious code |
+| Type definitions | All fields with descriptions |
+| API routes | Request/response examples |
+| Database schema | What each table/column is for |
+
+### Example: Well-Documented Business Logic
+
+```typescript
+/**
+ * Calculate prorated dues for new members.
+ *
+ * Fiscal year runs April 1 - March 31.
+ * Minimum dues is $25 regardless of join date.
+ * Initiation fee ($200) is never prorated.
+ *
+ * @see Bylaws Section 4.2 for proration rules
+ */
+export function calculateProratedDues(
+  annualDues: number,  // In cents (e.g., 15000 = $150)
+  joinDate: Date
+): number {
+  const fiscalYearStart = 4; // April
+  const currentMonth = joinDate.getMonth() + 1;
+
+  // Months remaining in fiscal year
+  const monthsRemaining = 12 - ((currentMonth - fiscalYearStart + 12) % 12);
+
+  // Prorate, but minimum $25
+  const prorated = Math.round(annualDues * monthsRemaining / 12);
+  const minimum = 2500; // $25 in cents
+
+  return Math.max(prorated, minimum);
+}
+```
+
+## 6.3 Reducing Tier 3 Dependency
+
+### Build Admin UI First
+
+Before building any feature, ask: "Can a board member manage this without code?"
+
+| Feature | Requires Admin UI For |
+|---------|----------------------|
+| Membership types | Add/edit types, pricing, rules |
+| Events | Full CRUD, recurring, categories |
+| Email templates | Edit subject, body, variables |
+| Range configuration | Add ranges, set statuses, rules |
+| Shop | Products, variants, inventory, pricing |
+| Documents | Upload, categorize, set access |
+| Settings | All configurable values |
+
+### Configuration Over Code
+
+Move business rules to database/config where possible:
+
+```typescript
+// ❌ Bad: Hardcoded, requires code change
+const MAX_GUESTS = 3;
+const GUEST_VISIT_LIMIT = 3;
+
+// ✅ Good: Configurable via admin UI
+const settings = await db.query.settings.findFirst();
+const maxGuests = settings.maxGuestsPerVisit;        // 3
+const visitLimit = settings.guestVisitsPerYear;      // 3
+```
+
+### Self-Healing Where Possible
+
+| Scenario | Automatic Recovery |
+|----------|-------------------|
+| Failed payment | Retry 3x, then notify member |
+| Email bounce | Mark email invalid, notify admin |
+| Upload fails | Retry with exponential backoff |
+| Rate limit hit | Queue and retry later |
+| External API down | Use cached data, retry later |
+
+## 6.4 Emergency Procedures
+
+### Site Is Down
+
+1. Check [status.cloudflare.com](https://status.cloudflare.com)
+2. Check GitHub Actions for failed deployments
+3. If recent deploy: revert via GitHub (one click)
+4. If unclear: contact Tier 3 developer
+
+### Payment System Broken
+
+1. Check [status.stripe.com](https://status.stripe.com)
+2. Accept manual payments (check/cash) at range
+3. Log payments in Admin → Payments → Manual
+4. Don't turn away members—honor memberships even if system shows expired
+
+### Database Issue
+
+1. D1 has automatic backups (Cloudflare)
+2. Contact Tier 3 developer for restore
+3. Point-in-time recovery available
+
+### Credential Compromised
+
+1. Rotate the specific secret in Cloudflare dashboard
+2. Admin → Settings → Integrations → Reconnect
+3. Check audit log for suspicious activity
+
+## 6.5 Vendor Relationships
+
+| Vendor | What They Provide | Failure Impact | Contact |
+|--------|-------------------|----------------|---------|
+| Cloudflare | Hosting, database, files | Site down | Dashboard or support |
+| Stripe | Payments | Can't process payments | Dashboard |
+| Resend | Email | Emails don't send | Dashboard |
+| Twilio | SMS | Texts don't send | Dashboard |
+| Domain registrar | Domain | Site unreachable | Varies |
+
+**All credentials stored in:** Cloudflare Dashboard → Workers → Settings → Variables
+
+**Password manager:** Use 1Password or similar for shared board access to vendor accounts.

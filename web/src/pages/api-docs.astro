@@ -1,0 +1,420 @@
+---
+/**
+ * API Documentation Page
+ *
+ * Interactive API documentation for developers.
+ */
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="API Documentation">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900">API Documentation</h1>
+      <p class="mt-2 text-gray-600">
+        REST API for Austin Rifle Club member portal, range status, events, and administration.
+      </p>
+      <div class="mt-4 flex gap-4">
+        <a
+          href="/api/openapi.json"
+          class="inline-flex items-center px-4 py-2 bg-green-700 text-white rounded-md hover:bg-green-600"
+        >
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+          </svg>
+          Download OpenAPI Spec
+        </a>
+      </div>
+    </div>
+
+    <!-- Base URL -->
+    <div class="bg-gray-100 rounded-lg p-4 mb-8">
+      <h2 class="font-semibold text-gray-700 mb-2">Base URL</h2>
+      <code class="text-green-700">https://austinrifleclub.org/api</code>
+    </div>
+
+    <!-- Authentication -->
+    <section class="mb-10">
+      <h2 class="text-2xl font-bold text-gray-900 mb-4">Authentication</h2>
+      <div class="bg-white border rounded-lg p-6">
+        <p class="text-gray-600 mb-4">
+          Protected endpoints require a Bearer token in the Authorization header.
+          Tokens are obtained through the better-auth authentication flow.
+        </p>
+        <div class="bg-gray-900 rounded-md p-4">
+          <code class="text-green-400">Authorization: Bearer &lt;token&gt;</code>
+        </div>
+        <div class="mt-4 text-sm text-gray-500">
+          <p><strong>Public endpoints:</strong> Range status, public events, health checks</p>
+          <p><strong>Member endpoints:</strong> Profile, registrations, payments</p>
+          <p><strong>Admin endpoints:</strong> Member management, event creation, range control</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Endpoints by Category -->
+    <section class="space-y-8">
+      <!-- Health -->
+      <div class="border rounded-lg overflow-hidden">
+        <div class="bg-gray-50 px-6 py-4 border-b">
+          <h3 class="text-xl font-semibold text-gray-900">Health</h3>
+          <p class="text-sm text-gray-500">Service health and readiness checks</p>
+        </div>
+        <div class="divide-y">
+          <div class="p-6">
+            <div class="flex items-center gap-3 mb-2">
+              <span class="px-2 py-1 bg-green-100 text-green-700 text-xs font-mono rounded">GET</span>
+              <code class="text-gray-900">/health</code>
+            </div>
+            <p class="text-gray-600 text-sm">Basic health check - returns status and timestamp</p>
+          </div>
+          <div class="p-6">
+            <div class="flex items-center gap-3 mb-2">
+              <span class="px-2 py-1 bg-green-100 text-green-700 text-xs font-mono rounded">GET</span>
+              <code class="text-gray-900">/health/ready</code>
+            </div>
+            <p class="text-gray-600 text-sm">Readiness check - verifies database connectivity</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Range Status -->
+      <div class="border rounded-lg overflow-hidden">
+        <div class="bg-gray-50 px-6 py-4 border-b">
+          <h3 class="text-xl font-semibold text-gray-900">Range Status</h3>
+          <p class="text-sm text-gray-500">Real-time range availability</p>
+        </div>
+        <div class="divide-y">
+          <div class="p-6">
+            <div class="flex items-center gap-3 mb-2">
+              <span class="px-2 py-1 bg-green-100 text-green-700 text-xs font-mono rounded">GET</span>
+              <code class="text-gray-900">/range-status</code>
+              <span class="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">Public</span>
+            </div>
+            <p class="text-gray-600 text-sm">Get status of all ranges with linked events</p>
+            <div class="mt-3 bg-gray-50 rounded p-3">
+              <p class="text-xs text-gray-500 mb-2">Response includes:</p>
+              <code class="text-xs text-gray-700">{"ranges": [...], "lastUpdated": "...", "weather": {...}}</code>
+            </div>
+          </div>
+          <div class="p-6">
+            <div class="flex items-center gap-3 mb-2">
+              <span class="px-2 py-1 bg-green-100 text-green-700 text-xs font-mono rounded">GET</span>
+              <code class="text-gray-900">/range-status/:id</code>
+              <span class="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">Public</span>
+            </div>
+            <p class="text-gray-600 text-sm">Get status of a specific range</p>
+          </div>
+          <div class="p-6">
+            <div class="flex items-center gap-3 mb-2">
+              <span class="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs font-mono rounded">PATCH</span>
+              <code class="text-gray-900">/range-status/:id</code>
+              <span class="px-2 py-1 bg-red-100 text-red-600 text-xs rounded">Admin</span>
+            </div>
+            <p class="text-gray-600 text-sm">Update range status (open, closed, event, maintenance)</p>
+          </div>
+          <div class="p-6">
+            <div class="flex items-center gap-3 mb-2">
+              <span class="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-mono rounded">POST</span>
+              <code class="text-gray-900">/range-status/:id/close</code>
+              <span class="px-2 py-1 bg-red-100 text-red-600 text-xs rounded">Admin</span>
+            </div>
+            <p class="text-gray-600 text-sm">Quick close with reason and optional duration</p>
+          </div>
+          <div class="p-6">
+            <div class="flex items-center gap-3 mb-2">
+              <span class="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-mono rounded">POST</span>
+              <code class="text-gray-900">/range-status/:id/open</code>
+              <span class="px-2 py-1 bg-red-100 text-red-600 text-xs rounded">Admin</span>
+            </div>
+            <p class="text-gray-600 text-sm">Quick open - clears closure status</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Events -->
+      <div class="border rounded-lg overflow-hidden">
+        <div class="bg-gray-50 px-6 py-4 border-b">
+          <h3 class="text-xl font-semibold text-gray-900">Events</h3>
+          <p class="text-sm text-gray-500">Club events, calendar, and registration</p>
+        </div>
+        <div class="divide-y">
+          <div class="p-6">
+            <div class="flex items-center gap-3 mb-2">
+              <span class="px-2 py-1 bg-green-100 text-green-700 text-xs font-mono rounded">GET</span>
+              <code class="text-gray-900">/events</code>
+              <span class="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">Public</span>
+            </div>
+            <p class="text-gray-600 text-sm">List events with pagination and filters</p>
+            <div class="mt-2 text-xs text-gray-500">
+              Query params: <code>page, limit, start, end, type</code>
+            </div>
+          </div>
+          <div class="p-6">
+            <div class="flex items-center gap-3 mb-2">
+              <span class="px-2 py-1 bg-green-100 text-green-700 text-xs font-mono rounded">GET</span>
+              <code class="text-gray-900">/events/:id</code>
+              <span class="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">Public</span>
+            </div>
+            <p class="text-gray-600 text-sm">Get event details with registration count</p>
+          </div>
+          <div class="p-6">
+            <div class="flex items-center gap-3 mb-2">
+              <span class="px-2 py-1 bg-green-100 text-green-700 text-xs font-mono rounded">GET</span>
+              <code class="text-gray-900">/events/calendar.ics</code>
+              <span class="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">Public</span>
+            </div>
+            <p class="text-gray-600 text-sm">iCal feed for calendar apps</p>
+          </div>
+          <div class="p-6">
+            <div class="flex items-center gap-3 mb-2">
+              <span class="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-mono rounded">POST</span>
+              <code class="text-gray-900">/events/:id/register</code>
+              <span class="px-2 py-1 bg-purple-100 text-purple-600 text-xs rounded">Member</span>
+            </div>
+            <p class="text-gray-600 text-sm">Register for an event (auto-waitlist if full)</p>
+          </div>
+          <div class="p-6">
+            <div class="flex items-center gap-3 mb-2">
+              <span class="px-2 py-1 bg-red-100 text-red-700 text-xs font-mono rounded">DELETE</span>
+              <code class="text-gray-900">/events/:id/register</code>
+              <span class="px-2 py-1 bg-purple-100 text-purple-600 text-xs rounded">Member</span>
+            </div>
+            <p class="text-gray-600 text-sm">Cancel registration (refund policy applies)</p>
+          </div>
+          <div class="p-6">
+            <div class="flex items-center gap-3 mb-2">
+              <span class="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-mono rounded">POST</span>
+              <code class="text-gray-900">/events</code>
+              <span class="px-2 py-1 bg-red-100 text-red-600 text-xs rounded">Admin</span>
+            </div>
+            <p class="text-gray-600 text-sm">Create a new event</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Members -->
+      <div class="border rounded-lg overflow-hidden">
+        <div class="bg-gray-50 px-6 py-4 border-b">
+          <h3 class="text-xl font-semibold text-gray-900">Members</h3>
+          <p class="text-sm text-gray-500">Member profiles and self-service</p>
+        </div>
+        <div class="divide-y">
+          <div class="p-6">
+            <div class="flex items-center gap-3 mb-2">
+              <span class="px-2 py-1 bg-green-100 text-green-700 text-xs font-mono rounded">GET</span>
+              <code class="text-gray-900">/members/me</code>
+              <span class="px-2 py-1 bg-purple-100 text-purple-600 text-xs rounded">Member</span>
+            </div>
+            <p class="text-gray-600 text-sm">Get current member profile with certifications, family, credits</p>
+          </div>
+          <div class="p-6">
+            <div class="flex items-center gap-3 mb-2">
+              <span class="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs font-mono rounded">PATCH</span>
+              <code class="text-gray-900">/members/me</code>
+              <span class="px-2 py-1 bg-purple-100 text-purple-600 text-xs rounded">Member</span>
+            </div>
+            <p class="text-gray-600 text-sm">Update contact info, emergency contact</p>
+          </div>
+          <div class="p-6">
+            <div class="flex items-center gap-3 mb-2">
+              <span class="px-2 py-1 bg-green-100 text-green-700 text-xs font-mono rounded">GET</span>
+              <code class="text-gray-900">/members/me/referral-code</code>
+              <span class="px-2 py-1 bg-purple-100 text-purple-600 text-xs rounded">Member</span>
+            </div>
+            <p class="text-gray-600 text-sm">Get or generate referral code with stats</p>
+          </div>
+          <div class="p-6">
+            <div class="flex items-center gap-3 mb-2">
+              <span class="px-2 py-1 bg-green-100 text-green-700 text-xs font-mono rounded">GET</span>
+              <code class="text-gray-900">/members/me/payments</code>
+              <span class="px-2 py-1 bg-purple-100 text-purple-600 text-xs rounded">Member</span>
+            </div>
+            <p class="text-gray-600 text-sm">Payment history</p>
+          </div>
+          <div class="p-6">
+            <div class="flex items-center gap-3 mb-2">
+              <span class="px-2 py-1 bg-green-100 text-green-700 text-xs font-mono rounded">GET</span>
+              <code class="text-gray-900">/members/me/volunteer-hours</code>
+              <span class="px-2 py-1 bg-purple-100 text-purple-600 text-xs rounded">Member</span>
+            </div>
+            <p class="text-gray-600 text-sm">Volunteer hours and credit balance by fiscal year</p>
+          </div>
+          <div class="p-6">
+            <div class="flex items-center gap-3 mb-2">
+              <span class="px-2 py-1 bg-green-100 text-green-700 text-xs font-mono rounded">GET</span>
+              <code class="text-gray-900">/members</code>
+              <span class="px-2 py-1 bg-red-100 text-red-600 text-xs rounded">Admin</span>
+            </div>
+            <p class="text-gray-600 text-sm">List all members with search and filters</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Payments -->
+      <div class="border rounded-lg overflow-hidden">
+        <div class="bg-gray-50 px-6 py-4 border-b">
+          <h3 class="text-xl font-semibold text-gray-900">Payments</h3>
+          <p class="text-sm text-gray-500">Stripe checkout integration</p>
+        </div>
+        <div class="divide-y">
+          <div class="p-6">
+            <div class="flex items-center gap-3 mb-2">
+              <span class="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-mono rounded">POST</span>
+              <code class="text-gray-900">/payments/checkout/membership</code>
+              <span class="px-2 py-1 bg-purple-100 text-purple-600 text-xs rounded">Member</span>
+            </div>
+            <p class="text-gray-600 text-sm">Create Stripe checkout for membership dues</p>
+            <div class="mt-2 text-xs text-gray-500">
+              Body: <code>{"membershipType": "individual|family|life"}</code>
+            </div>
+          </div>
+          <div class="p-6">
+            <div class="flex items-center gap-3 mb-2">
+              <span class="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-mono rounded">POST</span>
+              <code class="text-gray-900">/payments/checkout/event/:eventId</code>
+              <span class="px-2 py-1 bg-purple-100 text-purple-600 text-xs rounded">Member</span>
+            </div>
+            <p class="text-gray-600 text-sm">Create Stripe checkout for event registration</p>
+          </div>
+          <div class="p-6">
+            <div class="flex items-center gap-3 mb-2">
+              <span class="px-2 py-1 bg-green-100 text-green-700 text-xs font-mono rounded">GET</span>
+              <code class="text-gray-900">/payments/session/:sessionId</code>
+              <span class="px-2 py-1 bg-purple-100 text-purple-600 text-xs rounded">Member</span>
+            </div>
+            <p class="text-gray-600 text-sm">Check checkout session status</p>
+          </div>
+          <div class="p-6">
+            <div class="flex items-center gap-3 mb-2">
+              <span class="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-mono rounded">POST</span>
+              <code class="text-gray-900">/payments/webhook</code>
+              <span class="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">Stripe Only</span>
+            </div>
+            <p class="text-gray-600 text-sm">Stripe webhook handler (checkout.session.completed)</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Applications -->
+      <div class="border rounded-lg overflow-hidden">
+        <div class="bg-gray-50 px-6 py-4 border-b">
+          <h3 class="text-xl font-semibold text-gray-900">Applications</h3>
+          <p class="text-sm text-gray-500">Membership applications</p>
+        </div>
+        <div class="divide-y">
+          <div class="p-6">
+            <div class="flex items-center gap-3 mb-2">
+              <span class="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-mono rounded">POST</span>
+              <code class="text-gray-900">/applications</code>
+              <span class="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">Public</span>
+            </div>
+            <p class="text-gray-600 text-sm">Submit membership application</p>
+          </div>
+          <div class="p-6">
+            <div class="flex items-center gap-3 mb-2">
+              <span class="px-2 py-1 bg-green-100 text-green-700 text-xs font-mono rounded">GET</span>
+              <code class="text-gray-900">/applications</code>
+              <span class="px-2 py-1 bg-red-100 text-red-600 text-xs rounded">Admin</span>
+            </div>
+            <p class="text-gray-600 text-sm">List pending applications</p>
+          </div>
+          <div class="p-6">
+            <div class="flex items-center gap-3 mb-2">
+              <span class="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-mono rounded">POST</span>
+              <code class="text-gray-900">/applications/:id/approve</code>
+              <span class="px-2 py-1 bg-red-100 text-red-600 text-xs rounded">Admin</span>
+            </div>
+            <p class="text-gray-600 text-sm">Approve application</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Guests -->
+      <div class="border rounded-lg overflow-hidden">
+        <div class="bg-gray-50 px-6 py-4 border-b">
+          <h3 class="text-xl font-semibold text-gray-900">Guests</h3>
+          <p class="text-sm text-gray-500">Guest sign-in system</p>
+        </div>
+        <div class="divide-y">
+          <div class="p-6">
+            <div class="flex items-center gap-3 mb-2">
+              <span class="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-mono rounded">POST</span>
+              <code class="text-gray-900">/guests/sign-in</code>
+              <span class="px-2 py-1 bg-purple-100 text-purple-600 text-xs rounded">Member</span>
+            </div>
+            <p class="text-gray-600 text-sm">Sign in a guest (limited to 4 per year)</p>
+          </div>
+          <div class="p-6">
+            <div class="flex items-center gap-3 mb-2">
+              <span class="px-2 py-1 bg-green-100 text-green-700 text-xs font-mono rounded">GET</span>
+              <code class="text-gray-900">/members/me/guests</code>
+              <span class="px-2 py-1 bg-purple-100 text-purple-600 text-xs rounded">Member</span>
+            </div>
+            <p class="text-gray-600 text-sm">View guests you've signed in</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Rate Limits -->
+    <section class="mt-10">
+      <h2 class="text-2xl font-bold text-gray-900 mb-4">Rate Limits</h2>
+      <div class="bg-white border rounded-lg p-6">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b">
+              <th class="text-left py-2 text-gray-600">Endpoint Type</th>
+              <th class="text-left py-2 text-gray-600">Limit</th>
+              <th class="text-left py-2 text-gray-600">Window</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="border-b">
+              <td class="py-2">Authentication</td>
+              <td class="py-2">5 requests</td>
+              <td class="py-2">60 seconds</td>
+            </tr>
+            <tr class="border-b">
+              <td class="py-2">API (authenticated)</td>
+              <td class="py-2">100 requests</td>
+              <td class="py-2">60 seconds</td>
+            </tr>
+            <tr>
+              <td class="py-2">Public endpoints</td>
+              <td class="py-2">300 requests</td>
+              <td class="py-2">60 seconds</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Error Responses -->
+    <section class="mt-10">
+      <h2 class="text-2xl font-bold text-gray-900 mb-4">Error Responses</h2>
+      <div class="bg-white border rounded-lg p-6">
+        <p class="text-gray-600 mb-4">All errors return JSON with an error message:</p>
+        <div class="bg-gray-900 rounded-md p-4 mb-4">
+          <code class="text-red-400">{"error": "Error message", "details": [...]}</code>
+        </div>
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b">
+              <th class="text-left py-2 text-gray-600">Status</th>
+              <th class="text-left py-2 text-gray-600">Meaning</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="border-b"><td class="py-2">400</td><td class="py-2">Bad Request - Invalid input</td></tr>
+            <tr class="border-b"><td class="py-2">401</td><td class="py-2">Unauthorized - Authentication required</td></tr>
+            <tr class="border-b"><td class="py-2">403</td><td class="py-2">Forbidden - Insufficient permissions</td></tr>
+            <tr class="border-b"><td class="py-2">404</td><td class="py-2">Not Found - Resource doesn't exist</td></tr>
+            <tr class="border-b"><td class="py-2">409</td><td class="py-2">Conflict - Resource already exists</td></tr>
+            <tr><td class="py-2">429</td><td class="py-2">Too Many Requests - Rate limited</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</Layout>

@@ -1,0 +1,17 @@
+---
+/**
+ * Member Dashboard - Main Page
+ *
+ * Landing page for authenticated members showing:
+ * - Account summary
+ * - Dues status
+ * - Upcoming events
+ * - Quick actions
+ */
+import Layout from '../../layouts/Layout.astro';
+import DashboardHome from '../../components/dashboard/DashboardHome';
+---
+
+<Layout title="Dashboard" description="Your Austin Rifle Club member dashboard">
+  <DashboardHome client:load />
+</Layout>

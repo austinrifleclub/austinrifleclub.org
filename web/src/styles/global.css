@@ -1,0 +1,141 @@
+@import "tailwindcss";
+
+/* Dark mode support */
+@variant dark (&:where(.dark, .dark *));
+
+/* Dark mode color scheme */
+:root {
+  --bg-primary: theme(colors.white);
+  --bg-secondary: theme(colors.gray.50);
+  --text-primary: theme(colors.gray.900);
+  --text-secondary: theme(colors.gray.600);
+}
+
+.dark {
+  --bg-primary: theme(colors.gray.900);
+  --bg-secondary: theme(colors.gray.800);
+  --text-primary: theme(colors.gray.100);
+  --text-secondary: theme(colors.gray.400);
+}
+
+/* Toast slide-in animation */
+@keyframes slide-in {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-in {
+  animation: slide-in 0.3s ease-out;
+}
+
+/* Skeleton loading animation */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Dark mode transitions */
+.dark-transition {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Accessibility: Focus styles */
+*:focus-visible {
+  outline: 2px solid #166534;
+  outline-offset: 2px;
+}
+
+/* Accessibility: Skip to main content link */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: #166534;
+  color: white;
+  padding: 8px 16px;
+  z-index: 100;
+  transition: top 0.3s;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+/* Accessibility: Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Print styles */
+@media print {
+  /* Hide navigation and footer when printing */
+  header,
+  footer,
+  .no-print {
+    display: none !important;
+  }
+
+  /* Remove backgrounds and shadows for cleaner printing */
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  * {
+    box-shadow: none !important;
+  }
+
+  /* Ensure links are visible */
+  a[href]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.8em;
+    color: #666;
+  }
+
+  a[href^="#"]::after,
+  a[href^="javascript:"]::after {
+    content: "";
+  }
+
+  /* Page breaks */
+  h1, h2, h3 {
+    page-break-after: avoid;
+  }
+
+  table, img, pre {
+    page-break-inside: avoid;
+  }
+
+  /* Range rules specific print styles */
+  .range-rules-container {
+    font-size: 12pt;
+    line-height: 1.5;
+  }
+
+  .range-rules-container h2 {
+    margin-top: 20pt;
+    border-bottom: 1pt solid #000;
+  }
+}
