@@ -1,8 +1,9 @@
 import { betterAuth } from "better-auth";
+import { magicLink } from "better-auth/plugins";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { createDb } from "../db";
 import * as schema from "../db/schema";
-import { sendEmail, passwordResetEmail } from "./email";
+import { sendEmail, passwordResetEmail, magicLinkEmail } from "./email";
 
 export type Env = {
   DB: D1Database;
@@ -55,6 +56,32 @@ export function createAuth(env: Env) {
       },
     },
     trustedOrigins: ["http://localhost:4321"], // Astro dev server
+    plugins: [
+      magicLink({
+        sendMagicLink: async ({ email, url }) => {
+          // In staging/dev, log the magic link for easy testing
+          const isProduction = env.BETTER_AUTH_URL?.includes('austinrifleclub.org')
+            && !env.BETTER_AUTH_URL?.includes('staging');
+
+          if (!isProduction) {
+            console.log('========================================');
+            console.log('[Magic Link] Login link for testing:');
+            console.log(`  Email: ${email}`);
+            console.log(`  URL: ${url}`);
+            console.log('========================================');
+          }
+
+          const emailContent = magicLinkEmail(url);
+          await sendEmail(env.RESEND_API_KEY || '', {
+            to: email,
+            subject: emailContent.subject,
+            html: emailContent.html,
+            text: emailContent.text,
+          });
+        },
+        expiresIn: 60 * 15, // 15 minutes
+      }),
+    ],
   });
 }
 
