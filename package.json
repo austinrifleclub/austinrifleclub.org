@@ -16,6 +16,7 @@
     "db:migrate:production": "wrangler d1 migrations apply DB --env production --remote",
     "db:studio": "drizzle-kit studio",
     "db:seed": "wrangler d1 execute DB --local --file=./drizzle/seed.sql",
+    "db:seed:staging": "wrangler d1 execute DB --local --file=./drizzle/seed-staging.sql",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",

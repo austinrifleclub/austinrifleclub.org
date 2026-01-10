@@ -1,10 +1,11 @@
 -- Austin Rifle Club - Database Seed Data
 -- This file populates the database with initial data for development/testing
+-- Uses INSERT OR IGNORE to be idempotent (safe to run multiple times)
 
 -- =============================================================================
 -- RANGE STATUS
 -- =============================================================================
-INSERT INTO range_status (id, name, description, max_distance, status, status_note, features, updated_at) VALUES
+INSERT OR IGNORE INTO range_status (id, name, description, max_distance, status, status_note, features, updated_at) VALUES
   ('100yd', '100-Yard Range', 'Primary rifle range with covered firing line', 100, 'open', NULL, '["covered_firing_line", "target_frames", "benches"]', datetime('now')),
   ('200yd', '200-Yard Range', 'Extended rifle range', 200, 'open', NULL, '["target_frames", "spotting_scopes"]', datetime('now')),
   ('300yd', '300-Yard Range', 'Long range rifle', 300, 'open', NULL, '["steel_targets", "electronic_targets"]', datetime('now')),
@@ -15,7 +16,7 @@ INSERT INTO range_status (id, name, description, max_distance, status, status_no
 -- =============================================================================
 -- MEMBERSHIP TYPES
 -- =============================================================================
-INSERT INTO membership_types (id, name, description, annual_dues, initiation_fee, guest_limit, features, is_active) VALUES
+INSERT OR IGNORE INTO membership_types (id, name, description, annual_dues, initiation_fee, guest_limit, features, is_active) VALUES
   ('individual', 'Individual', 'Standard individual membership', 20000, 5000, 4, '["range_access", "events", "voting"]', 1),
   ('family', 'Family', 'Membership for family of up to 4', 30000, 7500, 6, '["range_access", "events", "voting", "family_members"]', 1),
   ('life', 'Life', 'Lifetime membership', 0, 250000, 6, '["range_access", "events", "voting", "no_dues"]', 1),
@@ -24,7 +25,7 @@ INSERT INTO membership_types (id, name, description, annual_dues, initiation_fee
 -- =============================================================================
 -- RANGES (detailed configuration)
 -- =============================================================================
-INSERT INTO ranges (id, name, short_name, description, max_distance_yards, covered, allowed_calibers, special_rules, display_order, is_active) VALUES
+INSERT OR IGNORE INTO ranges (id, name, short_name, description, max_distance_yards, covered, allowed_calibers, special_rules, display_order, is_active) VALUES
   ('range-100yd', '100-Yard Rifle Range', '100yd', 'Primary rifle range with covered firing line and multiple target frames', 100, 1, '["rifle", "pistol"]', 'No tracer or incendiary ammunition. Cease fire every 30 minutes for target changes.', 1, 1),
   ('range-200yd', '200-Yard Rifle Range', '200yd', 'Extended rifle range with electronic targets', 200, 0, '["rifle"]', 'Rifle calibers only. Electronic targets available.', 2, 1),
   ('range-300yd', '300-Yard Rifle Range', '300yd', 'Long distance rifle range', 300, 0, '["rifle"]', 'Prone and bench shooting only. No rapid fire.', 3, 1),
@@ -35,7 +36,7 @@ INSERT INTO ranges (id, name, short_name, description, max_distance_yards, cover
 -- =============================================================================
 -- CERTIFICATION TYPES
 -- =============================================================================
-INSERT INTO certification_types (id, name, description, requirements, valid_days, is_required_for_membership) VALUES
+INSERT OR IGNORE INTO certification_types (id, name, description, requirements, valid_days, is_required_for_membership) VALUES
   ('safety', 'Range Safety Orientation', 'Basic club safety orientation required for all members', 'Complete safety orientation class', NULL, 1),
   ('rso', 'Range Safety Officer', 'Qualified to serve as RSO during club events', 'NRA RSO certification + club orientation', 730, 0),
   ('holster', 'Holster Certification', 'Certified to draw from holster on pistol range', 'Complete holster qualification course', 365, 0),
@@ -44,7 +45,7 @@ INSERT INTO certification_types (id, name, description, requirements, valid_days
 -- =============================================================================
 -- VOLUNTEER ACTIVITY TYPES
 -- =============================================================================
-INSERT INTO volunteer_activity_types (id, name, description, credit_rate, max_credits_per_day) VALUES
+INSERT OR IGNORE INTO volunteer_activity_types (id, name, description, credit_rate, max_credits_per_day) VALUES
   ('work-day', 'Work Day', 'General club maintenance and improvement', 2500, 5000),
   ('rso', 'RSO Duty', 'Serving as Range Safety Officer', 3000, 6000),
   ('match-staff', 'Match Staff', 'Helping run club matches', 2500, 5000),
@@ -54,7 +55,7 @@ INSERT INTO volunteer_activity_types (id, name, description, credit_rate, max_cr
 -- =============================================================================
 -- SAMPLE EVENTS (next 3 months)
 -- =============================================================================
-INSERT INTO events (id, title, description, event_type, start_time, end_time, location, max_participants, cost, is_public, is_member_only, requires_registration, status, range_ids, created_at, updated_at) VALUES
+INSERT OR IGNORE INTO events (id, title, description, event_type, start_time, end_time, location, max_participants, cost, is_public, is_member_only, requires_registration, status, range_ids, created_at, updated_at) VALUES
   ('evt-001', 'Monthly IDPA Match', 'Monthly IDPA-style competition open to all members', 'match', datetime('now', '+7 days', 'start of day', '+8 hours'), datetime('now', '+7 days', 'start of day', '+14 hours'), 'Action Pistol Bay', 40, 2500, 1, 1, 1, 'published', '["range-action"]', datetime('now'), datetime('now')),
   ('evt-002', 'New Member Orientation', 'Required orientation for new members', 'orientation', datetime('now', '+14 days', 'start of day', '+9 hours'), datetime('now', '+14 days', 'start of day', '+12 hours'), 'Clubhouse', 20, 0, 0, 1, 1, 'published', NULL, datetime('now'), datetime('now')),
   ('evt-003', 'Work Day', 'Monthly work day - all members welcome', 'work_day', datetime('now', '+21 days', 'start of day', '+8 hours'), datetime('now', '+21 days', 'start of day', '+14 hours'), 'Entire Facility', NULL, 0, 1, 0, 0, 'published', NULL, datetime('now'), datetime('now')),
@@ -67,7 +68,7 @@ INSERT INTO events (id, title, description, event_type, start_time, end_time, lo
 -- =============================================================================
 -- CLUB SETTINGS
 -- =============================================================================
-INSERT INTO settings (key, value, description, updated_at) VALUES
+INSERT OR IGNORE INTO settings (key, value, description, updated_at) VALUES
   ('club_name', '"Austin Rifle Club"', 'Official club name', datetime('now')),
   ('club_address', '"16312 Littig Rd, Manor, TX 78653"', 'Club physical address', datetime('now')),
   ('club_phone', '"(512) 555-0100"', 'Club phone number', datetime('now')),
