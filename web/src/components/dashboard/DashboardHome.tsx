@@ -66,7 +66,19 @@ export default function DashboardHome() {
           setRangeStatus(data.ranges || []);
         }
 
-        // TODO: Fetch registered events when endpoint exists
+        // Fetch member's registered events
+        const eventsRes = await fetch(`${API_BASE}/api/events/my-registrations`, {
+          credentials: 'include',
+        });
+        if (eventsRes.ok) {
+          const data = await eventsRes.json();
+          // Filter to upcoming events only
+          const upcoming = (data || [])
+            .filter((reg: { event: Event }) => new Date(reg.event.startTime) > new Date())
+            .slice(0, 5)
+            .map((reg: { event: Event }) => reg.event);
+          setUpcomingEvents(upcoming);
+        }
       } catch (err) {
         console.error('Failed to fetch dashboard data:', err);
       } finally {
