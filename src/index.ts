@@ -6,6 +6,7 @@ import openApiSpec from "./openapi.json";
 import { requestLogger } from "./lib/logger";
 import { errorHandler, notFoundHandler } from "./lib/errors";
 import { securityHeaders, requestId } from "./middleware/security";
+import { authRateLimit, apiRateLimit, publicRateLimit } from "./middleware/rateLimit";
 
 // Route imports
 import healthRoutes from "./routes/health";
@@ -49,8 +50,15 @@ app.use(
   })
 );
 
-// Health check routes
+// Health check routes (no rate limit)
 app.route("/health", healthRoutes);
+
+// Public endpoints with lenient rate limiting
+app.use("/api/range-status/*", publicRateLimit);
+app.use("/api/events", publicRateLimit); // GET events list is public
+
+// Auth endpoints with strict rate limiting
+app.use("/api/auth/*", authRateLimit);
 
 // Mount better-auth at /api/auth/**
 app.on(["POST", "GET"], "/api/auth/**", async (c) => {
@@ -62,6 +70,9 @@ app.on(["POST", "GET"], "/api/auth/**", async (c) => {
 app.get("/api/openapi.json", (c) => {
   return c.json(openApiSpec);
 });
+
+// Standard API rate limiting for all other endpoints
+app.use("/api/*", apiRateLimit);
 
 // API Routes
 app.route("/api/user", userRoutes);

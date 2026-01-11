@@ -645,7 +645,29 @@ app.post("/:id/reject", requireAdmin, async (c) => {
     });
   }
 
-  // TODO: Process refund if payment was made (via Stripe)
+  // Process refund if payment was made (via Stripe)
+  if (application.stripePaymentIntentId && c.env.STRIPE_SECRET_KEY) {
+    try {
+      const { StripeService } = await import('../lib/stripe');
+      const stripe = new StripeService(c.env.STRIPE_SECRET_KEY);
+
+      const refundResult = await stripe.createRefund(application.stripePaymentIntentId, {
+        reason: 'requested_by_customer',
+        metadata: {
+          applicationId: id,
+          reason: reason,
+        },
+      });
+
+      if (refundResult.success) {
+        console.log(`[Applications] Refund processed: ${refundResult.refundId}`);
+      } else {
+        console.error(`[Applications] Refund failed: ${refundResult.error}`);
+      }
+    } catch (error) {
+      console.error('[Applications] Refund error:', error);
+    }
+  }
 
   return c.json(updated);
 });

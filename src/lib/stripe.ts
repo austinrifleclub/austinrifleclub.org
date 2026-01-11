@@ -43,6 +43,29 @@ interface StripeWebhookEvent {
   };
 }
 
+interface StripeRefund {
+  id: string;
+  amount: number;
+  status: 'pending' | 'succeeded' | 'failed' | 'canceled';
+  payment_intent: string;
+}
+
+interface StripePaymentIntent {
+  id: string;
+  amount: number;
+  amount_received: number;
+  status: string;
+  metadata: Record<string, string>;
+}
+
+export interface RefundResult {
+  success: boolean;
+  refundId?: string;
+  amount?: number;
+  status?: string;
+  error?: string;
+}
+
 export class StripeService {
   private apiKey: string;
   private baseUrl = 'https://api.stripe.com/v1';
@@ -194,6 +217,60 @@ export class StripeService {
    */
   parseWebhookEvent(payload: string): StripeWebhookEvent {
     return JSON.parse(payload);
+  }
+
+  /**
+   * Create a refund for a payment intent
+   */
+  async createRefund(
+    paymentIntentId: string,
+    options?: {
+      amount?: number; // Amount to refund in cents (omit for full refund)
+      reason?: 'duplicate' | 'fraudulent' | 'requested_by_customer';
+      metadata?: Record<string, string>;
+    }
+  ): Promise<RefundResult> {
+    try {
+      const refundData: Record<string, any> = {
+        payment_intent: paymentIntentId,
+      };
+
+      if (options?.amount) {
+        refundData.amount = options.amount;
+      }
+
+      if (options?.reason) {
+        refundData.reason = options.reason;
+      }
+
+      if (options?.metadata) {
+        Object.entries(options.metadata).forEach(([key, value]) => {
+          refundData[`metadata[${key}]`] = value;
+        });
+      }
+
+      const refund = await this.request<StripeRefund>('/refunds', 'POST', refundData);
+
+      return {
+        success: true,
+        refundId: refund.id,
+        amount: refund.amount,
+        status: refund.status,
+      };
+    } catch (error) {
+      console.error('[Stripe] Refund error:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Refund failed',
+      };
+    }
+  }
+
+  /**
+   * Get a payment intent
+   */
+  async getPaymentIntent(paymentIntentId: string): Promise<StripePaymentIntent> {
+    return this.request<StripePaymentIntent>(`/payment_intents/${paymentIntentId}`);
   }
 }
 

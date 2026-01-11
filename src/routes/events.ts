@@ -409,12 +409,39 @@ app.delete("/:id/register", requireMember, async (c) => {
     }
   }
 
-  // TODO: Process refund if applicable (via Stripe)
+  // Process refund if applicable (via Stripe)
+  let refundProcessed = false;
+  if (refundAmount > 0 && registration.stripePaymentId && c.env.STRIPE_SECRET_KEY) {
+    try {
+      const { StripeService } = await import('../lib/stripe');
+      const stripe = new StripeService(c.env.STRIPE_SECRET_KEY);
+
+      const refundResult = await stripe.createRefund(registration.stripePaymentId, {
+        amount: refundAmount,
+        reason: 'requested_by_customer',
+        metadata: {
+          eventId,
+          registrationId: registration.id,
+          refundPercent: refundPercent.toString(),
+        },
+      });
+
+      if (refundResult.success) {
+        console.log(`[Events] Refund processed: ${refundResult.refundId} for ${refundAmount} cents`);
+        refundProcessed = true;
+      } else {
+        console.error(`[Events] Refund failed: ${refundResult.error}`);
+      }
+    } catch (error) {
+      console.error('[Events] Refund error:', error);
+    }
+  }
 
   return c.json({
     message: "Registration cancelled",
     refundPercent,
     refundAmount,
+    refundProcessed,
   });
 });
 
@@ -597,9 +624,32 @@ app.post("/:id/cancel", requireAdmin, async (c) => {
         updatedAt: new Date(),
       })
       .where(eq(eventRegistrations.id, reg.id));
-  }
 
-  // TODO: Process refunds via Stripe
+    // Process refund for this registration
+    if (reg.amountPaid && reg.stripePaymentId && c.env.STRIPE_SECRET_KEY) {
+      try {
+        const { StripeService } = await import('../lib/stripe');
+        const stripe = new StripeService(c.env.STRIPE_SECRET_KEY);
+
+        const refundResult = await stripe.createRefund(reg.stripePaymentId, {
+          reason: 'requested_by_customer',
+          metadata: {
+            eventId: id,
+            registrationId: reg.id,
+            reason: 'event_cancelled',
+          },
+        });
+
+        if (refundResult.success) {
+          console.log(`[Events] Refund processed for cancelled event: ${refundResult.refundId}`);
+        } else {
+          console.error(`[Events] Refund failed for reg ${reg.id}: ${refundResult.error}`);
+        }
+      } catch (error) {
+        console.error('[Events] Refund error:', error);
+      }
+    }
+  }
 
   return c.json(updated);
 });

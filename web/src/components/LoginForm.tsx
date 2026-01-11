@@ -1,22 +1,27 @@
 /**
  * Login Form Component
  *
- * Handles email/password authentication.
+ * Handles email/password and magic link authentication.
  */
 
 import { useState } from 'react';
 
 const API_BASE = import.meta.env.PUBLIC_API_URL || 'http://localhost:8787';
 
+type LoginMethod = 'password' | 'magic-link';
+
 export default function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [loginMethod, setLoginMethod] = useState<LoginMethod>('password');
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handlePasswordLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setSuccess(null);
     setLoading(true);
 
     try {
@@ -43,70 +48,156 @@ export default function LoginForm() {
     }
   };
 
+  const handleMagicLinkLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setSuccess(null);
+    setLoading(true);
+
+    try {
+      const response = await fetch(`${API_BASE}/api/auth/magic-link/send`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.error || 'Failed to send magic link');
+      }
+
+      setSuccess('Check your email for a sign-in link. It expires in 15 minutes.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to send magic link. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
-          {error}
-        </div>
-      )}
-
-      <div>
-        <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-          Email Address
-        </label>
-        <input
-          type="email"
-          id="email"
-          name="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          autoComplete="email"
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-shadow"
-          placeholder="you@example.com"
-        />
-      </div>
-
-      <div>
-        <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+    <div className="space-y-6">
+      {/* Login Method Toggle */}
+      <div className="flex rounded-lg border border-gray-200 p-1 bg-gray-50">
+        <button
+          type="button"
+          onClick={() => {
+            setLoginMethod('password');
+            setError(null);
+            setSuccess(null);
+          }}
+          className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${
+            loginMethod === 'password'
+              ? 'bg-white text-green-700 shadow-sm'
+              : 'text-gray-600 hover:text-gray-800'
+          }`}
+        >
           Password
-        </label>
-        <input
-          type="password"
-          id="password"
-          name="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          autoComplete="current-password"
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-shadow"
-          placeholder="••••••••"
-        />
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            setLoginMethod('magic-link');
+            setError(null);
+            setSuccess(null);
+          }}
+          className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${
+            loginMethod === 'magic-link'
+              ? 'bg-white text-green-700 shadow-sm'
+              : 'text-gray-600 hover:text-gray-800'
+          }`}
+        >
+          Magic Link
+        </button>
       </div>
 
-      <div className="flex items-center justify-between text-sm">
-        <label className="flex items-center">
+      <form onSubmit={loginMethod === 'password' ? handlePasswordLogin : handleMagicLinkLogin} className="space-y-4">
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+            {error}
+          </div>
+        )}
+
+        {success && (
+          <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm">
+            {success}
+          </div>
+        )}
+
+        <div>
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+            Email Address
+          </label>
           <input
-            type="checkbox"
-            className="rounded border-gray-300 text-green-600 focus:ring-green-500"
+            type="email"
+            id="email"
+            name="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            autoComplete="email"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-shadow"
+            placeholder="you@example.com"
           />
-          <span className="ml-2 text-gray-600">Remember me</span>
-        </label>
-        <a href="/forgot-password" className="text-green-700 hover:text-green-800">
-          Forgot password?
-        </a>
-      </div>
+        </div>
 
-      <button
-        type="submit"
-        disabled={loading}
-        className="w-full bg-green-700 hover:bg-green-800 text-white py-2 px-4 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        {loading ? 'Signing in...' : 'Sign In'}
-      </button>
+        {loginMethod === 'password' && (
+          <>
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                Password
+              </label>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                autoComplete="current-password"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-shadow"
+                placeholder="••••••••"
+              />
+            </div>
 
-      <div className="relative my-6">
+            <div className="flex items-center justify-between text-sm">
+              <label className="flex items-center">
+                <input
+                  type="checkbox"
+                  className="rounded border-gray-300 text-green-600 focus:ring-green-500"
+                />
+                <span className="ml-2 text-gray-600">Remember me</span>
+              </label>
+              <a href="/forgot-password" className="text-green-700 hover:text-green-800">
+                Forgot password?
+              </a>
+            </div>
+          </>
+        )}
+
+        {loginMethod === 'magic-link' && (
+          <p className="text-sm text-gray-600">
+            We'll send you a secure link to sign in without a password.
+          </p>
+        )}
+
+        <button
+          type="submit"
+          disabled={loading || !!success}
+          className="w-full bg-green-700 hover:bg-green-800 text-white py-2 px-4 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {loading ? (
+            loginMethod === 'password' ? 'Signing in...' : 'Sending link...'
+          ) : loginMethod === 'password' ? (
+            'Sign In'
+          ) : (
+            'Send Magic Link'
+          )}
+        </button>
+      </form>
+
+      <div className="relative">
         <div className="absolute inset-0 flex items-center">
           <div className="w-full border-t border-gray-200"></div>
         </div>
@@ -142,6 +233,6 @@ export default function LoginForm() {
         </svg>
         Google
       </button>
-    </form>
+    </div>
   );
 }
