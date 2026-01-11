@@ -22,7 +22,9 @@
     "test:coverage": "vitest run --coverage",
     "lint": "tsc --noEmit",
     "secrets:staging": "echo 'Run: wrangler secret put BETTER_AUTH_SECRET --env staging'",
-    "secrets:production": "echo 'Run: wrangler secret put BETTER_AUTH_SECRET --env production'"
+    "secrets:production": "echo 'Run: wrangler secret put BETTER_AUTH_SECRET --env production'",
+    "setup:staging": "./scripts/setup-cloudflare.sh staging",
+    "setup:production": "./scripts/setup-cloudflare.sh production"
   },
   "keywords": [],
   "author": "",
