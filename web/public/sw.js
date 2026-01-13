@@ -10,9 +10,9 @@ const OFFLINE_URL = '/offline.html';
 // Assets to cache immediately on install
 const PRECACHE_ASSETS = [
   '/',
-  '/range-status',
+  '/ranges',
   '/offline.html',
-  '/logo.svg',
+  '/logo.png',
   '/manifest.json',
 ];
 
@@ -105,8 +105,8 @@ self.addEventListener('push', (event) => {
 
   const options = {
     body: data.body,
-    icon: '/logo.svg',
-    badge: '/logo.svg',
+    icon: '/logo.png',
+    badge: '/logo.png',
     vibrate: [100, 50, 100],
     data: {
       url: data.url || '/',
