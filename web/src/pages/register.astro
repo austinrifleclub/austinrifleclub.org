@@ -1,0 +1,43 @@
+---
+/**
+ * Registration Page
+ *
+ * Create a free account to register for public events or apply for membership.
+ */
+import Layout from '../layouts/Layout.astro';
+import LoginForm from '../components/LoginForm';
+---
+
+<Layout title="Create Account" description="Create a free Austin Rifle Club account">
+  <section class="py-12 md:py-20 bg-gray-50 dark:bg-stone-900 min-h-[80vh] flex items-center">
+    <div class="max-w-md mx-auto px-4 sm:px-6 lg:px-8 w-full">
+      <div class="bg-white dark:bg-stone-800 rounded-lg shadow-md p-8">
+        <div class="text-center mb-8">
+          <img src="/logo.png" alt="Austin Rifle Club" class="w-32 h-32 mx-auto mb-4" />
+          <h1 class="section-title">Create Free Account</h1>
+          <p class="text-body text-sm mt-2">
+            Register for public events or apply for membership
+          </p>
+        </div>
+
+        <LoginForm client:load showPasskey={false} />
+
+        <div class="mt-6 pt-6 border-t border-gray-200 dark:border-stone-700">
+          <p class="text-center text-sm text-gray-600 dark:text-gray-400">
+            Already have an account?{' '}
+            <a href="/login" class="link-accent font-medium">
+              Sign in
+            </a>
+          </p>
+        </div>
+      </div>
+
+      <!-- Info -->
+      <div class="mt-6 text-center text-sm text-gray-500 dark:text-gray-400">
+        <p>
+          Creating an account is free and doesn't require a membership.
+        </p>
+      </div>
+    </div>
+  </section>
+</Layout>

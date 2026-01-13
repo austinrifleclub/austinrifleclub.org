@@ -2,41 +2,47 @@
 /**
  * Login Page
  *
- * Member authentication page.
+ * Authentication page for members and users.
  */
 import Layout from '../layouts/Layout.astro';
 import LoginForm from '../components/LoginForm';
 ---
 
-<Layout title="Member Login" description="Sign in to your Austin Rifle Club member account">
-  <section class="py-12 md:py-20 bg-gray-50 min-h-[80vh] flex items-center">
+<Layout title="Login" description="Sign in to your Austin Rifle Club account">
+  <section class="py-12 md:py-20 bg-gray-50 dark:bg-stone-900 min-h-[80vh] flex items-center">
     <div class="max-w-md mx-auto px-4 sm:px-6 lg:px-8 w-full">
-      <div class="bg-white rounded-lg shadow-md p-8">
+      <div class="bg-white dark:bg-stone-800 rounded-lg shadow-md p-8">
         <div class="text-center mb-8">
-          <img src="/logo.svg" alt="ARC" class="h-16 w-16 mx-auto mb-4" />
-          <h1 class="text-2xl font-bold text-gray-900">Member Login</h1>
-          <p class="text-gray-600 text-sm mt-2">
-            Sign in to access your member dashboard
+          <img src="/logo.png" alt="Austin Rifle Club" class="w-32 h-32 mx-auto mb-4" />
+          <h1 class="section-title">Austin Rifle Club</h1>
+          <p class="text-body text-sm mt-2">
+            Sign in to access your account
           </p>
         </div>
 
         <LoginForm client:load />
 
-        <div class="mt-6 text-center text-sm text-gray-600">
-          <p>
-            Not a member?{' '}
-            <a href="/membership" class="text-green-700 hover:text-green-800 font-medium">
-              Join the club
-            </a>
+        <div class="mt-6 pt-6 border-t border-gray-200 dark:border-stone-700">
+          <p class="text-center text-sm text-gray-600 dark:text-gray-400 mb-3">
+            Don't have an account?
+          </p>
+          <a
+            href="/register"
+            class="block text-center bg-gray-100 hover:bg-gray-200 dark:bg-stone-700 dark:hover:bg-stone-600 text-gray-800 dark:text-white py-3 px-4 rounded-lg font-medium transition-colors"
+          >
+            Create Free Account
+          </a>
+          <p class="text-center text-xs text-gray-500 dark:text-gray-400 mt-2">
+            Register for public events or apply for membership
           </p>
         </div>
       </div>
 
       <!-- Help -->
-      <div class="mt-6 text-center text-sm text-gray-500">
+      <div class="mt-6 text-center text-sm text-gray-500 dark:text-gray-400">
         <p>
           Having trouble logging in?{' '}
-          <a href="mailto:info@austinrifleclub.org" class="text-green-700 hover:text-green-800">
+          <a href="mailto:info@austinrifleclub.org" class="link-accent">
             Contact us
           </a>
         </p>

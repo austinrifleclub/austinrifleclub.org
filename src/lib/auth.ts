@@ -1,9 +1,10 @@
 import { betterAuth } from "better-auth";
 import { magicLink } from "better-auth/plugins";
+import { passkey } from "@better-auth/passkey";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { createDb } from "../db";
 import * as schema from "../db/schema";
-import { sendEmail, passwordResetEmail, magicLinkEmail } from "./email";
+import { sendEmail, magicLinkEmail } from "./email";
 
 export type Env = {
   DB: D1Database;
@@ -30,22 +31,15 @@ export function createAuth(env: Env) {
         session: schema.sessions,
         account: schema.accounts,
         verification: schema.verifications,
+        passkey: schema.passkeys,
       },
     }),
     baseURL: env.BETTER_AUTH_URL,
+    basePath: "/api/auth",
     secret: env.BETTER_AUTH_SECRET,
+    // Passwordless authentication only - using magic links and passkeys
     emailAndPassword: {
-      enabled: true,
-      requireEmailVerification: false, // Set to true in production
-      sendResetPassword: async ({ user, url }) => {
-        const email = passwordResetEmail(url);
-        await sendEmail(env.RESEND_API_KEY || '', {
-          to: user.email,
-          subject: email.subject,
-          html: email.html,
-          text: email.text,
-        });
-      },
+      enabled: false,
     },
     session: {
       expiresIn: 60 * 60 * 24 * 7, // 7 days
@@ -80,6 +74,11 @@ export function createAuth(env: Env) {
           });
         },
         expiresIn: 60 * 15, // 15 minutes
+      }),
+      passkey({
+        rpID: new URL(env.BETTER_AUTH_URL).hostname,
+        rpName: "Austin Rifle Club",
+        origin: env.BETTER_AUTH_URL,
       }),
     ],
   });
