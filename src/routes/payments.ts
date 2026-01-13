@@ -275,7 +275,7 @@ app.post("/webhook", async (c) => {
         await db
           .update(eventRegistrations)
           .set({
-            stripePaymentId: session.payment_intent as string,
+            stripePaymentId: session.payment_intent ? String(session.payment_intent) : null,
             amountPaid: session.amount_total,
           })
           .where(

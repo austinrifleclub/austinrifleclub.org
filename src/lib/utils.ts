@@ -13,6 +13,35 @@ export function generateId(): string {
 }
 
 /**
+ * Safely parse a full name into first and last name parts.
+ * Handles empty strings, whitespace-only strings, and single names.
+ *
+ * @param fullName - The full name to parse
+ * @param defaultFirst - Default first name if parsing fails (default: "Member")
+ * @param defaultLast - Default last name if parsing fails (default: "")
+ */
+export function parseFullName(
+  fullName: string | null | undefined,
+  defaultFirst = "Member",
+  defaultLast = ""
+): { firstName: string; lastName: string } {
+  if (!fullName || typeof fullName !== "string") {
+    return { firstName: defaultFirst, lastName: defaultLast };
+  }
+
+  const trimmed = fullName.trim();
+  if (!trimmed) {
+    return { firstName: defaultFirst, lastName: defaultLast };
+  }
+
+  const parts = trimmed.split(/\s+/);
+  const firstName = parts[0] || defaultFirst;
+  const lastName = parts.slice(1).join(" ") || defaultLast;
+
+  return { firstName, lastName };
+}
+
+/**
  * Generate a badge number for new members
  * Format: M followed by 4-5 digits (e.g., M1234, M12345)
  *

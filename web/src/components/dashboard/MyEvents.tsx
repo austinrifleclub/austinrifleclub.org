@@ -30,7 +30,8 @@ export default function MyEvents() {
         });
         if (res.ok) {
           const data = await res.json();
-          setRegistrations(data.registrations || []);
+          // API returns array directly, not wrapped in object
+          setRegistrations(Array.isArray(data) ? data : []);
         } else if (res.status !== 404) {
           setError('Failed to load registrations');
         }

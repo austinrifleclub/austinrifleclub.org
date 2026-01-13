@@ -173,9 +173,9 @@ app.post("/:id/sign-in", async (c) => {
     throw new ForbiddenError("Guest has reached visit limit for this year (3 visits max). Guest should consider becoming a member.");
   }
 
-  // Check how many guests member has signed in today
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  // Check how many guests member has signed in today (UTC midnight)
+  const now = new Date();
+  const todayUtc = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
 
   const [todayCount] = await db
     .select({ count: sql<number>`COUNT(*)` })
@@ -183,7 +183,7 @@ app.post("/:id/sign-in", async (c) => {
     .where(
       and(
         eq(guestVisits.hostMemberId, member.id),
-        sql`${guestVisits.signedInAt} >= ${today.getTime()}`
+        sql`${guestVisits.signedInAt} >= ${todayUtc.getTime()}`
       )
     );
 
@@ -193,7 +193,6 @@ app.post("/:id/sign-in", async (c) => {
 
   // Create visit record
   const visitId = generateId();
-  const now = new Date();
 
   const [visit] = await db
     .insert(guestVisits)

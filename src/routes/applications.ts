@@ -40,6 +40,7 @@ import {
   calculateProratedDues,
   getFiscalYearEndDate,
   getCurrentFiscalYear,
+  parseFullName,
 } from "../lib/utils";
 import {
   sendEmail,
@@ -459,7 +460,7 @@ app.patch("/:id", requireAdmin, async (c) => {
   });
 
   if (user && parsed.data.status) {
-    const firstName = user.name.split(' ')[0] || 'Applicant';
+    const { firstName } = parseFullName(user.name, 'Applicant');
     const emailTemplate = applicationStatusUpdateEmail(firstName, parsed.data.status);
     await sendEmail(c.env.RESEND_API_KEY || '', {
       to: user.email,
@@ -545,8 +546,7 @@ app.post("/:id/approve", requireAdmin, async (c) => {
       joinDate: now,
       expirationDate,
       probationEndsAt,
-      firstName: user.name.split(" ")[0] || "",
-      lastName: user.name.split(" ").slice(1).join(" ") || "",
+      ...parseFullName(user.name, "Member", ""),
       phone: "", // Would come from application in full implementation
       addressLine1: "", // Would come from application
       city: "",
@@ -583,7 +583,7 @@ app.post("/:id/approve", requireAdmin, async (c) => {
   });
 
   // Send welcome email with badge number
-  const firstName = user.name.split(' ')[0] || 'Member';
+  const { firstName } = parseFullName(user.name, 'Member');
   const emailTemplate = welcomeEmail(firstName);
   await sendEmail(c.env.RESEND_API_KEY || '', {
     to: user.email,
@@ -652,7 +652,7 @@ app.post("/:id/reject", requireAdmin, async (c) => {
   });
 
   if (user) {
-    const firstName = user.name.split(' ')[0] || 'Applicant';
+    const { firstName } = parseFullName(user.name, 'Applicant');
     const emailTemplate = applicationRejectedEmail(firstName, reason);
     await sendEmail(c.env.RESEND_API_KEY || '', {
       to: user.email,
