@@ -7,6 +7,7 @@
 import { DrizzleD1Database } from "drizzle-orm/d1";
 import { auditLog } from "../db/schema";
 import { generateId } from "./utils";
+import { log } from "./logger";
 
 export type AuditAction =
   | 'member.create'
@@ -63,7 +64,11 @@ export async function logAudit(
     });
   } catch (error) {
     // Don't let audit logging failures break the main operation
-    console.error('[Audit] Failed to log:', error);
+    log.error('Audit log failed', error instanceof Error ? error : new Error(String(error)), {
+      action: entry.action,
+      targetType: entry.targetType,
+      targetId: entry.targetId,
+    });
   }
 }
 

@@ -28,27 +28,24 @@ app.use("*", requestId()); // Add request ID for tracing
 app.use("*", securityHeaders()); // Add security headers
 app.use("*", logger()); // Keep Hono's logger for development
 app.use("*", requestLogger()); // Add structured JSON logging
-app.use(
-  "*",
-  cors({
-    origin: (origin) => {
-      // Allow configured origins in production
-      const allowedOrigins = [
-        "http://localhost:4321",
-        "http://localhost:3000",
-        "https://austinrifleclub.org",
-        "https://www.austinrifleclub.org",
-        "https://staging.austinrifleclub.org",
-      ];
-      return allowedOrigins.includes(origin) ? origin : null;
-    },
+// CORS middleware - origins configured via environment variables
+app.use("*", async (c, next) => {
+  const corsOrigins = c.env.CORS_ALLOWED_ORIGINS?.split(",") || [
+    "http://localhost:4321",
+    "http://localhost:3000",
+  ];
+
+  const corsMiddleware = cors({
+    origin: (origin) => corsOrigins.includes(origin) ? origin : null,
     credentials: true,
     allowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowHeaders: ["Content-Type", "Authorization", "X-Request-ID"],
     exposeHeaders: ["X-Request-ID", "X-RateLimit-Limit", "X-RateLimit-Remaining", "X-RateLimit-Reset"],
     maxAge: 86400, // 24 hours
-  })
-);
+  });
+
+  return corsMiddleware(c, next);
+});
 
 // Health check routes (no rate limit)
 app.route("/health", healthRoutes);

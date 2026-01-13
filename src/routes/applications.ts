@@ -15,6 +15,7 @@
 import { Hono } from "hono";
 import { eq, and, desc, sql } from "drizzle-orm";
 import { Env } from "../lib/auth";
+import { log } from "../lib/logger";
 import {
   requireAuth,
   requireAdmin,
@@ -660,12 +661,12 @@ app.post("/:id/reject", requireAdmin, async (c) => {
       });
 
       if (refundResult.success) {
-        console.log(`[Applications] Refund processed: ${refundResult.refundId}`);
+        log.info('Application refund processed', { applicationId: id, refundId: refundResult.refundId });
       } else {
-        console.error(`[Applications] Refund failed: ${refundResult.error}`);
+        log.error('Application refund failed', new Error(refundResult.error || 'Unknown error'), { applicationId: id });
       }
     } catch (error) {
-      console.error('[Applications] Refund error:', error);
+      log.error('Application refund error', error instanceof Error ? error : new Error(String(error)), { applicationId: id });
     }
   }
 

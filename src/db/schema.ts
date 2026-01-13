@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer, real, index, uniqueIndex } from "drizzle-orm/sqlite-core";
+import { sqliteTable, text, integer, real, index, uniqueIndex, type AnySQLiteColumn } from "drizzle-orm/sqlite-core";
 import { relations } from "drizzle-orm";
 
 // =============================================================================
@@ -124,7 +124,7 @@ export const members = sqliteTable("members", {
 
   // Family membership
   primaryMemberId: text("primary_member_id")            // If dependent, points to primary
-    .references((): any => members.id),
+    .references((): AnySQLiteColumn => members.id),
   familyRole: text("family_role"),                      // primary, spouse, junior
 
   // Dates
@@ -156,7 +156,7 @@ export const members = sqliteTable("members", {
   // Referral tracking
   referralCode: text("referral_code").unique(),         // Unique code for sharing
   referredBy: text("referred_by")                       // Member ID who referred
-    .references((): any => members.id),
+    .references((): AnySQLiteColumn => members.id),
 
   // Texas LTC (for background check waiver)
   hasTexasLtc: integer("has_texas_ltc", { mode: "boolean" }).default(false),
@@ -352,7 +352,7 @@ export const events = sqliteTable("events", {
 
   // Recurrence - Occurrence fields
   parentEventId: text("parent_event_id")                // Points to template for generated occurrences
-    .references((): any => events.id),
+    .references((): AnySQLiteColumn => events.id),
   occurrenceDate: integer("occurrence_date", { mode: "timestamp" }), // The specific date this occurrence is for
 
   // MEC Import tracking

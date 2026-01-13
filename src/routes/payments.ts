@@ -7,6 +7,7 @@
 import { Hono } from "hono";
 import { eq } from "drizzle-orm";
 import { Env } from "../lib/auth";
+import { log } from "../lib/logger";
 import { requireMember, MemberContext } from "../middleware/auth";
 import { createDb } from "../db";
 import { members, eventRegistrations, duesPayments } from "../db/schema";
@@ -171,10 +172,10 @@ app.post("/webhook", async (c) => {
         await db.insert(duesPayments).values({
           id: paymentId,
           memberId: metadata.memberId,
-          amount: session.amount_total, // Already in cents
+          amount: session.amount_total ?? 0, // Already in cents
           paymentType: metadata.membershipType === 'life' ? 'life' : 'annual',
           paymentMethod: "stripe",
-          stripePaymentId: session.payment_intent as string,
+          stripePaymentId: (session.payment_intent as string) ?? null,
           periodStart: new Date(),
           periodEnd: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
           status: "completed",
@@ -237,7 +238,7 @@ app.post("/webhook", async (c) => {
           },
         });
 
-        console.log(`[Webhook] Membership payment completed for ${metadata.memberId}`);
+        log.info('Membership payment completed', { memberId: metadata.memberId, membershipType: metadata.membershipType });
       } else if (metadata.type === "event") {
         // Update event registration as paid
         await db
@@ -302,18 +303,18 @@ app.post("/webhook", async (c) => {
           },
         });
 
-        console.log(`[Webhook] Event payment completed for ${metadata.eventId}`);
+        log.info('Event payment completed', { eventId: metadata.eventId, memberId: metadata.memberId });
       }
       break;
     }
 
     case "checkout.session.expired": {
-      console.log(`[Webhook] Checkout session expired: ${event.data.object.id}`);
+      log.info('Checkout session expired', { sessionId: event.data.object.id });
       break;
     }
 
     case "payment_intent.payment_failed": {
-      console.log(`[Webhook] Payment failed: ${event.data.object.id}`);
+      log.warn('Payment failed', { paymentIntentId: event.data.object.id });
       break;
     }
   }

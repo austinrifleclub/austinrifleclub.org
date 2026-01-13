@@ -17,6 +17,7 @@
 import { Hono } from "hono";
 import { eq, sql } from "drizzle-orm";
 import { Env } from "../lib/auth";
+import { log } from "../lib/logger";
 import {
   optionalAuth,
   requireAdmin,
@@ -34,6 +35,21 @@ import {
   rangeReopenAlert,
   safetyAlertSMS,
 } from "../lib/sms";
+import type { DrizzleD1Database } from "drizzle-orm/d1";
+import type * as schema from "../db/schema";
+
+// Type definitions for query results
+interface NotificationPref {
+  userId: string;
+  rangeStatus: string | null;
+  safetyAlerts: string | null;
+}
+
+interface MemberWithPhone {
+  phone: string;
+}
+
+type DbType = DrizzleD1Database<typeof schema>;
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -114,13 +130,6 @@ app.get("/", optionalAuth, async (c) => {
   return c.json({
     ranges: results,
     lastUpdated,
-    // Include weather placeholder - would integrate with weather API
-    weather: {
-      temp: null,
-      conditions: null,
-      windSpeed: null,
-      source: "weather integration pending",
-    },
   });
 });
 
@@ -526,19 +535,19 @@ function isSmsEnabled(prefJson: string | null): boolean {
  * Send range closure notifications to opted-in members
  */
 async function sendRangeClosureNotifications(
-  db: any,
+  db: DbType,
   accountSid: string,
   authToken: string,
   rangeName: string,
   reason: string
 ): Promise<{ sent: number; failed: number }> {
   // Get all notification preferences with rangeStatus SMS enabled
-  const prefs = await db.query.notificationPreferences.findMany();
+  const prefs = await db.query.notificationPreferences.findMany() as NotificationPref[];
 
   // Filter for SMS enabled on rangeStatus and get user IDs
   const smsEnabledUserIds = prefs
-    .filter((p: any) => isSmsEnabled(p.rangeStatus))
-    .map((p: any) => p.userId);
+    .filter((p) => isSmsEnabled(p.rangeStatus))
+    .map((p) => p.userId);
 
   if (smsEnabledUserIds.length === 0) {
     return { sent: 0, failed: 0 };
@@ -553,7 +562,7 @@ async function sendRangeClosureNotifications(
     return { sent: 0, failed: 0 };
   }
 
-  const phones = membersWithPhones.map((m: any) => m.phone).filter(Boolean);
+  const phones = (membersWithPhones as MemberWithPhone[]).map((m) => m.phone).filter(Boolean);
   const message = rangeClosureAlert(rangeName, reason);
 
   return sendBulkSMS(accountSid, authToken, phones, message);
@@ -563,18 +572,18 @@ async function sendRangeClosureNotifications(
  * Send range reopen notifications to opted-in members
  */
 async function sendRangeReopenNotifications(
-  db: any,
+  db: DbType,
   accountSid: string,
   authToken: string,
   rangeName: string
 ): Promise<{ sent: number; failed: number }> {
   // Get all notification preferences with rangeStatus SMS enabled
-  const prefs = await db.query.notificationPreferences.findMany();
+  const prefs = await db.query.notificationPreferences.findMany() as NotificationPref[];
 
   // Filter for SMS enabled on rangeStatus
   const smsEnabledUserIds = prefs
-    .filter((p: any) => isSmsEnabled(p.rangeStatus))
-    .map((p: any) => p.userId);
+    .filter((p) => isSmsEnabled(p.rangeStatus))
+    .map((p) => p.userId);
 
   if (smsEnabledUserIds.length === 0) {
     return { sent: 0, failed: 0 };
@@ -589,7 +598,7 @@ async function sendRangeReopenNotifications(
     return { sent: 0, failed: 0 };
   }
 
-  const phones = membersWithPhones.map((m: any) => m.phone).filter(Boolean);
+  const phones = (membersWithPhones as MemberWithPhone[]).map((m) => m.phone).filter(Boolean);
   const message = rangeReopenAlert(rangeName);
 
   return sendBulkSMS(accountSid, authToken, phones, message);
@@ -615,10 +624,10 @@ app.post("/safety-alert", requireAdmin, async (c) => {
   }
 
   // Get all notification preferences with safetyAlerts SMS enabled
-  const prefs = await db.query.notificationPreferences.findMany();
+  const prefs = await db.query.notificationPreferences.findMany() as NotificationPref[];
   const smsEnabledUserIds = prefs
-    .filter((p: any) => isSmsEnabled(p.safetyAlerts))
-    .map((p: any) => p.userId);
+    .filter((p) => isSmsEnabled(p.safetyAlerts))
+    .map((p) => p.userId);
 
   if (smsEnabledUserIds.length === 0) {
     return c.json({
@@ -654,7 +663,7 @@ app.post("/safety-alert", requireAdmin, async (c) => {
   });
 
   if (!c.env.TWILIO_ACCOUNT_SID || !c.env.TWILIO_AUTH_TOKEN) {
-    console.log('[SMS] Safety alert (dev mode):', message);
+    log.debug('Safety alert not sent (SMS not configured)', { recipientCount: membersWithPhones.length });
     return c.json({
       success: true,
       message: "Safety alert logged (SMS not configured)",
@@ -662,7 +671,7 @@ app.post("/safety-alert", requireAdmin, async (c) => {
     });
   }
 
-  const phones = membersWithPhones.map((m: any) => m.phone).filter(Boolean);
+  const phones = (membersWithPhones as MemberWithPhone[]).map((m) => m.phone).filter(Boolean);
   const smsBody = safetyAlertSMS(message);
   const result = await sendBulkSMS(c.env.TWILIO_ACCOUNT_SID, c.env.TWILIO_AUTH_TOKEN, phones, smsBody);
 

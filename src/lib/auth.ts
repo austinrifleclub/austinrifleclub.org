@@ -12,6 +12,7 @@ export type Env = {
   R2: R2Bucket;
   BETTER_AUTH_SECRET: string;
   BETTER_AUTH_URL: string;
+  CORS_ALLOWED_ORIGINS?: string;
   RESEND_API_KEY?: string;
   STRIPE_SECRET_KEY?: string;
   STRIPE_WEBHOOK_SECRET?: string;
@@ -53,18 +54,6 @@ export function createAuth(env: Env) {
     plugins: [
       magicLink({
         sendMagicLink: async ({ email, url }) => {
-          // In staging/dev, log the magic link for easy testing
-          const isProduction = env.BETTER_AUTH_URL?.includes('austinrifleclub.org')
-            && !env.BETTER_AUTH_URL?.includes('staging');
-
-          if (!isProduction) {
-            console.log('========================================');
-            console.log('[Magic Link] Login link for testing:');
-            console.log(`  Email: ${email}`);
-            console.log(`  URL: ${url}`);
-            console.log('========================================');
-          }
-
           const emailContent = magicLinkEmail(url);
           await sendEmail(env.RESEND_API_KEY || '', {
             to: email,

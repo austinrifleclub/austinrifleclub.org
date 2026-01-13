@@ -23,6 +23,7 @@ import {
   duesPayments,
   volunteerHours,
   certifications,
+  certificationTypes,
   guestVisits,
   users,
   boardMembers,
@@ -80,13 +81,19 @@ app.get("/me", requireAuth, async (c) => {
       )
     );
 
-  // Get active certifications
-  const certs = await db.query.certifications.findMany({
-    where: eq(certifications.memberId, member.id),
-    with: {
-      // Would need to add relations - simplified for now
-    },
-  });
+  // Get active certifications with type info
+  const certs = await db
+    .select({
+      id: certifications.id,
+      certificationTypeId: certifications.certificationTypeId,
+      earnedDate: certifications.earnedDate,
+      expiresAt: certifications.expiresAt,
+      typeName: certificationTypes.name,
+      typeDescription: certificationTypes.description,
+    })
+    .from(certifications)
+    .leftJoin(certificationTypes, eq(certifications.certificationTypeId, certificationTypes.id))
+    .where(eq(certifications.memberId, member.id));
 
   // Get family members if primary
   let familyMembers: typeof members.$inferSelect[] = [];

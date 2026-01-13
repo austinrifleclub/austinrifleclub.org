@@ -5,6 +5,8 @@
  * Uses Stripe test mode by default.
  */
 
+import { log } from './logger';
+
 interface CreateCheckoutOptions {
   customerId?: string;
   customerEmail: string;
@@ -35,11 +37,19 @@ interface StripeCheckoutSession {
   metadata: Record<string, string>;
 }
 
+interface StripeWebhookEventObject {
+  id: string;
+  amount_total?: number;
+  payment_intent?: string;
+  metadata?: Record<string, string>;
+  [key: string]: unknown;
+}
+
 interface StripeWebhookEvent {
   id: string;
   type: string;
   data: {
-    object: any;
+    object: StripeWebhookEventObject;
   };
 }
 
@@ -77,7 +87,7 @@ export class StripeService {
   private async request<T>(
     endpoint: string,
     method: 'GET' | 'POST' | 'DELETE' = 'GET',
-    body?: Record<string, any>
+    body?: Record<string, unknown>
   ): Promise<T> {
     const headers: Record<string, string> = {
       'Authorization': `Bearer ${this.apiKey}`,
@@ -104,7 +114,7 @@ export class StripeService {
     return data;
   }
 
-  private encodeFormData(data: Record<string, any>, prefix = ''): string {
+  private encodeFormData(data: Record<string, unknown>, prefix = ''): string {
     const params: string[] = [];
 
     for (const [key, value] of Object.entries(data)) {
@@ -113,17 +123,17 @@ export class StripeService {
       if (value === null || value === undefined) continue;
 
       if (typeof value === 'object' && !Array.isArray(value)) {
-        params.push(this.encodeFormData(value, fullKey));
+        params.push(this.encodeFormData(value as Record<string, unknown>, fullKey));
       } else if (Array.isArray(value)) {
         value.forEach((item, index) => {
-          if (typeof item === 'object') {
-            params.push(this.encodeFormData(item, `${fullKey}[${index}]`));
+          if (typeof item === 'object' && item !== null) {
+            params.push(this.encodeFormData(item as Record<string, unknown>, `${fullKey}[${index}]`));
           } else {
-            params.push(`${fullKey}[${index}]=${encodeURIComponent(item)}`);
+            params.push(`${fullKey}[${index}]=${encodeURIComponent(String(item))}`);
           }
         });
       } else {
-        params.push(`${fullKey}=${encodeURIComponent(value)}`);
+        params.push(`${fullKey}=${encodeURIComponent(String(value))}`);
       }
     }
 
@@ -171,7 +181,7 @@ export class StripeService {
         url: session.url,
       };
     } catch (error) {
-      console.error('[Stripe] Checkout error:', error);
+      log.error('Stripe checkout error', error instanceof Error ? error : new Error(String(error)));
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Payment failed',
@@ -258,7 +268,7 @@ export class StripeService {
         status: refund.status,
       };
     } catch (error) {
-      console.error('[Stripe] Refund error:', error);
+      log.error('Stripe refund error', error instanceof Error ? error : new Error(String(error)), { paymentIntentId });
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Refund failed',

@@ -6,6 +6,7 @@
 
 import { Context, Next } from "hono";
 import { Env } from "../lib/auth";
+import { log } from "../lib/logger";
 
 interface RateLimitOptions {
   /** Maximum requests per window */
@@ -81,7 +82,7 @@ export function rateLimit(options: RateLimitOptions) {
       }
     } catch (error) {
       // If KV fails, allow the request but log the error
-      console.error('[RateLimit] KV error:', error);
+      log.error('Rate limit KV error', error instanceof Error ? error : new Error(String(error)), { key });
     }
 
     await next();

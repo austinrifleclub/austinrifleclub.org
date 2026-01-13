@@ -4,6 +4,8 @@
  * Handles sending transactional emails via Resend.
  */
 
+import { log } from './logger';
+
 interface EmailOptions {
   to: string;
   subject: string;
@@ -23,9 +25,7 @@ export async function sendEmail(
   options: EmailOptions
 ): Promise<{ success: boolean; id?: string; error?: string }> {
   if (!apiKey) {
-    console.log('[Email] No API key, logging email instead:');
-    console.log(`  To: ${options.to}`);
-    console.log(`  Subject: ${options.subject}`);
+    log.debug('Email not sent (no API key)', { to: options.to, subject: options.subject });
     return { success: true, id: 'dev-mode' };
   }
 
@@ -48,13 +48,13 @@ export async function sendEmail(
     const data: ResendResponse = await response.json();
 
     if (!response.ok) {
-      console.error('[Email] Failed to send:', data.error);
+      log.error('Email send failed', new Error(data.error || 'Unknown error'), { to: options.to });
       return { success: false, error: data.error };
     }
 
     return { success: true, id: data.id };
   } catch (error) {
-    console.error('[Email] Error:', error);
+    log.error('Email error', error instanceof Error ? error : new Error(String(error)), { to: options.to });
     return { success: false, error: 'Failed to send email' };
   }
 }

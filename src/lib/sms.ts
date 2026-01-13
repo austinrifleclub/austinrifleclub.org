@@ -4,6 +4,8 @@
  * Handles sending SMS notifications via Twilio.
  */
 
+import { log } from './logger';
+
 interface SMSOptions {
   to: string;
   body: string;
@@ -24,9 +26,7 @@ export async function sendSMS(
   options: SMSOptions
 ): Promise<{ success: boolean; sid?: string; error?: string }> {
   if (!accountSid || !authToken) {
-    console.log('[SMS] No credentials, logging message instead:');
-    console.log(`  To: ${options.to}`);
-    console.log(`  Body: ${options.body}`);
+    log.debug('SMS not sent (no credentials)', { to: options.to });
     return { success: true, sid: 'dev-mode' };
   }
 
@@ -56,13 +56,13 @@ export async function sendSMS(
     const data: TwilioResponse = await response.json();
 
     if (!response.ok || data.error_code) {
-      console.error('[SMS] Failed to send:', data.error_message);
+      log.error('SMS send failed', new Error(data.error_message || 'Unknown error'), { to: options.to });
       return { success: false, error: data.error_message || 'Failed to send SMS' };
     }
 
     return { success: true, sid: data.sid };
   } catch (error) {
-    console.error('[SMS] Error:', error);
+    log.error('SMS error', error instanceof Error ? error : new Error(String(error)), { to: options.to });
     return { success: false, error: 'Failed to send SMS' };
   }
 }

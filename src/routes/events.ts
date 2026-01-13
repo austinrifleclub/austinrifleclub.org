@@ -9,6 +9,7 @@
 import { Hono } from "hono";
 import { eq, and, gte, lte, desc, sql } from "drizzle-orm";
 import { Env } from "../lib/auth";
+import { log } from "../lib/logger";
 import {
   requireMember,
   requireAdmin,
@@ -463,13 +464,13 @@ app.delete("/:id/register", requireMember, async (c) => {
       });
 
       if (refundResult.success) {
-        console.log(`[Events] Refund processed: ${refundResult.refundId} for ${refundAmount} cents`);
+        log.info('Event registration refund processed', { eventId, registrationId: registration.id, refundId: refundResult.refundId, amount: refundAmount });
         refundProcessed = true;
       } else {
-        console.error(`[Events] Refund failed: ${refundResult.error}`);
+        log.error('Event registration refund failed', new Error(refundResult.error || 'Unknown error'), { eventId, registrationId: registration.id });
       }
     } catch (error) {
-      console.error('[Events] Refund error:', error);
+      log.error('Event registration refund error', error instanceof Error ? error : new Error(String(error)), { eventId });
     }
   }
 
@@ -681,12 +682,12 @@ app.post("/:id/cancel", requireAdmin, async (c) => {
         });
 
         if (refundResult.success) {
-          console.log(`[Events] Refund processed for cancelled event: ${refundResult.refundId}`);
+          log.info('Cancelled event refund processed', { eventId: id, registrationId: reg.id, refundId: refundResult.refundId });
         } else {
-          console.error(`[Events] Refund failed for reg ${reg.id}: ${refundResult.error}`);
+          log.error('Cancelled event refund failed', new Error(refundResult.error || 'Unknown error'), { eventId: id, registrationId: reg.id });
         }
       } catch (error) {
-        console.error('[Events] Refund error:', error);
+        log.error('Cancelled event refund error', error instanceof Error ? error : new Error(String(error)), { eventId: id, registrationId: reg.id });
       }
     }
   }
