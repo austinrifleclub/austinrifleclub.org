@@ -48,7 +48,7 @@ const memberNavItems = [
 ];
 
 const clubNavItems = [
-  { id: 'permissions', label: 'Responsibilities', href: '/dashboard/permissions', icon: '📋' },
+  { id: 'matrix', label: 'Responsibilities', href: '/dashboard/matrix', icon: '📋' },
 ];
 
 // Helper to check if member has active status
