@@ -6,6 +6,7 @@
 
 import { useState, useEffect } from 'react';
 import DashboardLayout from './DashboardLayout';
+import MembershipGate, { type MemberStatus } from '../ui/MembershipGate';
 
 const API_BASE = import.meta.env.PUBLIC_API_URL || 'http://localhost:8787';
 
@@ -19,10 +20,23 @@ export default function ReferralProgram() {
   const [referralData, setReferralData] = useState<ReferralData | null>(null);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
+  const [memberStatus, setMemberStatus] = useState<MemberStatus>(null);
+  const [duesCurrent, setDuesCurrent] = useState(false);
 
   useEffect(() => {
-    const fetchReferralCode = async () => {
+    const fetchData = async () => {
       try {
+        // Fetch member status first
+        const memberRes = await fetch(`${API_BASE}/api/members/me`, {
+          credentials: 'include',
+        });
+        if (memberRes.ok) {
+          const memberData = await memberRes.json();
+          setMemberStatus(memberData.status as MemberStatus);
+          setDuesCurrent(memberData.duesCurrent);
+        }
+
+        // Fetch referral code
         const res = await fetch(`${API_BASE}/api/members/me/referral-code`, {
           credentials: 'include',
         });
@@ -30,13 +44,13 @@ export default function ReferralProgram() {
           setReferralData(await res.json());
         }
       } catch (err) {
-        console.error('Failed to fetch referral code:', err);
+        console.error('Failed to fetch data:', err);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchReferralCode();
+    fetchData();
   }, []);
 
   const copyToClipboard = async () => {
@@ -55,7 +69,7 @@ export default function ReferralProgram() {
     return (
       <DashboardLayout activeTab="referrals">
         <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-700"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-navy-700"></div>
         </div>
       </DashboardLayout>
     );
@@ -63,35 +77,36 @@ export default function ReferralProgram() {
 
   return (
     <DashboardLayout activeTab="referrals">
+      <MembershipGate feature="referrals" memberStatus={memberStatus} duesCurrent={duesCurrent}>
       <div className="max-w-3xl mx-auto">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Referral Program</h1>
-        <p className="text-gray-600 mb-8">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Referral Program</h1>
+        <p className="text-gray-600 dark:text-gray-400 mb-8">
           Earn $25 in volunteer credit for each new member you refer!
         </p>
 
         {/* Referral Stats */}
         <div className="grid md:grid-cols-3 gap-4 mb-8">
-          <div className="bg-white rounded-lg shadow-sm border p-6 text-center">
-            <p className="text-3xl font-bold text-green-700">
+          <div className="bg-white dark:bg-stone-800 rounded-lg shadow-sm border dark:border-stone-700 p-6 text-center">
+            <p className="text-3xl font-bold text-navy-700 dark:text-blue-400">
               {referralData?.referralCount || 0}
             </p>
-            <p className="text-gray-600 text-sm">Members Referred</p>
+            <p className="text-gray-600 dark:text-gray-400 text-sm">Members Referred</p>
           </div>
-          <div className="bg-white rounded-lg shadow-sm border p-6 text-center">
-            <p className="text-3xl font-bold text-green-700">
+          <div className="bg-white dark:bg-stone-800 rounded-lg shadow-sm border dark:border-stone-700 p-6 text-center">
+            <p className="text-3xl font-bold text-navy-700 dark:text-blue-400">
               ${(referralData?.referralCount || 0) * 25}
             </p>
-            <p className="text-gray-600 text-sm">Credits Earned</p>
+            <p className="text-gray-600 dark:text-gray-400 text-sm">Credits Earned</p>
           </div>
-          <div className="bg-white rounded-lg shadow-sm border p-6 text-center">
-            <p className="text-3xl font-bold text-green-700">$25</p>
+          <div className="bg-white dark:bg-stone-800 rounded-lg shadow-sm border dark:border-stone-700 p-6 text-center">
+            <p className="text-3xl font-bold text-navy-700 dark:text-blue-400">$25</p>
             <p className="text-gray-600 text-sm">Per Referral</p>
           </div>
         </div>
 
         {/* Share Link */}
-        <div className="bg-white rounded-lg shadow-sm border p-6 mb-8">
-          <h2 className="font-semibold text-lg mb-4">Your Referral Link</h2>
+        <div className="bg-white dark:bg-stone-800 rounded-lg shadow-sm border dark:border-stone-700 p-6 mb-8">
+          <h2 className="font-semibold text-lg mb-4 text-gray-900 dark:text-white">Your Referral Link</h2>
 
           <div className="flex gap-2 mb-4">
             <input
@@ -104,8 +119,8 @@ export default function ReferralProgram() {
               onClick={copyToClipboard}
               className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                 copied
-                  ? 'bg-green-100 text-green-700'
-                  : 'bg-green-700 hover:bg-green-800 text-white'
+                  ? 'bg-navy-100 text-navy-700'
+                  : 'bg-navy-700 hover:bg-navy-800 text-white'
               }`}
             >
               {copied ? 'Copied!' : 'Copy'}
@@ -119,8 +134,8 @@ export default function ReferralProgram() {
         </div>
 
         {/* Share Options */}
-        <div className="bg-white rounded-lg shadow-sm border p-6 mb-8">
-          <h2 className="font-semibold text-lg mb-4">Share Via</h2>
+        <div className="bg-white dark:bg-stone-800 rounded-lg shadow-sm border dark:border-stone-700 p-6 mb-8">
+          <h2 className="font-semibold text-lg mb-4 text-gray-900 dark:text-white">Share Via</h2>
 
           <div className="flex flex-wrap gap-3">
             <a
@@ -155,40 +170,40 @@ export default function ReferralProgram() {
         </div>
 
         {/* How It Works */}
-        <div className="bg-gray-50 rounded-lg p-6">
-          <h2 className="font-semibold text-lg mb-4">How It Works</h2>
+        <div className="bg-gray-50 dark:bg-stone-900 rounded-lg p-6">
+          <h2 className="font-semibold text-lg mb-4 text-gray-900 dark:text-white">How It Works</h2>
 
           <div className="grid md:grid-cols-3 gap-6">
             <div className="text-center">
-              <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                <span className="text-green-800 font-bold">1</span>
+              <div className="w-10 h-10 bg-navy-100 dark:bg-blue-900/50 rounded-full flex items-center justify-center mx-auto mb-3">
+                <span className="text-navy-800 dark:text-blue-400 font-bold">1</span>
               </div>
-              <h3 className="font-medium mb-1">Share Your Link</h3>
-              <p className="text-sm text-gray-600">
+              <h3 className="font-medium mb-1 text-gray-900 dark:text-white">Share Your Link</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
                 Send your unique referral link to friends interested in joining.
               </p>
             </div>
             <div className="text-center">
-              <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                <span className="text-green-800 font-bold">2</span>
+              <div className="w-10 h-10 bg-navy-100 dark:bg-blue-900/50 rounded-full flex items-center justify-center mx-auto mb-3">
+                <span className="text-navy-800 dark:text-blue-400 font-bold">2</span>
               </div>
-              <h3 className="font-medium mb-1">They Join</h3>
-              <p className="text-sm text-gray-600">
+              <h3 className="font-medium mb-1 text-gray-900 dark:text-white">They Join</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
                 Your friend completes their membership application.
               </p>
             </div>
             <div className="text-center">
-              <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                <span className="text-green-800 font-bold">3</span>
+              <div className="w-10 h-10 bg-navy-100 dark:bg-blue-900/50 rounded-full flex items-center justify-center mx-auto mb-3">
+                <span className="text-navy-800 dark:text-blue-400 font-bold">3</span>
               </div>
-              <h3 className="font-medium mb-1">You Get Credit</h3>
-              <p className="text-sm text-gray-600">
+              <h3 className="font-medium mb-1 text-gray-900 dark:text-white">You Get Credit</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
                 $25 is added to your volunteer credit balance automatically.
               </p>
             </div>
           </div>
 
-          <div className="mt-6 p-4 bg-white rounded-lg">
+          <div className="mt-6 p-4 bg-white dark:bg-stone-800 rounded-lg">
             <p className="text-sm text-gray-600">
               <strong>Note:</strong> Credits are applied after the referred member completes their
               first dues payment. There's no limit to how many members you can refer. Credits can
@@ -197,6 +212,7 @@ export default function ReferralProgram() {
           </div>
         </div>
       </div>
+      </MembershipGate>
     </DashboardLayout>
   );
 }

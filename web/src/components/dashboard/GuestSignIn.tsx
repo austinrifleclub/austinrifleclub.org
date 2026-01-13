@@ -13,6 +13,7 @@
 
 import { useState, useEffect } from 'react';
 import DashboardLayout from './DashboardLayout';
+import MembershipGate, { type MemberStatus } from '../ui/MembershipGate';
 
 const API_BASE = import.meta.env.PUBLIC_API_URL || 'http://localhost:8787';
 
@@ -41,6 +42,8 @@ export default function GuestSignIn() {
   const [searchTerm, setSearchTerm] = useState('');
   const [showNewGuestForm, setShowNewGuestForm] = useState(false);
   const [pendingSignIns, setPendingSignIns] = useState<PendingSignIn[]>([]);
+  const [memberStatus, setMemberStatus] = useState<MemberStatus>(null);
+  const [duesCurrent, setDuesCurrent] = useState(false);
 
   // New guest form
   const [newName, setNewName] = useState('');
@@ -51,8 +54,19 @@ export default function GuestSignIn() {
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   useEffect(() => {
-    const fetchGuests = async () => {
+    const fetchData = async () => {
       try {
+        // Fetch member status first
+        const memberRes = await fetch(`${API_BASE}/api/members/me`, {
+          credentials: 'include',
+        });
+        if (memberRes.ok) {
+          const memberData = await memberRes.json();
+          setMemberStatus(memberData.status as MemberStatus);
+          setDuesCurrent(memberData.duesCurrent);
+        }
+
+        // Fetch guests
         const res = await fetch(`${API_BASE}/api/guests`, {
           credentials: 'include',
         });
@@ -60,13 +74,13 @@ export default function GuestSignIn() {
           setGuests(await res.json());
         }
       } catch (err) {
-        console.error('Failed to fetch guests:', err);
+        console.error('Failed to fetch data:', err);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchGuests();
+    fetchData();
 
     // Load pending sign-ins from localStorage
     const stored = localStorage.getItem('arc_pending_guest_signins');
@@ -233,24 +247,22 @@ export default function GuestSignIn() {
 
   return (
     <DashboardLayout activeTab="guests">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Guest Sign-In</h1>
-            <p className="text-gray-600">Sign in up to 4 guests per visit</p>
+      <MembershipGate feature="guests" memberStatus={memberStatus} duesCurrent={duesCurrent}>
+        <div className="max-w-4xl mx-auto">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-2xl font-bold text-primary">Guest Sign-In</h1>
+              <p className="text-secondary">Sign in up to 4 guests per visit</p>
+            </div>
+            <button onClick={() => setShowNewGuestForm(true)} className="btn btn-primary">
+              + New Guest
+            </button>
           </div>
-          <button
-            onClick={() => setShowNewGuestForm(true)}
-            className="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-lg font-medium transition-colors"
-          >
-            + New Guest
-          </button>
-        </div>
 
         {/* Offline indicator */}
         {typeof navigator !== 'undefined' && !navigator.onLine && (
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-            <p className="text-yellow-800 text-sm">
+          <div className="alert alert-warning mb-6">
+            <p className="text-sm">
               <strong>Offline Mode:</strong> Guest sign-ins will be saved locally and synced when
               you're back online.
             </p>
@@ -258,41 +270,28 @@ export default function GuestSignIn() {
         )}
 
         {message && (
-          <div
-            className={`mb-6 p-4 rounded-lg ${
-              message.type === 'success'
-                ? 'bg-green-50 text-green-700 border border-green-200'
-                : 'bg-red-50 text-red-700 border border-red-200'
-            }`}
-          >
+          <div className={`mb-6 alert ${message.type === 'success' ? 'alert-success' : 'alert-error'}`}>
             {message.text}
           </div>
         )}
 
         {/* Today's Sign-Ins */}
         {todaySignIns.length > 0 && (
-          <div className="bg-white rounded-lg shadow-sm border p-6 mb-6">
-            <h2 className="font-semibold text-lg mb-4">Today's Sign-Ins ({todaySignIns.length})</h2>
+          <div className="dashboard-section mb-6">
+            <h2 className="dashboard-section-title mb-4">Today's Sign-Ins ({todaySignIns.length})</h2>
             <div className="space-y-2">
               {todaySignIns.map((signIn) => (
-                <div
-                  key={signIn.id}
-                  className="flex items-center justify-between py-2 border-b last:border-0"
-                >
+                <div key={signIn.id} className="list-item py-2 border-b last:border-0">
                   <div>
-                    <span className="font-medium">{signIn.name}</span>
-                    <span className="text-gray-500 text-sm ml-2">
+                    <span className="font-medium text-primary">{signIn.name}</span>
+                    <span className="text-muted text-sm ml-2">
                       {new Date(signIn.signedInAt).toLocaleTimeString([], {
                         hour: 'numeric',
                         minute: '2-digit',
                       })}
                     </span>
                   </div>
-                  <span
-                    className={`text-xs px-2 py-0.5 rounded-full ${
-                      signIn.synced ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
-                    }`}
-                  >
+                  <span className={`status-badge status-badge-sm ${signIn.synced ? 'status-badge-active' : 'status-badge-grace'}`}>
                     {signIn.synced ? 'Synced' : 'Pending sync'}
                   </span>
                 </div>
@@ -303,63 +302,54 @@ export default function GuestSignIn() {
 
         {/* New Guest Form */}
         {showNewGuestForm && (
-          <div className="bg-white rounded-lg shadow-sm border p-6 mb-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="font-semibold text-lg">Sign In New Guest</h2>
-              <button
-                onClick={() => setShowNewGuestForm(false)}
-                className="text-gray-400 hover:text-gray-600"
-              >
+          <div className="dashboard-section mb-6">
+            <div className="dashboard-section-header">
+              <h2 className="dashboard-section-title">Sign In New Guest</h2>
+              <button onClick={() => setShowNewGuestForm(false)} className="text-muted hover:text-primary">
                 &times;
               </button>
             </div>
 
             <form onSubmit={handleQuickSignIn} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Guest Name *
-                </label>
+                <label className="form-label">Guest Name *</label>
                 <input
                   type="text"
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                  className="form-input w-full"
                   placeholder="John Doe"
                 />
               </div>
 
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Email (Optional)
-                  </label>
+                  <label className="form-label">Email (Optional)</label>
                   <input
                     type="email"
                     value={newEmail}
                     onChange={(e) => setNewEmail(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                    className="form-input w-full"
                     placeholder="john@example.com"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Phone (Optional)
-                  </label>
+                  <label className="form-label">Phone (Optional)</label>
                   <input
                     type="tel"
                     value={newPhone}
                     onChange={(e) => setNewPhone(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                    className="form-input w-full"
                     placeholder="(512) 555-1234"
                   />
                 </div>
               </div>
 
               {/* Waiver */}
-              <div className="bg-gray-50 rounded-lg p-4">
-                <h3 className="font-medium mb-2">Range Safety Waiver</h3>
-                <div className="text-sm text-gray-600 max-h-32 overflow-y-auto mb-3 p-2 bg-white rounded border">
+              <div className="section-card p-4">
+                <h3 className="font-medium mb-2 text-primary">Range Safety Waiver</h3>
+                <div className="text-sm text-secondary max-h-32 overflow-y-auto mb-3 p-2 section-highlight rounded">
                   <p className="mb-2">
                     By signing below, guest acknowledges and agrees to the following:
                   </p>
@@ -390,25 +380,17 @@ export default function GuestSignIn() {
                     type="checkbox"
                     checked={waiverAgreed}
                     onChange={(e) => setWaiverAgreed(e.target.checked)}
-                    className="rounded border-gray-300 text-green-600 focus:ring-green-500"
+                    className="form-checkbox"
                   />
-                  <span className="text-sm">Guest has read and agrees to the waiver</span>
+                  <span className="text-sm text-secondary">Guest has read and agrees to the waiver</span>
                 </label>
               </div>
 
               <div className="flex gap-3 justify-end">
-                <button
-                  type="button"
-                  onClick={() => setShowNewGuestForm(false)}
-                  className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-                >
+                <button type="button" onClick={() => setShowNewGuestForm(false)} className="btn btn-secondary">
                   Cancel
                 </button>
-                <button
-                  type="submit"
-                  disabled={submitting || !waiverAgreed}
-                  className="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50"
-                >
+                <button type="submit" disabled={submitting || !waiverAgreed} className="btn btn-primary">
                   {submitting ? 'Signing In...' : 'Sign In Guest'}
                 </button>
               </div>
@@ -417,8 +399,8 @@ export default function GuestSignIn() {
         )}
 
         {/* Previous Guests */}
-        <div className="bg-white rounded-lg shadow-sm border p-6">
-          <h2 className="font-semibold text-lg mb-4">Previous Guests</h2>
+        <div className="dashboard-section">
+          <h2 className="dashboard-section-title mb-4">Previous Guests</h2>
 
           <div className="mb-4">
             <input
@@ -426,28 +408,25 @@ export default function GuestSignIn() {
               placeholder="Search guests..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+              className="form-input w-full"
             />
           </div>
 
           {loading ? (
-            <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-700 mx-auto"></div>
+            <div className="loading-container py-8">
+              <div className="loading-spinner" />
             </div>
           ) : filteredGuests.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
+            <div className="text-center py-8 text-muted">
               {searchTerm ? 'No guests found matching your search.' : 'No previous guests found.'}
             </div>
           ) : (
             <div className="space-y-2">
               {filteredGuests.map((guest) => (
-                <div
-                  key={guest.id}
-                  className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50"
-                >
+                <div key={guest.id} className="quick-action justify-between">
                   <div>
-                    <p className="font-medium">{guest.name}</p>
-                    <p className="text-sm text-gray-500">
+                    <p className="font-medium text-primary">{guest.name}</p>
+                    <p className="text-sm text-muted">
                       {guest.visitCountCurrentYear} visit
                       {guest.visitCountCurrentYear !== 1 ? 's' : ''} this year
                       {guest.lastVisitAt && (
@@ -455,10 +434,7 @@ export default function GuestSignIn() {
                       )}
                     </p>
                   </div>
-                  <button
-                    onClick={() => handleReturningGuestSignIn(guest)}
-                    className="bg-green-100 hover:bg-green-200 text-green-800 px-3 py-1 rounded text-sm font-medium transition-colors"
-                  >
+                  <button onClick={() => handleReturningGuestSignIn(guest)} className="btn btn-secondary btn-sm">
                     Sign In
                   </button>
                 </div>
@@ -467,17 +443,18 @@ export default function GuestSignIn() {
           )}
         </div>
 
-        {/* Guest Policy */}
-        <div className="mt-6 bg-gray-50 rounded-lg p-4 text-sm text-gray-600">
-          <h3 className="font-medium text-gray-800 mb-2">Guest Policy</h3>
-          <ul className="list-disc list-inside space-y-1">
-            <li>Members may bring up to 4 guests per visit</li>
-            <li>Guests must complete waiver on each visit</li>
-            <li>Guest must remain with member at all times</li>
-            <li>Same guest may visit up to 3 times per year before requiring membership</li>
-          </ul>
+          {/* Guest Policy */}
+          <div className="mt-6 section-card p-4 text-sm text-secondary">
+            <h3 className="font-medium text-primary mb-2">Guest Policy</h3>
+            <ul className="list-disc list-inside space-y-1">
+              <li>Members may bring up to 4 guests per visit</li>
+              <li>Guests must complete waiver on each visit</li>
+              <li>Guest must remain with member at all times</li>
+              <li>Same guest may visit up to 3 times per year before requiring membership</li>
+            </ul>
+          </div>
         </div>
-      </div>
+      </MembershipGate>
     </DashboardLayout>
   );
 }

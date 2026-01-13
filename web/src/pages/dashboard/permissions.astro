@@ -1,0 +1,18 @@
+---
+/**
+ * Permissions Matrix Page
+ *
+ * Displays the RACI responsibility matrix showing who can do what.
+ * Viewable by all logged-in users.
+ * Editable only by authorized roles (President, Secretary).
+ */
+import DashboardLayout from '../../components/dashboard/DashboardLayout';
+import PermissionsPage from '../../components/dashboard/PermissionsPage';
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout title="Permissions | Austin Rifle Club">
+  <DashboardLayout client:load activeTab="permissions">
+    <PermissionsPage client:load />
+  </DashboardLayout>
+</Layout>

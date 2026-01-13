@@ -115,8 +115,8 @@ export default function ProfileEditor() {
   if (loading) {
     return (
       <DashboardLayout activeTab="profile">
-        <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-700"></div>
+        <div className="loading-container">
+          <div className="loading-spinner" />
         </div>
       </DashboardLayout>
     );
@@ -125,176 +125,150 @@ export default function ProfileEditor() {
   return (
     <DashboardLayout activeTab="profile">
       <div className="max-w-3xl mx-auto">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">My Profile</h1>
+        <h1 className="text-2xl font-bold text-primary mb-6">My Profile</h1>
 
         {/* Read-only Info */}
-        <div className="bg-white rounded-lg shadow-sm border p-6 mb-6">
-          <h2 className="font-semibold text-lg mb-4">Membership Information</h2>
+        <div className="dashboard-section mb-6">
+          <h2 className="dashboard-section-title mb-4">Membership Information</h2>
           <div className="grid md:grid-cols-2 gap-4">
             <div>
-              <label className="text-sm text-gray-500">Member Name</label>
-              <p className="font-medium">{profile?.firstName} {profile?.lastName}</p>
+              <label className="text-sm text-muted">Member Name</label>
+              <p className="font-medium text-primary">{profile?.firstName} {profile?.lastName}</p>
             </div>
             <div>
-              <label className="text-sm text-gray-500">Badge Number</label>
-              <p className="font-medium">{profile?.badgeNumber || 'Pending'}</p>
+              <label className="text-sm text-muted">Badge Number</label>
+              <p className="font-medium text-primary">{profile?.badgeNumber || 'Pending'}</p>
             </div>
             <div>
-              <label className="text-sm text-gray-500">Membership Type</label>
-              <p className="font-medium">{profile?.membershipType}</p>
+              <label className="text-sm text-muted">Membership Type</label>
+              <p className="font-medium text-primary">{profile?.membershipType}</p>
             </div>
             <div>
-              <label className="text-sm text-gray-500">Status</label>
-              <p className={`font-medium ${profile?.duesCurrent ? 'text-green-600' : 'text-red-600'}`}>
+              <label className="text-sm text-muted">Status</label>
+              <p className={`font-medium ${profile?.duesCurrent ? 'text-success-accent' : 'text-danger-accent'}`}>
                 {profile?.duesCurrent ? 'Active' : profile?.inGracePeriod ? 'Grace Period' : 'Expired'}
               </p>
             </div>
             <div>
-              <label className="text-sm text-gray-500">Expiration Date</label>
-              <p className="font-medium">
+              <label className="text-sm text-muted">Expiration Date</label>
+              <p className="font-medium text-primary">
                 {profile?.expirationDate
                   ? new Date(profile.expirationDate).toLocaleDateString()
                   : 'N/A'}
               </p>
             </div>
             <div>
-              <label className="text-sm text-gray-500">Volunteer Credits</label>
-              <p className="font-medium">${profile?.volunteerCreditBalance?.toFixed(2) || '0.00'}</p>
+              <label className="text-sm text-muted">Volunteer Credits</label>
+              <p className="font-medium text-primary">${profile?.volunteerCreditBalance?.toFixed(2) || '0.00'}</p>
             </div>
           </div>
         </div>
 
         {/* Editable Form */}
-        <form onSubmit={handleSave} className="bg-white rounded-lg shadow-sm border p-6">
-          <h2 className="font-semibold text-lg mb-4">Contact Information</h2>
+        <form onSubmit={handleSave} className="dashboard-section">
+          <h2 className="dashboard-section-title mb-4">Contact Information</h2>
 
           {message && (
-            <div
-              className={`mb-4 p-3 rounded-lg text-sm ${
-                message.type === 'success'
-                  ? 'bg-green-50 text-green-700 border border-green-200'
-                  : 'bg-red-50 text-red-700 border border-red-200'
-              }`}
-            >
+            <div className={`mb-4 alert ${message.type === 'success' ? 'alert-success' : 'alert-error'}`}>
               {message.text}
             </div>
           )}
 
           <div className="grid md:grid-cols-2 gap-4 mb-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Phone Number
-              </label>
+              <label className="form-label">Phone Number</label>
               <input
                 type="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                className="form-input w-full"
                 placeholder="(512) 555-1234"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                NRA Number (Optional)
-              </label>
+              <label className="form-label">NRA Number (Optional)</label>
               <input
                 type="text"
                 value={nraNumber}
                 onChange={(e) => setNraNumber(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                className="form-input w-full"
                 placeholder="NRA membership number"
               />
             </div>
           </div>
 
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Street Address
-            </label>
+            <label className="form-label">Street Address</label>
             <input
               type="text"
               value={address}
               onChange={(e) => setAddress(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+              className="form-input w-full"
               placeholder="123 Main St"
             />
           </div>
 
           <div className="grid md:grid-cols-3 gap-4 mb-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                City
-              </label>
+              <label className="form-label">City</label>
               <input
                 type="text"
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                className="form-input w-full"
                 placeholder="Austin"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                State
-              </label>
+              <label className="form-label">State</label>
               <input
                 type="text"
                 value={state}
                 onChange={(e) => setState(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                className="form-input w-full"
                 placeholder="TX"
                 maxLength={2}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                ZIP Code
-              </label>
+              <label className="form-label">ZIP Code</label>
               <input
                 type="text"
                 value={zip}
                 onChange={(e) => setZip(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                className="form-input w-full"
                 placeholder="78701"
               />
             </div>
           </div>
 
-          <h3 className="font-medium text-gray-900 mb-3">Emergency Contact</h3>
+          <h3 className="font-medium text-primary mb-3">Emergency Contact</h3>
           <div className="grid md:grid-cols-2 gap-4 mb-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Contact Name
-              </label>
+              <label className="form-label">Contact Name</label>
               <input
                 type="text"
                 value={emergencyContact}
                 onChange={(e) => setEmergencyContact(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                className="form-input w-full"
                 placeholder="Jane Doe"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Contact Phone
-              </label>
+              <label className="form-label">Contact Phone</label>
               <input
                 type="tel"
                 value={emergencyPhone}
                 onChange={(e) => setEmergencyPhone(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                className="form-input w-full"
                 placeholder="(512) 555-5678"
               />
             </div>
           </div>
 
           <div className="flex justify-end">
-            <button
-              type="submit"
-              disabled={saving}
-              className="bg-green-700 hover:bg-green-800 text-white px-6 py-2 rounded-lg font-medium transition-colors disabled:opacity-50"
-            >
+            <button type="submit" disabled={saving} className="btn btn-primary">
               {saving ? 'Saving...' : 'Save Changes'}
             </button>
           </div>

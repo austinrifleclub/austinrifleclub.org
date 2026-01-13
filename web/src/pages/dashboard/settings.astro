@@ -1,0 +1,26 @@
+---
+/**
+ * Dashboard Settings Page
+ *
+ * Account settings including passkey management.
+ */
+import Layout from '../../layouts/Layout.astro';
+import DashboardLayout from '../../components/dashboard/DashboardLayout';
+import PasskeySettings from '../../components/dashboard/PasskeySettings';
+---
+
+<Layout title="Settings" description="Manage your account settings">
+  <DashboardLayout activeTab="settings" client:load>
+    <div class="max-w-3xl">
+      <h1 class="text-2xl font-bold text-stone-900 dark:text-stone-100 mb-6">Account Settings</h1>
+
+      <div class="space-y-6">
+        <!-- Security Section -->
+        <section>
+          <h2 class="text-lg font-semibold text-stone-800 dark:text-stone-200 mb-4">Security</h2>
+          <PasskeySettings client:load />
+        </section>
+      </div>
+    </div>
+  </DashboardLayout>
+</Layout>

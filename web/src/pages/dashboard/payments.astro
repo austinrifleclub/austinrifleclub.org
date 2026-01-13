@@ -1,0 +1,13 @@
+---
+/**
+ * Payments Page
+ *
+ * View payment history and manage billing.
+ */
+import Layout from '../../layouts/Layout.astro';
+import Payments from '../../components/dashboard/Payments';
+---
+
+<Layout title="Payments" description="View your payment history at Austin Rifle Club">
+  <Payments client:load />
+</Layout>

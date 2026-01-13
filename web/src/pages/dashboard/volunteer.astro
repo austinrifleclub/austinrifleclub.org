@@ -1,0 +1,13 @@
+---
+/**
+ * Volunteer Hours Page
+ *
+ * Log and view volunteer hours and credits.
+ */
+import Layout from '../../layouts/Layout.astro';
+import VolunteerHours from '../../components/dashboard/VolunteerHours';
+---
+
+<Layout title="Volunteer Hours" description="Track your volunteer hours at Austin Rifle Club">
+  <VolunteerHours client:load />
+</Layout>

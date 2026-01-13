@@ -1,0 +1,10 @@
+---
+import Layout from '../layouts/Layout.astro';
+import RACIMatrix from '../components/dashboard/RACIMatrix';
+---
+
+<Layout title="RACI Matrix Test - Austin Rifle Club">
+  <main class="container" style="padding: 2rem; max-width: 1400px; margin: 0 auto;">
+    <RACIMatrix client:load canEdit={true} />
+  </main>
+</Layout>

@@ -33,15 +33,29 @@ interface DashboardLayoutProps {
   activeTab?: string;
 }
 
-const navItems = [
+const accountNavItems = [
   { id: 'home', label: 'Dashboard', href: '/dashboard', icon: '🏠' },
   { id: 'profile', label: 'My Profile', href: '/dashboard/profile', icon: '👤' },
   { id: 'events', label: 'My Events', href: '/dashboard/events', icon: '📅' },
-  { id: 'guests', label: 'Guest Sign-In', href: '/dashboard/guests', icon: '🎫' },
   { id: 'payments', label: 'Payments', href: '/dashboard/payments', icon: '💳' },
+  { id: 'settings', label: 'Settings', href: '/dashboard/settings', icon: '⚙️' },
+];
+
+const memberNavItems = [
+  { id: 'guests', label: 'Guest Sign-In', href: '/dashboard/guests', icon: '🎫' },
   { id: 'volunteer', label: 'Volunteer Hours', href: '/dashboard/volunteer', icon: '⏱️' },
   { id: 'referrals', label: 'Referrals', href: '/dashboard/referrals', icon: '🔗' },
 ];
+
+const clubNavItems = [
+  { id: 'permissions', label: 'Responsibilities', href: '/dashboard/permissions', icon: '📋' },
+];
+
+// Helper to check if member has active status
+function isMemberActive(member: MemberProfile | null): boolean {
+  if (!member) return false;
+  return (member.status === 'active' || member.status === 'probationary') && member.duesCurrent;
+}
 
 export default function DashboardLayout({ children, activeTab = 'home' }: DashboardLayoutProps) {
   const [user, setUser] = useState<User | null>(null);
@@ -103,81 +117,131 @@ export default function DashboardLayout({ children, activeTab = 'home' }: Dashbo
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="dashboard-container items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-700 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
+          <div className="loading-spinner lg" />
+          <p className="mt-4 text-secondary">Loading...</p>
         </div>
       </div>
     );
   }
 
+  const getMemberStatusClass = () => {
+    if (member?.duesCurrent) return 'active';
+    if (member?.inGracePeriod) return 'grace';
+    return 'expired';
+  };
+
+  const getMemberStatusLabel = () => {
+    if (member?.duesCurrent) return 'Active';
+    if (member?.inGracePeriod) return 'Grace Period';
+    return 'Expired';
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="dashboard-container">
       {/* Sidebar */}
-      <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
-      >
+      <aside className={`dashboard-sidebar ${sidebarOpen ? 'open' : ''}`}>
         <div className="flex flex-col h-full">
-          {/* Logo */}
-          <div className="p-4 border-b">
+          {/* Header with Logo and Close Button */}
+          <div className="sidebar-header">
             <a href="/" className="flex items-center gap-2">
-              <img src="/logo.png" alt="ARC" className="h-8 w-8" />
-              <span className="font-bold text-green-800">Member Portal</span>
+              <img src="/logo.png" alt="Austin Rifle Club" className="h-8 w-8" />
+              <span className="font-bold text-accent">Member Portal</span>
             </a>
+            <button
+              onClick={() => setSidebarOpen(false)}
+              className="sidebar-close-btn lg:hidden"
+              aria-label="Close menu"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
           </div>
 
           {/* Member Info */}
           {member && (
-            <div className="p-4 border-b bg-gray-50">
-              <p className="font-semibold text-sm">{member.firstName} {member.lastName}</p>
-              <p className="text-xs text-gray-600">Badge: {member.badgeNumber || 'Pending'}</p>
+            <div className="sidebar-member-info">
+              <p className="font-semibold text-sm text-primary">{member.firstName} {member.lastName}</p>
+              <p className="text-xs text-secondary">Badge: {member.badgeNumber || 'Pending'}</p>
               <div className="flex items-center gap-2 mt-2">
-                <span
-                  className={`text-xs px-2 py-0.5 rounded-full ${
-                    member.duesCurrent
-                      ? 'bg-green-100 text-green-700'
-                      : member.inGracePeriod
-                        ? 'bg-yellow-100 text-yellow-700'
-                        : 'bg-red-100 text-red-700'
-                  }`}
-                >
-                  {member.duesCurrent
-                    ? 'Active'
-                    : member.inGracePeriod
-                      ? 'Grace Period'
-                      : 'Expired'}
+                <span className={`member-status-badge ${getMemberStatusClass()}`}>
+                  {getMemberStatusLabel()}
                 </span>
-                <span className="text-xs text-gray-500">{member.membershipType}</span>
+                <span className="text-xs text-muted">{member.membershipType}</span>
               </div>
             </div>
           )}
 
           {/* Navigation */}
-          <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-            {navItems.map((item) => (
-              <a
-                key={item.id}
-                href={item.href}
-                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
-                  activeTab === item.id
-                    ? 'bg-green-100 text-green-800 font-medium'
-                    : 'text-gray-600 hover:bg-gray-100'
-                }`}
-              >
-                <span>{item.icon}</span>
-                {item.label}
-              </a>
-            ))}
+          <nav className="sidebar-nav">
+            {/* Account Section */}
+            <div className="sidebar-nav-section">
+              <h3 className="sidebar-nav-section-title">Account</h3>
+              <div className="space-y-1">
+                {accountNavItems.map((item) => (
+                  <a
+                    key={item.id}
+                    href={item.href}
+                    className={`sidebar-nav-item ${activeTab === item.id ? 'active' : ''}`}
+                  >
+                    <span>{item.icon}</span>
+                    {item.label}
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            {/* Member Section */}
+            <div className="sidebar-nav-section">
+              <h3 className="sidebar-nav-section-title">Member Benefits</h3>
+              <div className="space-y-1">
+                {memberNavItems.map((item) => {
+                  const isLocked = !isMemberActive(member);
+                  return (
+                    <a
+                      key={item.id}
+                      href={item.href}
+                      className={`sidebar-nav-item ${activeTab === item.id ? 'active' : ''} ${isLocked ? 'locked' : ''}`}
+                      title={isLocked ? 'Requires active membership' : undefined}
+                    >
+                      <span>{item.icon}</span>
+                      {item.label}
+                      {isLocked && (
+                        <svg className="w-3.5 h-3.5 ml-auto text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        </svg>
+                      )}
+                    </a>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Club Info Section */}
+            <div className="sidebar-nav-section">
+              <h3 className="sidebar-nav-section-title">Club Info</h3>
+              <div className="space-y-1">
+                {clubNavItems.map((item) => (
+                  <a
+                    key={item.id}
+                    href={item.href}
+                    className={`sidebar-nav-item ${activeTab === item.id ? 'active' : ''}`}
+                  >
+                    <span>{item.icon}</span>
+                    {item.label}
+                  </a>
+                ))}
+              </div>
+            </div>
           </nav>
 
           {/* Sign Out */}
-          <div className="p-4 border-t">
+          <div className="sidebar-footer">
             <button
               onClick={handleSignOut}
-              className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-100 w-full transition-colors"
+              className="sidebar-nav-item w-full"
             >
               <span>🚪</span>
               Sign Out
@@ -191,26 +255,26 @@ export default function DashboardLayout({ children, activeTab = 'home' }: Dashbo
         <div
           className="fixed inset-0 bg-black/50 z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
-        ></div>
+        />
       )}
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col min-w-0">
+      <main className="dashboard-main">
         {/* Mobile header */}
-        <header className="lg:hidden bg-white border-b px-4 py-3 flex items-center gap-4">
+        <header className="dashboard-mobile-header">
           <button
             onClick={() => setSidebarOpen(true)}
-            className="text-gray-600 hover:text-gray-900"
+            className="text-secondary hover:text-primary"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
-          <span className="font-semibold text-green-800">Member Portal</span>
+          <span className="font-semibold text-accent">Member Portal</span>
         </header>
 
         {/* Page Content */}
-        <div className="flex-1 p-4 lg:p-8 overflow-y-auto">
+        <div className="dashboard-content">
           {children}
         </div>
       </main>

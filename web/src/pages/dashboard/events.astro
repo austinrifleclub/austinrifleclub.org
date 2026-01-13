@@ -1,0 +1,13 @@
+---
+/**
+ * My Events Page
+ *
+ * View registered events and registration history.
+ */
+import Layout from '../../layouts/Layout.astro';
+import MyEvents from '../../components/dashboard/MyEvents';
+---
+
+<Layout title="My Events" description="View your event registrations at Austin Rifle Club">
+  <MyEvents client:load />
+</Layout>
