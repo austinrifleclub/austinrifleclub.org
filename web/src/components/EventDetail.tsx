@@ -22,6 +22,10 @@ interface Event {
   registrationCount: number;
   spotsRemaining: number | null;
   registrationDeadline: string | null;
+  // Access control fields
+  canRegister: boolean;
+  registrationBlockReason: string | null;
+  missingCertifications: string[];
 }
 
 interface Props {
@@ -29,11 +33,15 @@ interface Props {
 }
 
 const eventTypeLabels: Record<string, string> = {
-  match: 'Competition',
-  class: 'Training Class',
-  meeting: 'Meeting',
-  workday: 'Work Day',
-  social: 'Social Event',
+  match: 'Match',
+  class: 'Class',
+  arc_meeting: 'Meeting',
+  arc_education: 'Education',
+  arc_event: 'Club Event',
+  work_day: 'Work Day',
+  youth_event: 'Youth',
+  organized_practice: 'Practice',
+  range_unavailable: 'Range Closed',
 };
 
 export default function EventDetail({ eventId }: Props) {
@@ -101,6 +109,16 @@ export default function EventDetail({ eventId }: Props) {
         setRegMessage({
           type: 'error',
           text: 'Please log in to register for events.',
+        });
+      } else if (response.status === 403) {
+        // Access restriction - refresh event to show updated canRegister state
+        const refreshRes = await fetch(`${API_BASE}/api/events/${eventId}`);
+        if (refreshRes.ok) {
+          setEvent(await refreshRes.json());
+        }
+        setRegMessage({
+          type: 'error',
+          text: data.error || 'You do not have access to register for this event.',
         });
       } else if (response.status === 409) {
         setIsRegistered(true);
@@ -179,8 +197,8 @@ export default function EventDetail({ eventId }: Props) {
   if (loading) {
     return (
       <div className="text-center py-12">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-700 mx-auto"></div>
-        <p className="mt-4 text-gray-600">Loading event details...</p>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent mx-auto"></div>
+        <p className="mt-4 text-secondary">Loading event details...</p>
       </div>
     );
   }
@@ -188,11 +206,11 @@ export default function EventDetail({ eventId }: Props) {
   if (error || !event) {
     return (
       <div className="text-center py-12">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md mx-auto">
-          <p className="text-red-700">{error || 'Event not found'}</p>
+        <div className="alert alert-error max-w-md mx-auto p-6">
+          <p>{error || 'Event not found'}</p>
           <a
             href="/calendar"
-            className="mt-4 inline-block text-green-700 hover:text-green-800 font-medium"
+            className="mt-4 inline-block link-accent font-medium"
           >
             ← Back to Calendar
           </a>
@@ -207,14 +225,14 @@ export default function EventDetail({ eventId }: Props) {
 
   return (
     <div>
-      <a href="/calendar" className="text-green-700 hover:text-green-800 text-sm font-medium mb-4 inline-block">
+      <a href="/calendar" className="link-accent text-sm font-medium mb-4 inline-block">
         ← Back to Calendar
       </a>
 
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
+      <div className="bg-surface border border-[var(--color-border)] rounded-lg shadow-md overflow-hidden">
         {/* Header */}
-        <div className="bg-green-700 text-white p-6">
-          <span className="text-sm font-medium bg-green-600 px-3 py-1 rounded-full">
+        <div className="text-white p-6" style={{ background: 'var(--color-navy-700)' }}>
+          <span className="text-sm font-medium px-3 py-1 rounded-full" style={{ background: 'var(--color-navy-600)' }}>
             {eventTypeLabels[event.eventType] || event.eventType}
           </span>
           <h1 className="text-2xl md:text-3xl font-bold mt-3">{event.title}</h1>
@@ -225,17 +243,17 @@ export default function EventDetail({ eventId }: Props) {
           <div className="grid md:grid-cols-2 gap-6 mb-6">
             <div className="space-y-4">
               <div>
-                <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">Date & Time</h3>
-                <p className="mt-1 text-gray-900">{formatDate(event.startTime)}</p>
-                <p className="text-gray-600">
+                <h3 className="text-sm font-medium text-muted uppercase tracking-wide">Date & Time</h3>
+                <p className="mt-1 text-primary">{formatDate(event.startTime)}</p>
+                <p className="text-secondary">
                   {formatTime(event.startTime)} - {formatTime(event.endTime)}
                 </p>
               </div>
 
               {event.location && (
                 <div>
-                  <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">Location</h3>
-                  <p className="mt-1 text-gray-900">{event.location}</p>
+                  <h3 className="text-sm font-medium text-muted uppercase tracking-wide">Location</h3>
+                  <p className="mt-1 text-primary">{event.location}</p>
                 </div>
               )}
             </div>
@@ -243,23 +261,23 @@ export default function EventDetail({ eventId }: Props) {
             <div className="space-y-4">
               {event.cost !== null && event.cost > 0 && (
                 <div>
-                  <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">Cost</h3>
-                  <p className="mt-1 text-2xl font-bold text-gray-900">${event.cost}</p>
+                  <h3 className="text-sm font-medium text-muted uppercase tracking-wide">Cost</h3>
+                  <p className="mt-1 text-2xl font-bold text-primary">${event.cost}</p>
                 </div>
               )}
 
               <div>
-                <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">Registration</h3>
+                <h3 className="text-sm font-medium text-muted uppercase tracking-wide">Registration</h3>
                 {event.maxParticipants ? (
-                  <p className="mt-1 text-gray-900">
+                  <p className="mt-1 text-primary">
                     {event.registrationCount} / {event.maxParticipants} registered
                     {event.spotsRemaining !== null && event.spotsRemaining > 0 && (
-                      <span className="text-green-600 ml-2">({event.spotsRemaining} spots left)</span>
+                      <span className="text-accent ml-2">({event.spotsRemaining} spots left)</span>
                     )}
-                    {isFull && <span className="text-red-600 ml-2">(Full - Waitlist available)</span>}
+                    {isFull && <span className="text-red-600 dark:text-red-400 ml-2">(Full - Waitlist available)</span>}
                   </p>
                 ) : (
-                  <p className="mt-1 text-gray-900">{event.registrationCount} registered</p>
+                  <p className="mt-1 text-primary">{event.registrationCount} registered</p>
                 )}
               </div>
             </div>
@@ -268,8 +286,8 @@ export default function EventDetail({ eventId }: Props) {
           {/* Description */}
           {event.description && (
             <div className="mb-6">
-              <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-2">About This Event</h3>
-              <div className="prose prose-green max-w-none text-gray-700">
+              <h3 className="text-sm font-medium text-muted uppercase tracking-wide mb-2">About This Event</h3>
+              <div className="text-secondary">
                 <p>{event.description}</p>
               </div>
             </div>
@@ -277,55 +295,72 @@ export default function EventDetail({ eventId }: Props) {
 
           {/* Registration Section */}
           {!isPast && (
-            <div className="border-t pt-6">
+            <div className="border-t border-[var(--color-border)] pt-6">
               {regMessage && (
-                <div className={`mb-4 p-4 rounded-lg ${regMessage.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}`}>
+                <div className={`mb-4 alert ${regMessage.type === 'success' ? 'alert-success' : 'alert-error'}`}>
                   {regMessage.text}
                 </div>
               )}
 
+              {/* Access restriction warning */}
+              {!event.canRegister && event.registrationBlockReason && (
+                <div className="mb-4 alert alert-warning">
+                  <p className="font-medium">{event.registrationBlockReason}</p>
+                  {event.missingCertifications && event.missingCertifications.length > 0 && (
+                    <div className="mt-2">
+                      <p className="text-sm">Missing certifications:</p>
+                      <ul className="list-disc list-inside text-sm mt-1">
+                        {event.missingCertifications.map((cert, idx) => (
+                          <li key={idx}>{cert}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {registrationClosed ? (
-                <div className="text-center py-4 bg-gray-50 rounded-lg">
-                  <p className="text-gray-600">Registration for this event has closed.</p>
+                <div className="text-center py-4 section-card">
+                  <p className="text-secondary">Registration for this event has closed.</p>
                 </div>
               ) : isRegistered ? (
-                <div className="flex flex-col sm:flex-row gap-4 items-center justify-between bg-green-50 p-4 rounded-lg">
+                <div className="flex flex-col sm:flex-row gap-4 items-center justify-between alert alert-success">
                   <div>
-                    <span className="text-green-800 font-medium">You're registered for this event</span>
-                    <p className="text-sm text-green-600 mt-1">Check your email for event details</p>
+                    <span className="font-medium">You're registered for this event</span>
+                    <p className="text-sm mt-1 opacity-80">Check your email for event details</p>
                   </div>
                   <button
                     onClick={handleCancel}
                     disabled={registering}
-                    className="text-red-600 hover:text-red-700 font-medium text-sm disabled:opacity-50"
+                    className="text-danger-accent hover:opacity-80 font-medium text-sm disabled:opacity-50"
                   >
                     Cancel Registration
                   </button>
                 </div>
-              ) : (
+              ) : event.canRegister ? (
                 <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
                   <div>
                     {isFull ? (
-                      <p className="text-gray-600">This event is full, but you can join the waitlist.</p>
+                      <p className="text-secondary">This event is full, but you can join the waitlist.</p>
                     ) : (
-                      <p className="text-gray-600">Secure your spot for this event.</p>
+                      <p className="text-secondary">Secure your spot for this event.</p>
                     )}
                   </div>
                   <button
                     onClick={handleRegister}
                     disabled={registering}
-                    className="bg-green-700 hover:bg-green-800 text-white px-6 py-3 rounded-lg font-medium transition-colors disabled:opacity-50"
+                    className="btn-primary px-6 py-3 disabled:opacity-50"
                   >
                     {registering ? 'Processing...' : isFull ? 'Join Waitlist' : 'Register Now'}
                   </button>
                 </div>
-              )}
+              ) : null}
             </div>
           )}
 
           {isPast && (
-            <div className="border-t pt-6 text-center">
-              <p className="text-gray-500">This event has ended.</p>
+            <div className="border-t border-[var(--color-border)] pt-6 text-center">
+              <p className="text-muted">This event has ended.</p>
             </div>
           )}
         </div>

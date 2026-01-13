@@ -33,7 +33,15 @@ import {
   waitlistPromotionEmail,
 } from "../lib/email";
 import { logAudit } from "../lib/audit";
-import { members, users } from "../db/schema";
+import { members, users, certifications, boardMembers } from "../db/schema";
+import {
+  buildAccessContext,
+  canViewEvent,
+  canRegisterForEvent,
+  filterVisibleEvents,
+  getMissingCertificationNames,
+  type AccessContext,
+} from "../lib/eventAccess";
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -43,7 +51,7 @@ const app = new Hono<{ Bindings: Env }>();
 
 /**
  * GET /api/events
- * List events (public events for visitors, all for members)
+ * List events (filtered by access control)
  */
 app.get("/", optionalAuth, async (c) => {
   const db = c.get("db")!;
@@ -61,30 +69,35 @@ app.get("/", optionalAuth, async (c) => {
 
   const eventType = query.type;
 
+  // Build access context for filtering
+  const accessCtx = await buildAccessContext(db, user?.id);
+
   const conditions = [
     eq(events.status, "published"),
     gte(events.startTime, startDate),
     lte(events.startTime, endDate),
   ];
 
-  // Non-authenticated users only see public events
-  if (!user) {
-    conditions.push(eq(events.isPublic, true));
-  }
-
   if (eventType) {
     conditions.push(eq(events.eventType, eventType));
   }
 
+  // Fetch events (we'll filter by access after)
   const eventList = await db.query.events.findMany({
     where: and(...conditions),
     orderBy: events.startTime,
-    limit,
-    offset,
+    // Fetch more than limit to account for filtering
+    limit: limit * 3,
   });
 
+  // Filter by access control
+  const visibleEvents = filterVisibleEvents(eventList, accessCtx);
+
+  // Apply pagination after filtering
+  const paginatedEvents = visibleEvents.slice(offset, offset + limit);
+
   // Get registration counts in a single query (fixes N+1)
-  const eventIds = eventList.map((e) => e.id);
+  const eventIds = paginatedEvents.map((e) => e.id);
 
   let registrationCounts: Map<string, number> = new Map();
 
@@ -106,7 +119,7 @@ app.get("/", optionalAuth, async (c) => {
     registrationCounts = new Map(counts.map((c) => [c.eventId, c.count]));
   }
 
-  const eventsWithCounts = eventList.map((event) => {
+  const eventsWithCounts = paginatedEvents.map((event) => {
     const count = registrationCounts.get(event.id) ?? 0;
     return {
       ...event,
@@ -119,13 +132,13 @@ app.get("/", optionalAuth, async (c) => {
 
   return c.json({
     events: eventsWithCounts,
-    pagination: { page, limit },
+    pagination: { page, limit, totalVisible: visibleEvents.length },
   });
 });
 
 /**
  * GET /api/events/:id
- * Get a specific event
+ * Get a specific event with access control info
  */
 app.get("/:id", optionalAuth, async (c) => {
   const db = c.get("db")!;
@@ -140,8 +153,10 @@ app.get("/:id", optionalAuth, async (c) => {
     return c.json({ error: "Event not found" }, 404);
   }
 
-  // Check visibility
-  if (!event.isPublic && !user) {
+  // Build access context and check visibility
+  const accessCtx = await buildAccessContext(db, user?.id);
+
+  if (!canViewEvent(event, accessCtx)) {
     return c.json({ error: "Event not found" }, 404);
   }
 
@@ -156,12 +171,20 @@ app.get("/:id", optionalAuth, async (c) => {
       )
     );
 
+  // Check if user can register and get detailed info
+  const registrationInfo = canRegisterForEvent(event, accessCtx);
+  const missingCertNames = getMissingCertificationNames(registrationInfo.missingCertifications);
+
   return c.json({
     ...event,
     registrationCount: countResult?.count ?? 0,
     spotsRemaining: event.maxParticipants
       ? event.maxParticipants - (countResult?.count ?? 0)
       : null,
+    // Access control info
+    canRegister: registrationInfo.canRegister,
+    registrationBlockReason: registrationInfo.reason,
+    missingCertifications: missingCertNames,
   });
 });
 
@@ -176,6 +199,7 @@ app.get("/:id", optionalAuth, async (c) => {
 app.post("/:id/register", requireMember, async (c) => {
   const db = c.get("db");
   const member = c.get("member");
+  const user = c.get("user");
   const eventId = c.req.param("id");
 
   const event = await db.query.events.findFirst({
@@ -184,6 +208,18 @@ app.post("/:id/register", requireMember, async (c) => {
 
   if (!event) {
     return c.json({ error: "Event not found" }, 404);
+  }
+
+  // Build access context and check registration permissions
+  const accessCtx = await buildAccessContext(db, user?.id, member.id);
+  const registrationInfo = canRegisterForEvent(event, accessCtx);
+
+  if (!registrationInfo.canRegister) {
+    const missingCertNames = getMissingCertificationNames(registrationInfo.missingCertifications);
+    return c.json({
+      error: registrationInfo.reason,
+      missingCertifications: missingCertNames,
+    }, 403);
   }
 
   if (event.status !== "published") {
@@ -492,12 +528,14 @@ app.post("/", requireAdmin, async (c) => {
   }
 
   const eventId = generateId();
+  const { rangeIds, requiresCertification, ...eventData } = parsed.data;
   const [event] = await db
     .insert(events)
     .values({
       id: eventId,
-      ...parsed.data,
-      rangeIds: parsed.data.rangeIds ? JSON.stringify(parsed.data.rangeIds) : null,
+      ...eventData,
+      rangeIds: rangeIds ? JSON.stringify(rangeIds) : null,
+      requiresCertification: requiresCertification ? JSON.stringify(requiresCertification) : null,
       status: "draft",
       createdBy: admin.id,
       createdAt: new Date(),
@@ -540,11 +578,13 @@ app.patch("/:id", requireAdmin, async (c) => {
     return c.json({ error: "Validation failed", details: parsed.error.issues }, 400);
   }
 
+  const { rangeIds: updateRangeIds, requiresCertification: updateReqCerts, ...updateData } = parsed.data;
   const [updated] = await db
     .update(events)
     .set({
-      ...parsed.data,
-      rangeIds: parsed.data.rangeIds ? JSON.stringify(parsed.data.rangeIds) : undefined,
+      ...updateData,
+      rangeIds: updateRangeIds ? JSON.stringify(updateRangeIds) : undefined,
+      requiresCertification: updateReqCerts ? JSON.stringify(updateReqCerts) : undefined,
       updatedAt: new Date(),
     })
     .where(eq(events.id, id))
@@ -705,24 +745,76 @@ app.post("/:id/check-in/:memberId", requireAdmin, async (c) => {
 /**
  * GET /api/events/calendar.ics
  * Export events as iCal feed
+ *
+ * Query params:
+ * - type: Filter by event type (match, youth_event, etc.)
+ * - discipline: Filter matches by discipline (uspsa, idpa, steel, etc.)
  */
 app.get("/calendar.ics", optionalAuth, async (c) => {
   const db = c.get("db")!;
+  const typeFilter = c.req.query("type");
+  const disciplineFilter = c.req.query("discipline");
 
   const now = new Date();
-  const threeMonthsLater = new Date();
-  threeMonthsLater.setMonth(threeMonthsLater.getMonth() + 3);
+  const sixMonthsLater = new Date();
+  sixMonthsLater.setMonth(sixMonthsLater.getMonth() + 6);
 
-  const eventList = await db.query.events.findMany({
-    where: and(
-      eq(events.status, "published"),
-      eq(events.isPublic, true),
-      gte(events.startTime, now),
-      lte(events.startTime, threeMonthsLater)
-    ),
+  // Build where conditions
+  const conditions = [
+    eq(events.status, "published"),
+    eq(events.isPublic, true),
+    gte(events.startTime, now),
+    lte(events.startTime, sixMonthsLater)
+  ];
+
+  // Add type filter if specified
+  if (typeFilter) {
+    conditions.push(eq(events.eventType, typeFilter));
+  }
+
+  let eventList = await db.query.events.findMany({
+    where: and(...conditions),
     orderBy: events.startTime,
-    limit: 100,
+    limit: 200,
   });
+
+  // Filter by discipline (title pattern) if specified
+  if (disciplineFilter && typeFilter === 'match') {
+    const disciplinePatterns: Record<string, RegExp> = {
+      uspsa: /uspsa/i,
+      idpa: /idpa/i,
+      steel: /steel challenge/i,
+      highpower: /high power|highpower/i,
+      benchrest: /benchrest/i,
+      silhouette: /silhouette/i,
+      '2700': /2700|bullseye/i,
+    };
+    const pattern = disciplinePatterns[disciplineFilter];
+    if (pattern) {
+      eventList = eventList.filter((e) => pattern.test(e.title));
+    }
+  }
+
+  // Build calendar name based on filters
+  let calendarName = 'Austin Rifle Club Events';
+  let filename = 'arc-events.ics';
+  if (typeFilter === 'match' && disciplineFilter) {
+    const disciplineNames: Record<string, string> = {
+      uspsa: 'USPSA', idpa: 'IDPA', steel: 'Steel Challenge',
+      highpower: 'High Power Rifle', benchrest: 'Benchrest',
+      silhouette: 'Silhouette', '2700': '2700 Bullseye',
+    };
+    calendarName = `ARC ${disciplineNames[disciplineFilter] || disciplineFilter} Matches`;
+    filename = `arc-${disciplineFilter}-matches.ics`;
+  } else if (typeFilter) {
+    const typeNames: Record<string, string> = {
+      match: 'Matches', youth_event: 'Youth Events',
+      organized_practice: 'Practice', work_day: 'Work Days',
+      arc_meeting: 'Meetings', arc_education: 'Education',
+    };
+    calendarName = `ARC ${typeNames[typeFilter] || typeFilter}`;
+    filename = `arc-${typeFilter}.ics`;
+  }
 
   const formatICalDate = (date: Date): string => {
     return date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
@@ -765,7 +857,7 @@ app.get("/calendar.ics", optionalAuth, async (c) => {
     'PRODID:-//Austin Rifle Club//Events//EN',
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
-    'X-WR-CALNAME:Austin Rifle Club Events',
+    `X-WR-CALNAME:${calendarName}`,
     'X-WR-TIMEZONE:America/Chicago',
     ...icsEvents,
     'END:VCALENDAR',
@@ -774,7 +866,7 @@ app.get("/calendar.ics", optionalAuth, async (c) => {
   return new Response(icsContent, {
     headers: {
       'Content-Type': 'text/calendar; charset=utf-8',
-      'Content-Disposition': 'attachment; filename="arc-events.ics"',
+      'Content-Disposition': `attachment; filename="${filename}"`,
       'Cache-Control': 'public, max-age=3600',
     },
   });

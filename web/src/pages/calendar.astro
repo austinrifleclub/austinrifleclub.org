@@ -3,88 +3,27 @@
  * Events Calendar Page
  *
  * Shows upcoming events, matches, classes, and meetings.
+ * Organized by persona needs:
+ * - New members: orientation/safety eval callout
+ * - Everyone: this week at-a-glance
+ * - Competitors: filter by discipline
+ * - Youth/families: dedicated filter
  */
 import Layout from '../layouts/Layout.astro';
 import EventCalendar from '../components/EventCalendar';
 ---
 
 <Layout title="Calendar" description="Upcoming events, matches, and classes at Austin Rifle Club">
-  <section class="py-8 md:py-12 bg-gray-50 min-h-screen">
+  <section class="py-8 md:py-12 bg-gray-50 dark:bg-stone-900 min-h-screen">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="text-center mb-8">
-        <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
-          Event Calendar
-        </h1>
-        <p class="text-gray-600 max-w-2xl mx-auto">
-          Matches, classes, work days, and social events. Check back often for updates.
+        <h1 class="page-title mb-2">Event Calendar</h1>
+        <p class="text-body max-w-2xl mx-auto">
+          Matches, classes, work days, and club events
         </p>
       </div>
 
       <EventCalendar client:load />
-
-      <!-- Event Types Legend -->
-      <div class="mt-12 bg-white rounded-lg shadow-md p-6">
-        <h2 class="text-lg font-semibold mb-4">Event Types</h2>
-        <div class="grid md:grid-cols-2 lg:grid-cols-5 gap-4">
-          <div class="flex items-center gap-2">
-            <div class="w-4 h-4 rounded bg-blue-500"></div>
-            <span class="text-sm">
-              <strong>Matches</strong> - Competitions
-            </span>
-          </div>
-          <div class="flex items-center gap-2">
-            <div class="w-4 h-4 rounded bg-purple-500"></div>
-            <span class="text-sm">
-              <strong>Classes</strong> - Training
-            </span>
-          </div>
-          <div class="flex items-center gap-2">
-            <div class="w-4 h-4 rounded bg-gray-500"></div>
-            <span class="text-sm">
-              <strong>Meetings</strong> - Club business
-            </span>
-          </div>
-          <div class="flex items-center gap-2">
-            <div class="w-4 h-4 rounded bg-orange-500"></div>
-            <span class="text-sm">
-              <strong>Work Days</strong> - Volunteer
-            </span>
-          </div>
-          <div class="flex items-center gap-2">
-            <div class="w-4 h-4 rounded bg-green-500"></div>
-            <span class="text-sm">
-              <strong>Social</strong> - Get-togethers
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Regular Events -->
-      <div class="mt-8 bg-white rounded-lg shadow-md p-6">
-        <h2 class="text-lg font-semibold mb-4">Regular Activities</h2>
-        <div class="grid md:grid-cols-2 gap-6">
-          <div>
-            <h3 class="font-medium text-green-800 mb-2">Weekly</h3>
-            <ul class="text-sm text-gray-600 space-y-1">
-              <li>• Tuesday Evening IDPA (Apr-Oct)</li>
-              <li>• Wednesday Morning Small Bore</li>
-              <li>• Saturday Air Gun (2nd & 4th)</li>
-            </ul>
-          </div>
-          <div>
-            <h3 class="font-medium text-green-800 mb-2">Monthly</h3>
-            <ul class="text-sm text-gray-600 space-y-1">
-              <li>• 1st Saturday - IDPA Match</li>
-              <li>• 2nd Saturday - USPSA Match</li>
-              <li>• 3rd Saturday - Steel Challenge</li>
-              <li>• 4th Saturday - 3-Gun</li>
-            </ul>
-          </div>
-        </div>
-        <p class="mt-4 text-xs text-gray-500">
-          Schedule subject to change. Always check the calendar for current events.
-        </p>
-      </div>
     </div>
   </section>
 </Layout>
