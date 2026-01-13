@@ -66,9 +66,8 @@ export default function EventDetail({ eventId }: Props) {
         }
         const data = await response.json();
         setEvent(data);
-      } catch (err) {
+      } catch {
         setError('Unable to load event details');
-        console.error('Failed to fetch event:', err);
       } finally {
         setLoading(false);
       }

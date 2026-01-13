@@ -43,8 +43,8 @@ export default function ReferralProgram() {
         if (res.ok) {
           setReferralData(await res.json());
         }
-      } catch (err) {
-        console.error('Failed to fetch data:', err);
+      } catch {
+        // silent
       } finally {
         setLoading(false);
       }
@@ -60,8 +60,8 @@ export default function ReferralProgram() {
       await navigator.clipboard.writeText(referralData.referralUrl);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      console.error('Failed to copy:', err);
+    } catch {
+      // silent
     }
   };
 

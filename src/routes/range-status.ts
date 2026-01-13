@@ -72,8 +72,23 @@ app.get("/", optionalAuth, async (c) => {
     orderBy: rangeStatus.id,
   });
 
-  // Check for expired statuses and auto-revert
   const now = new Date();
+
+  // Collect event IDs that need to be fetched (avoid N+1)
+  const eventIds = ranges
+    .filter(r => r.calendarEventId)
+    .map(r => r.calendarEventId as string);
+
+  // Fetch all linked events in one query
+  const linkedEvents = eventIds.length > 0
+    ? await db.query.events.findMany({
+        where: sql`${events.id} IN (${sql.join(eventIds.map(id => sql`${id}`), sql`, `)})`,
+      })
+    : [];
+
+  const eventsMap = new Map(linkedEvents.map(e => [e.id, e]));
+
+  // Process ranges - update expired ones and attach linked events
   const results = await Promise.all(
     ranges.map(async (range) => {
       // If status has expired, revert to open
@@ -96,17 +111,13 @@ app.get("/", optionalAuth, async (c) => {
             statusNote: null,
             expiresAt: null,
             calendarEventId: null,
+            linkedEvent: null,
           };
         }
       }
 
-      // If linked to an event, get event details
-      let linkedEvent = null;
-      if (range.calendarEventId) {
-        linkedEvent = await db.query.events.findFirst({
-          where: eq(events.id, range.calendarEventId),
-        });
-      }
+      // Get linked event from the pre-fetched map
+      const linkedEvent = range.calendarEventId ? eventsMap.get(range.calendarEventId) : null;
 
       return {
         ...range,

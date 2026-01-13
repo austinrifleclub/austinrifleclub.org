@@ -176,9 +176,8 @@ export default function RangeStatusDisplay() {
         setLastUpdated(new Date());
       }
       setError(null);
-    } catch (err) {
+    } catch {
       setError('Unable to load range status. Please try again.');
-      console.error('Failed to fetch range status:', err);
     } finally {
       setLoading(false);
     }

@@ -57,8 +57,8 @@ export default function EventsManager() {
         const data = await response.json();
         setEvents(data.events || []);
       }
-    } catch (error) {
-      console.error('Failed to fetch events:', error);
+    } catch {
+      // silent
     } finally {
       setLoading(false);
     }

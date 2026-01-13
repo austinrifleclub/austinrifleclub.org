@@ -24,6 +24,12 @@ interface RecentActivity {
   timestamp: string;
 }
 
+interface RangeStatusItem {
+  id: string;
+  status: 'open' | 'closed' | 'event' | 'maintenance';
+  name: string;
+}
+
 export default function AdminDashboard() {
   const [stats, setStats] = useState<Stats>({
     totalMembers: 0,
@@ -42,8 +48,8 @@ export default function AdminDashboard() {
         // Fetch range status
         const rangeRes = await fetch(`${API_BASE}/api/range-status`);
         if (rangeRes.ok) {
-          const rangeData = await rangeRes.json();
-          const openRanges = rangeData.ranges.filter((r: any) => r.status === 'open').length;
+          const rangeData = await rangeRes.json() as { ranges: RangeStatusItem[] };
+          const openRanges = rangeData.ranges.filter((r) => r.status === 'open').length;
           setStats(prev => ({
             ...prev,
             rangesOpen: openRanges,
@@ -54,7 +60,7 @@ export default function AdminDashboard() {
         // Fetch events
         const eventsRes = await fetch(`${API_BASE}/api/events`);
         if (eventsRes.ok) {
-          const eventsData = await eventsRes.json();
+          const eventsData = await eventsRes.json() as { events?: unknown[] };
           setStats(prev => ({
             ...prev,
             upcomingEvents: eventsData.events?.length || 0,
@@ -67,8 +73,8 @@ export default function AdminDashboard() {
           { id: '2', type: 'range', message: 'Range E status changed to Closed', timestamp: new Date(Date.now() - 3600000).toISOString() },
           { id: '3', type: 'event', message: 'IDPA Match registration opened', timestamp: new Date(Date.now() - 7200000).toISOString() },
         ]);
-      } catch (error) {
-        console.error('Failed to fetch dashboard data:', error);
+      } catch {
+        // Silently handle errors - dashboard will show default values
       } finally {
         setLoading(false);
       }
@@ -93,16 +99,17 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="animate-pulse">
-        <div className="h-8 bg-gray-200 rounded w-48 mb-6"></div>
+      <div className="animate-pulse" aria-busy="true" aria-label="Loading dashboard">
+        <div className="h-8 bg-gray-200 rounded w-48 mb-6" aria-hidden="true"></div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {[1, 2, 3, 4].map(i => (
-            <div key={i} className="bg-white rounded-lg shadow p-6">
+            <div key={i} className="bg-white rounded-lg shadow p-6" aria-hidden="true">
               <div className="h-4 bg-gray-200 rounded w-24 mb-2"></div>
               <div className="h-8 bg-gray-200 rounded w-16"></div>
             </div>
           ))}
         </div>
+        <span className="sr-only">Loading dashboard data...</span>
       </div>
     );
   }

@@ -55,8 +55,8 @@ export default function SettingsManager() {
         referral_credit: '25',
         guest_visit_limit: '3',
       });
-    } catch (error) {
-      console.error('Failed to fetch settings:', error);
+    } catch {
+      // silent
     } finally {
       setLoading(false);
     }

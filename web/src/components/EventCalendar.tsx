@@ -317,9 +317,8 @@ export default function EventCalendar() {
         const data: EventsResponse = await response.json();
         setEvents(data.events);
         setError(null);
-      } catch (err) {
+      } catch {
         setError('Unable to load events. Please try again.');
-        console.error('Failed to fetch events:', err);
       } finally {
         setLoading(false);
       }

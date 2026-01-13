@@ -46,8 +46,8 @@ export default function ApplicationsManager() {
         const data = await response.json();
         setApplications(data.applications || []);
       }
-    } catch (error) {
-      console.error('Failed to fetch applications:', error);
+    } catch {
+      // silent
     } finally {
       setLoading(false);
     }

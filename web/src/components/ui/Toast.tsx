@@ -107,6 +107,6 @@ export function toast(type: ToastType, message: string, duration?: number) {
   if (toastHandler) {
     toastHandler(type, message, duration);
   } else {
-    console.warn('Toast handler not initialized');
+    if (import.meta.env.DEV) console.warn('Toast handler not initialized');
   }
 }

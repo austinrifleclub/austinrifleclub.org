@@ -274,9 +274,8 @@ export default function RangeStatusCombined() {
       const updated = new Date(data.lastUpdated);
       setLastUpdated(updated.getFullYear() > 2000 ? updated : new Date());
       setError(null);
-    } catch (err) {
+    } catch {
       setError('Unable to load range status. Please try again.');
-      console.error('Failed to fetch range status:', err);
     } finally {
       setLoading(false);
     }

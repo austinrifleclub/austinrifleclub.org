@@ -47,8 +47,8 @@ export default function MembersManager() {
         const data = await response.json();
         setMembers(data.members || []);
       }
-    } catch (error) {
-      console.error('Failed to fetch members:', error);
+    } catch {
+      // silent
     } finally {
       setLoading(false);
     }

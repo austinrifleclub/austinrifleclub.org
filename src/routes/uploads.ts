@@ -33,12 +33,15 @@ const ALLOWED_TYPES: Record<string, { mimes: string[]; maxSize: number }> = {
 };
 
 /**
- * Generate a unique filename for R2
+ * Generate a unique filename for R2 using cryptographically secure random
  */
 function generateR2Key(folder: string, originalName: string): string {
   const ext = originalName.split('.').pop() || 'bin';
   const timestamp = Date.now();
-  const random = Math.random().toString(36).substring(2, 8);
+  // Use crypto.getRandomValues for secure random generation
+  const array = new Uint8Array(6);
+  crypto.getRandomValues(array);
+  const random = Array.from(array, b => b.toString(16).padStart(2, '0')).join('');
   return `${folder}/${timestamp}-${random}.${ext}`;
 }
 

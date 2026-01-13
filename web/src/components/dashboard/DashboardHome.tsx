@@ -79,8 +79,8 @@ export default function DashboardHome() {
             .map((reg: { event: Event }) => reg.event);
           setUpcomingEvents(upcoming);
         }
-      } catch (err) {
-        console.error('Failed to fetch dashboard data:', err);
+      } catch {
+        // Silently handle errors - dashboard will show empty state
       } finally {
         setLoading(false);
       }

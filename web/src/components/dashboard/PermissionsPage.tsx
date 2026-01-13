@@ -47,8 +47,7 @@ export default function PermissionsPage() {
           const positionId = member.boardPosition.positionId.toLowerCase();
           setCanEdit(RACI_EDITORS.includes(positionId));
         }
-      } catch (err) {
-        console.error('Failed to check permissions:', err);
+      } catch {
         setError('Failed to load permissions');
       } finally {
         setLoading(false);
@@ -74,9 +73,8 @@ export default function PermissionsPage() {
     );
   }
 
-  const handleSave = async (data: unknown) => {
-    // For now, just log - GitHub integration will be added later
-    console.log('Saving RACI matrix:', data);
+  const handleSave = async (_data: unknown) => {
+    // GitHub integration will be added later
     alert('Save functionality coming soon! Changes will be committed to GitHub.');
   };
 

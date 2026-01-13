@@ -66,8 +66,8 @@ export default function ProfileEditor() {
           setEmergencyPhone(data.emergencyPhone || '');
           setNraNumber(data.nraNumber || '');
         }
-      } catch (err) {
-        console.error('Failed to fetch profile:', err);
+      } catch {
+        // Profile will remain empty, user can enter new data
       } finally {
         setLoading(false);
       }

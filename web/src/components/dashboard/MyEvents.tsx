@@ -35,8 +35,8 @@ export default function MyEvents() {
         } else if (res.status !== 404) {
           setError('Failed to load registrations');
         }
-      } catch (err) {
-        console.error('Failed to fetch registrations:', err);
+      } catch {
+        // silent
         setError('Failed to load registrations');
       } finally {
         setLoading(false);

@@ -178,8 +178,10 @@ export const log = {
 /**
  * Request logging middleware for Hono
  */
+import type { Context, Next } from 'hono';
+
 export function requestLogger() {
-  return async (c: any, next: () => Promise<void>) => {
+  return async (c: Context, next: Next) => {
     const start = Date.now();
     const requestId = crypto.randomUUID();
 

@@ -73,8 +73,8 @@ export default function GuestSignIn() {
         if (res.ok) {
           setGuests(await res.json());
         }
-      } catch (err) {
-        console.error('Failed to fetch data:', err);
+      } catch {
+        // silent
       } finally {
         setLoading(false);
       }
@@ -118,8 +118,8 @@ export default function GuestSignIn() {
             localStorage.setItem('arc_pending_guest_signins', JSON.stringify(updated));
             return updated;
           });
-        } catch (err) {
-          console.error('Failed to sync sign-in:', err);
+        } catch {
+          // silent
         }
       }
     };

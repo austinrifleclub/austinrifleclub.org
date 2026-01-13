@@ -43,8 +43,8 @@ export default function PasskeySettings() {
     try {
       const list = await listPasskeys();
       setPasskeys(list);
-    } catch (err) {
-      console.error('Failed to load passkeys:', err);
+    } catch {
+      // silent
     }
   };
 

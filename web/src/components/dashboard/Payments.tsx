@@ -57,8 +57,8 @@ export default function Payments() {
             annualDuesAmount: data.annualDuesAmount || 250,
           });
         }
-      } catch (err) {
-        console.error('Failed to fetch payment data:', err);
+      } catch {
+        // silent
       } finally {
         setLoading(false);
       }

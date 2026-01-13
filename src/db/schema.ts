@@ -175,6 +175,7 @@ export const members = sqliteTable("members", {
   userIdIdx: index("members_user_id_idx").on(table.userId),
   statusIdx: index("members_status_idx").on(table.status),
   expirationIdx: index("members_expiration_idx").on(table.expirationDate),
+  expirationStatusIdx: index("members_expiration_status_idx").on(table.expirationDate, table.status),
 }));
 
 /**
@@ -256,6 +257,7 @@ export const applications = sqliteTable("applications", {
 }, (table) => ({
   statusIdx: index("applications_status_idx").on(table.status),
   userIdIdx: index("applications_user_id_idx").on(table.userId),
+  userStatusIdx: index("applications_user_status_idx").on(table.userId, table.status),
 }));
 
 /**

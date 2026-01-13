@@ -39,8 +39,8 @@ export default function RangesManager() {
         const data = await response.json();
         setRanges(data.ranges);
       }
-    } catch (error) {
-      console.error('Failed to fetch ranges:', error);
+    } catch {
+      // silent
     } finally {
       setLoading(false);
     }

@@ -93,8 +93,8 @@ export default function DashboardLayout({ children, activeTab = 'home' }: Dashbo
           const memberData = await memberRes.json();
           setMember(memberData);
         }
-      } catch (err) {
-        console.error('Failed to fetch user data:', err);
+      } catch {
+        // Authentication failed, redirect to login
         window.location.href = '/login';
       } finally {
         setLoading(false);

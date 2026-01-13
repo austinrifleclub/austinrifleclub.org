@@ -60,8 +60,8 @@ export default function VolunteerHours() {
         setEntries(data.entries || []);
         setStats(data.stats || { totalHours: 0, totalCredits: 0, pendingHours: 0 });
       }
-    } catch (err) {
-      console.error('Failed to fetch data:', err);
+    } catch {
+      // silent
     } finally {
       setLoading(false);
     }
@@ -77,8 +77,8 @@ export default function VolunteerHours() {
         setEntries(data.entries || []);
         setStats(data.stats || { totalHours: 0, totalCredits: 0, pendingHours: 0 });
       }
-    } catch (err) {
-      console.error('Failed to fetch volunteer data:', err);
+    } catch {
+      // silent
     }
   };
 
@@ -103,8 +103,8 @@ export default function VolunteerHours() {
         setFormData({ date: '', hours: '', description: '' });
         fetchVolunteerData();
       }
-    } catch (err) {
-      console.error('Failed to log hours:', err);
+    } catch {
+      // silent
     } finally {
       setSubmitting(false);
     }

@@ -542,8 +542,8 @@ export default function RACIMatrix({ canEdit = false, onSave }: RACIMatrixProps)
     try {
       await onSave(data);
       setHasChanges(false);
-    } catch (err) {
-      console.error('Failed to save:', err);
+    } catch {
+      // silent
       alert('Failed to save changes. Please try again.');
     } finally {
       setSaving(false);
