@@ -1,0 +1,1 @@
+ALTER TABLE `events` ADD `board_only` integer DEFAULT false;

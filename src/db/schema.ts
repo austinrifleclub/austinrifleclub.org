@@ -68,6 +68,27 @@ export const verifications = sqliteTable("verifications", {
   updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
 });
 
+/**
+ * Passkey credentials for WebAuthn authentication
+ * Each user can have multiple passkeys (different devices)
+ */
+export const passkeys = sqliteTable("passkeys", {
+  id: text("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  name: text("name"),
+  publicKey: text("public_key").notNull(),
+  credentialId: text("credential_id").notNull().unique(),
+  counter: integer("counter").notNull(),
+  deviceType: text("device_type"),
+  backedUp: integer("backed_up", { mode: "boolean" }).default(false),
+  transports: text("transports"),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+}, (table) => ({
+  userIdIdx: index("passkeys_user_id_idx").on(table.userId),
+}));
+
 // =============================================================================
 // MEMBERSHIP TABLES
 // =============================================================================
@@ -285,6 +306,18 @@ export const duesPayments = sqliteTable("dues_payments", {
  * - work_day: 2nd Saturday monthly
  * - youth_event: 4H, junior programs
  * - range_unavailable: Closures, construction
+ *
+ * Recurrence Model (MEC-compatible):
+ * 1. Template events have isRecurring=true with recurrenceRule (iCal RRULE)
+ * 2. Individual occurrences can be generated on-the-fly OR stored as rows
+ * 3. Stored occurrences have parentEventId pointing to template
+ * 4. Exceptions/cancellations stored in excludeDates or as cancelled occurrences
+ *
+ * RRULE examples:
+ * - "FREQ=MONTHLY;BYDAY=1SA,3SA" = 1st & 3rd Saturday monthly
+ * - "FREQ=MONTHLY;BYDAY=2SA" = 2nd Saturday monthly (work days)
+ * - "FREQ=MONTHLY;BYDAY=2MO" = 2nd Monday monthly (BOD meetings)
+ * - "FREQ=WEEKLY;BYDAY=TU,TH" = Every Tuesday & Thursday
  */
 export const events = sqliteTable("events", {
   id: text("id").primaryKey(),
@@ -293,7 +326,8 @@ export const events = sqliteTable("events", {
   description: text("description"),                     // Rich text/markdown
   eventType: text("event_type").notNull(),
 
-  // Timing
+  // Timing - for templates, these are the "prototype" times
+  // For occurrences, these are the actual occurrence times
   startTime: integer("start_time", { mode: "timestamp" }).notNull(),
   endTime: integer("end_time", { mode: "timestamp" }).notNull(),
 
@@ -310,11 +344,20 @@ export const events = sqliteTable("events", {
   requiresCertification: text("requires_certification"), // JSON array of cert type IDs
   membersOnly: integer("members_only", { mode: "boolean" }).default(true),
 
-  // Recurrence
+  // Recurrence - Template fields
   isRecurring: integer("is_recurring", { mode: "boolean" }).default(false),
-  recurrenceRule: text("recurrence_rule"),              // iCal RRULE format
-  parentEventId: text("parent_event_id")
+  recurrenceRule: text("recurrence_rule"),              // iCal RRULE: "FREQ=MONTHLY;BYDAY=1SA,3SA"
+  recurrenceEndDate: integer("recurrence_end_date", { mode: "timestamp" }), // When pattern ends (null = forever)
+  excludeDates: text("exclude_dates"),                  // JSON array of ISO dates to skip
+
+  // Recurrence - Occurrence fields
+  parentEventId: text("parent_event_id")                // Points to template for generated occurrences
     .references((): any => events.id),
+  occurrenceDate: integer("occurrence_date", { mode: "timestamp" }), // The specific date this occurrence is for
+
+  // MEC Import tracking
+  mecPostId: integer("mec_post_id"),                    // Original MEC WordPress post ID
+  mecSourceUrl: text("mec_source_url"),                 // URL to original event page
 
   // Management
   directorId: text("director_id")                       // Match director, instructor
@@ -326,8 +369,9 @@ export const events = sqliteTable("events", {
   cancelledAt: integer("cancelled_at", { mode: "timestamp" }),
   cancellationReason: text("cancellation_reason"),
 
-  // Visibility
+  // Visibility & Access Control
   isPublic: integer("is_public", { mode: "boolean" }).default(false),
+  boardOnly: integer("board_only", { mode: "boolean" }).default(false),
 
   createdBy: text("created_by")
     .references(() => members.id),
@@ -337,6 +381,8 @@ export const events = sqliteTable("events", {
   startTimeIdx: index("events_start_time_idx").on(table.startTime),
   eventTypeIdx: index("events_event_type_idx").on(table.eventType),
   statusIdx: index("events_status_idx").on(table.status),
+  parentEventIdx: index("events_parent_event_idx").on(table.parentEventId),
+  mecPostIdx: index("events_mec_post_idx").on(table.mecPostId),
 }));
 
 /**
@@ -943,6 +989,7 @@ export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 export type Session = typeof sessions.$inferSelect;
 export type Account = typeof accounts.$inferSelect;
+export type Passkey = typeof passkeys.$inferSelect;
 
 // Member types
 export type Member = typeof members.$inferSelect;
