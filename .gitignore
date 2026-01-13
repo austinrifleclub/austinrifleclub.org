@@ -33,3 +33,10 @@ npm-debug.log*
 # Nix
 .direnv/
 result
+
+# MCP / Claude Code
+.mcp.json
+.playwright-mcp/
+
+# Assets (scraped/temporary)
+assets/current-site/
