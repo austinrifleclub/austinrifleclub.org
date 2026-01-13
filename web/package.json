@@ -20,7 +20,7 @@
     "@types/react-dom": "^19.2.3",
     "ag-grid-community": "^35.0.0",
     "ag-grid-react": "^35.0.0",
-    "astro": "^5.16.8",
+    "astro": "^5.16.9",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "scheduler": "^0.27.0",
