@@ -11,6 +11,7 @@ interface EmailOptions {
   subject: string;
   html: string;
   text?: string;
+  fromEmail?: string;
 }
 
 interface ResendResponse {
@@ -18,12 +19,13 @@ interface ResendResponse {
   error?: string;
 }
 
-const FROM_EMAIL = 'Austin Rifle Club <noreply@austinrifleclub.org>';
+const DEFAULT_FROM_EMAIL = 'Austin Rifle Club <noreply@austinrifleclub.org>';
 
 export async function sendEmail(
   apiKey: string,
   options: EmailOptions
 ): Promise<{ success: boolean; id?: string; error?: string }> {
+  const fromEmail = options.fromEmail || DEFAULT_FROM_EMAIL;
   if (!apiKey) {
     log.debug('Email not sent (no API key)', { to: options.to, subject: options.subject });
     return { success: true, id: 'dev-mode' };
@@ -37,7 +39,7 @@ export async function sendEmail(
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: FROM_EMAIL,
+        from: fromEmail,
         to: options.to,
         subject: options.subject,
         html: options.html,

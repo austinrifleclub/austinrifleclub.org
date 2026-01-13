@@ -48,6 +48,7 @@ import {
   adminNotificationEmail,
 } from "../lib/email";
 import { logAudit } from "../lib/audit";
+import { ValidationError, NotFoundError, ConflictError, InternalError } from "../lib/errors";
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -69,7 +70,7 @@ app.post("/", async (c) => {
   const parsed = startApplicationSchema.safeParse(body);
 
   if (!parsed.success) {
-    return c.json({ error: "Validation failed", details: parsed.error.issues }, 400);
+    throw new ValidationError("Validation failed", parsed.error.issues);
   }
 
   const { email, firstName, lastName, phone, membershipType, howHeardAboutUs, utmSource, utmMedium, utmCampaign } = parsed.data;
@@ -91,12 +92,11 @@ app.post("/", async (c) => {
     });
 
     if (existingApp) {
-      return c.json({
-        error: "Application already exists",
+      throw new ConflictError("Application already exists", {
         applicationId: existingApp.id,
         status: existingApp.status,
         resumeToken: existingApp.resumeToken,
-      }, 409);
+      });
     }
 
     // Check if they're already a member
@@ -105,7 +105,7 @@ app.post("/", async (c) => {
     });
 
     if (existingMember && ["active", "probationary"].includes(existingMember.status)) {
-      return c.json({ error: "Already an active member" }, 409);
+      throw new ConflictError("Already an active member");
     }
 
     userId = existingUser.id;
@@ -154,14 +154,16 @@ app.post("/", async (c) => {
   });
 
   // Notify admins of new application
+  const publicUrl = c.env.PUBLIC_URL || 'https://austinrifleclub.org';
+  const adminEmailAddr = c.env.ADMIN_EMAIL || 'membership@austinrifleclub.org';
   const adminEmail = adminNotificationEmail(
     'New Membership Application',
     `A new membership application has been submitted by ${firstName} ${lastName} (${email}).`,
-    `https://austinrifleclub.org/admin/applications/${application.id}`,
+    `${publicUrl}/admin/applications/${application.id}`,
     'Review Application'
   );
   await sendEmail(c.env.RESEND_API_KEY || '', {
-    to: 'membership@austinrifleclub.org',
+    to: adminEmailAddr,
     ...adminEmail,
   });
 
@@ -169,7 +171,7 @@ app.post("/", async (c) => {
     id: application.id,
     status: application.status,
     resumeToken: application.resumeToken,
-    resumeUrl: `https://austinrifleclub.org/apply/resume?token=${resumeToken}`,
+    resumeUrl: `${publicUrl}/apply/resume?token=${resumeToken}`,
     expiresAt: application.expiresAt,
   }, 201);
 });
@@ -187,17 +189,17 @@ app.get("/resume/:token", async (c) => {
   });
 
   if (!application) {
-    return c.json({ error: "Application not found" }, 404);
+    throw new NotFoundError("Application");
   }
 
   // Check if expired
   if (application.expiresAt && new Date() > application.expiresAt) {
-    return c.json({ error: "Application has expired", status: "expired" }, 410);
+    throw new ValidationError("Application has expired");
   }
 
   // Check if already completed
   if (["approved", "rejected"].includes(application.status)) {
-    return c.json({ error: "Application already completed", status: application.status }, 410);
+    throw new ValidationError(`Application already ${application.status}`);
   }
 
   return c.json(application);
@@ -223,7 +225,7 @@ app.get("/mine", requireAuth, async (c) => {
   });
 
   if (!application) {
-    return c.json({ error: "No active application" }, 404);
+    throw new NotFoundError("Application");
   }
 
   return c.json(application);
@@ -245,14 +247,14 @@ app.patch("/mine", requireAuth, async (c) => {
   });
 
   if (!application) {
-    return c.json({ error: "No active application or cannot be modified" }, 404);
+    throw new NotFoundError("Application");
   }
 
   const body = await c.req.json();
   const parsed = updateApplicationSchema.safeParse(body);
 
   if (!parsed.success) {
-    return c.json({ error: "Validation failed", details: parsed.error.issues }, 400);
+    throw new ValidationError("Validation failed", parsed.error.issues);
   }
 
   const [updated] = await db
@@ -283,17 +285,17 @@ app.post("/mine/submit", requireAuth, async (c) => {
   });
 
   if (!application) {
-    return c.json({ error: "No draft application found" }, 404);
+    throw new NotFoundError("Draft application");
   }
 
   // Validate required fields are present
   if (!application.governmentIdUrl) {
-    return c.json({ error: "Government ID required" }, 400);
+    throw new ValidationError("Government ID required");
   }
 
   // LTC holders don't need background consent form
   if (!application.hasTexasLtc && !application.backgroundConsentUrl) {
-    return c.json({ error: "Background consent form required (or provide Texas LTC)" }, 400);
+    throw new ValidationError("Background consent form required (or provide Texas LTC)");
   }
 
   const [updated] = await db
@@ -306,14 +308,16 @@ app.post("/mine/submit", requireAuth, async (c) => {
     .returning();
 
   // Notify admin of submission
+  const publicUrl = c.env.PUBLIC_URL || 'https://austinrifleclub.org';
+  const adminEmailAddr = c.env.ADMIN_EMAIL || 'membership@austinrifleclub.org';
   const adminEmail = adminNotificationEmail(
     'Application Documents Submitted',
     `Application documents have been submitted and are ready for review.`,
-    `https://austinrifleclub.org/admin/applications/${application.id}`,
+    `${publicUrl}/admin/applications/${application.id}`,
     'Review Documents'
   );
   await sendEmail(c.env.RESEND_API_KEY || '', {
-    to: 'membership@austinrifleclub.org',
+    to: adminEmailAddr,
     ...adminEmail,
   });
 
@@ -379,7 +383,7 @@ app.get("/:id", requireAdmin, async (c) => {
   });
 
   if (!application) {
-    return c.json({ error: "Application not found" }, 404);
+    throw new NotFoundError("Application", id);
   }
 
   // Get the user info
@@ -406,7 +410,7 @@ app.patch("/:id", requireAdmin, async (c) => {
   const parsed = adminUpdateApplicationSchema.safeParse(body);
 
   if (!parsed.success) {
-    return c.json({ error: "Validation failed", details: parsed.error.issues }, 400);
+    throw new ValidationError("Validation failed", parsed.error.issues);
   }
 
   const application = await db.query.applications.findFirst({
@@ -414,7 +418,7 @@ app.patch("/:id", requireAdmin, async (c) => {
   });
 
   if (!application) {
-    return c.json({ error: "Application not found" }, 404);
+    throw new NotFoundError("Application", id);
   }
 
   const [updated] = await db
@@ -469,14 +473,11 @@ app.post("/:id/approve", requireAdmin, async (c) => {
   });
 
   if (!application) {
-    return c.json({ error: "Application not found" }, 404);
+    throw new NotFoundError("Application", id);
   }
 
   if (application.status !== "pending_vote") {
-    return c.json({
-      error: "Application must be in pending_vote status",
-      currentStatus: application.status,
-    }, 400);
+    throw new ValidationError(`Application must be in pending_vote status (current: ${application.status})`);
   }
 
   // Verify BOD vote passed (3/4 majority)
@@ -484,12 +485,11 @@ app.post("/:id/approve", requireAdmin, async (c) => {
   const requiredVotes = Math.ceil(totalVotes * 0.75);
 
   if ((application.votesFor ?? 0) < requiredVotes) {
-    return c.json({
-      error: "BOD vote did not pass (3/4 majority required)",
+    throw new ValidationError("BOD vote did not pass (3/4 majority required)", {
       votesFor: application.votesFor,
       votesAgainst: application.votesAgainst,
       required: requiredVotes,
-    }, 400);
+    });
   }
 
   // Get the last badge number to generate next one
@@ -514,7 +514,7 @@ app.post("/:id/approve", requireAdmin, async (c) => {
   });
 
   if (!user) {
-    return c.json({ error: "User not found" }, 500);
+    throw new InternalError("User not found for application");
   }
 
   // Create member record
@@ -596,7 +596,7 @@ app.post("/:id/reject", requireAdmin, async (c) => {
   const reason = body.reason as string;
 
   if (!reason || reason.length < 10) {
-    return c.json({ error: "Rejection reason required (min 10 characters)" }, 400);
+    throw new ValidationError("Rejection reason required (min 10 characters)");
   }
 
   const application = await db.query.applications.findFirst({
@@ -604,11 +604,11 @@ app.post("/:id/reject", requireAdmin, async (c) => {
   });
 
   if (!application) {
-    return c.json({ error: "Application not found" }, 404);
+    throw new NotFoundError("Application", id);
   }
 
   if (["approved", "rejected"].includes(application.status)) {
-    return c.json({ error: "Application already finalized" }, 400);
+    throw new ValidationError("Application already finalized");
   }
 
   const [updated] = await db

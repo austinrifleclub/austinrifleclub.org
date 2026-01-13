@@ -37,6 +37,7 @@ import {
 } from "../lib/sms";
 import type { DrizzleD1Database } from "drizzle-orm/d1";
 import type * as schema from "../db/schema";
+import { ValidationError, NotFoundError } from "../lib/errors";
 
 // Type definitions for query results
 interface NotificationPref {
@@ -146,7 +147,7 @@ app.get("/:id", optionalAuth, async (c) => {
   });
 
   if (!range) {
-    return c.json({ error: "Range not found" }, 404);
+    throw new NotFoundError("Range", id);
   }
 
   // Get linked event if any
@@ -183,7 +184,7 @@ app.patch("/:id", requireAdmin, async (c) => {
   const parsed = updateRangeStatusSchema.safeParse(body);
 
   if (!parsed.success) {
-    return c.json({ error: "Validation failed", details: parsed.error.issues }, 400);
+    throw new ValidationError("Validation failed", parsed.error.issues);
   }
 
   const existing = await db.query.rangeStatus.findFirst({
@@ -191,7 +192,7 @@ app.patch("/:id", requireAdmin, async (c) => {
   });
 
   if (!existing) {
-    return c.json({ error: "Range not found" }, 404);
+    throw new NotFoundError("Range", id);
   }
 
   const [updated] = await db
@@ -250,7 +251,7 @@ app.post("/:id/close", requireAdmin, async (c) => {
   const sendNotifications = body.sendNotifications !== false;
 
   if (!reason) {
-    return c.json({ error: "Reason required" }, 400);
+    throw new ValidationError("Reason required");
   }
 
   // Get current status for audit log
@@ -259,7 +260,7 @@ app.post("/:id/close", requireAdmin, async (c) => {
   });
 
   if (!existing) {
-    return c.json({ error: "Range not found" }, 404);
+    throw new NotFoundError("Range", id);
   }
 
   let expiresAt = null;
@@ -335,7 +336,7 @@ app.post("/:id/open", requireAdmin, async (c) => {
   });
 
   if (!existing) {
-    return c.json({ error: "Range not found" }, 404);
+    throw new NotFoundError("Range", id);
   }
 
   const [updated] = await db
@@ -401,7 +402,7 @@ app.post("/bulk-update", requireAdmin, async (c) => {
   }>;
 
   if (!Array.isArray(updates) || updates.length === 0) {
-    return c.json({ error: "updates array required" }, 400);
+    throw new ValidationError("updates array required");
   }
 
   const results = await Promise.all(
@@ -616,11 +617,11 @@ app.post("/safety-alert", requireAdmin, async (c) => {
   const message = body.message as string;
 
   if (!message) {
-    return c.json({ error: "Message required" }, 400);
+    throw new ValidationError("Message required");
   }
 
   if (message.length > 140) {
-    return c.json({ error: "Message too long (max 140 characters)" }, 400);
+    throw new ValidationError("Message too long (max 140 characters)");
   }
 
   // Get all notification preferences with safetyAlerts SMS enabled

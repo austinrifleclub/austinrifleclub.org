@@ -22,6 +22,7 @@ import {
 import { paginationSchema } from "../lib/validation";
 import { logAudit } from "../lib/audit";
 import { z } from "zod";
+import { ValidationError, NotFoundError, ConflictError } from "../lib/errors";
 
 const app = new Hono<{ Bindings: Env; Variables: MemberContext }>();
 
@@ -120,7 +121,7 @@ app.post("/types", requireAdmin, async (c) => {
   const parsed = createCertificationTypeSchema.safeParse(body);
 
   if (!parsed.success) {
-    return c.json({ error: "Validation failed", details: parsed.error.issues }, 400);
+    throw new ValidationError("Validation failed", parsed.error.issues);
   }
 
   const id = crypto.randomUUID();
@@ -160,14 +161,14 @@ app.patch("/types/:id", requireAdmin, async (c) => {
   });
 
   if (!existing) {
-    return c.json({ error: "Certification type not found" }, 404);
+    throw new NotFoundError("Certification type", id);
   }
 
   const body = await c.req.json();
   const parsed = updateCertificationTypeSchema.safeParse(body);
 
   if (!parsed.success) {
-    return c.json({ error: "Validation failed", details: parsed.error.issues }, 400);
+    throw new ValidationError("Validation failed", parsed.error.issues);
   }
 
   const [updated] = await db
@@ -203,10 +204,7 @@ app.delete("/types/:id", requireAdmin, async (c) => {
   });
 
   if (existingCerts) {
-    return c.json({
-      error: "Cannot delete certification type",
-      message: "Members have this certification. Revoke all certifications first.",
-    }, 400);
+    throw new ValidationError("Cannot delete certification type: members have this certification. Revoke all certifications first.");
   }
 
   const [deleted] = await db
@@ -215,7 +213,7 @@ app.delete("/types/:id", requireAdmin, async (c) => {
     .returning();
 
   if (!deleted) {
-    return c.json({ error: "Certification type not found" }, 404);
+    throw new NotFoundError("Certification type", id);
   }
 
   await logAudit(db, {
@@ -328,7 +326,7 @@ app.post("/", requireAdmin, async (c) => {
   const parsed = grantCertificationSchema.safeParse(body);
 
   if (!parsed.success) {
-    return c.json({ error: "Validation failed", details: parsed.error.issues }, 400);
+    throw new ValidationError("Validation failed", parsed.error.issues);
   }
 
   // Check member exists
@@ -337,7 +335,7 @@ app.post("/", requireAdmin, async (c) => {
   });
 
   if (!member) {
-    return c.json({ error: "Member not found" }, 404);
+    throw new NotFoundError("Member", parsed.data.memberId);
   }
 
   // Check certification type exists
@@ -346,7 +344,7 @@ app.post("/", requireAdmin, async (c) => {
   });
 
   if (!certType) {
-    return c.json({ error: "Certification type not found" }, 404);
+    throw new NotFoundError("Certification type", parsed.data.certificationTypeId);
   }
 
   // Check if member already has this certification (active)
@@ -359,10 +357,7 @@ app.post("/", requireAdmin, async (c) => {
   });
 
   if (existing) {
-    return c.json({
-      error: "Member already has this certification",
-      existingCertification: existing,
-    }, 409);
+    throw new ConflictError("Member already has this certification", { existingCertification: existing });
   }
 
   const id = crypto.randomUUID();
@@ -438,7 +433,7 @@ app.delete("/:id", requireAdmin, async (c) => {
     .limit(1);
 
   if (!cert.length) {
-    return c.json({ error: "Certification not found" }, 404);
+    throw new NotFoundError("Certification", id);
   }
 
   await db.delete(certifications).where(eq(certifications.id, id));
@@ -482,11 +477,11 @@ app.post("/:id/renew", requireAdmin, async (c) => {
     .limit(1);
 
   if (!cert.length) {
-    return c.json({ error: "Certification not found" }, 404);
+    throw new NotFoundError("Certification", id);
   }
 
   if (!cert[0].typeValidityMonths) {
-    return c.json({ error: "This certification does not expire and cannot be renewed" }, 400);
+    throw new ValidationError("This certification does not expire and cannot be renewed");
   }
 
   // Calculate new expiration from now or current expiration (whichever is later)

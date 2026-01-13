@@ -13,6 +13,10 @@ export type Env = {
   BETTER_AUTH_SECRET: string;
   BETTER_AUTH_URL: string;
   CORS_ALLOWED_ORIGINS?: string;
+  PUBLIC_URL?: string;
+  FROM_EMAIL?: string;
+  ADMIN_EMAIL?: string;
+  FROM_PHONE?: string;
   RESEND_API_KEY?: string;
   STRIPE_SECRET_KEY?: string;
   STRIPE_WEBHOOK_SECRET?: string;

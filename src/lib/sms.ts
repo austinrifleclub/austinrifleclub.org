@@ -9,6 +9,7 @@ import { log } from './logger';
 interface SMSOptions {
   to: string;
   body: string;
+  fromPhone?: string;
 }
 
 interface TwilioResponse {
@@ -18,7 +19,7 @@ interface TwilioResponse {
   error_message?: string;
 }
 
-const FROM_PHONE = '+15125550100'; // Replace with actual Twilio number
+const DEFAULT_FROM_PHONE = '+15125550100';
 
 export async function sendSMS(
   accountSid: string,
@@ -36,6 +37,8 @@ export async function sendSMS(
     return { success: false, error: 'Invalid phone number' };
   }
 
+  const fromPhone = options.fromPhone || DEFAULT_FROM_PHONE;
+
   try {
     const url = `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`;
     const auth = btoa(`${accountSid}:${authToken}`);
@@ -47,7 +50,7 @@ export async function sendSMS(
         'Content-Type': 'application/x-www-form-urlencoded',
       },
       body: new URLSearchParams({
-        From: FROM_PHONE,
+        From: fromPhone,
         To: toNumber,
         Body: options.body,
       }),
@@ -142,31 +145,4 @@ export async function sendBulkSMS(
   const errors = results.filter((r) => !r.success).map((r) => r.error || 'Unknown error');
 
   return { sent, failed, errors };
-}
-
-/**
- * Send SMS to members who have opted in for SMS alerts
- */
-export async function sendAlertToOptedInMembers(
-  db: any, // DrizzleDB
-  accountSid: string,
-  authToken: string,
-  alertType: 'range_closure' | 'safety' | 'event',
-  body: string
-): Promise<{ sent: number; failed: number }> {
-  // Get members who have opted in for this alert type
-  const members = await db.query.notificationPreferences.findMany({
-    where: (prefs: any, { eq, and }: any) =>
-      and(
-        eq(prefs.smsEnabled, true),
-        eq(prefs[`sms${alertType.charAt(0).toUpperCase() + alertType.slice(1)}Alerts`], true)
-      ),
-  });
-
-  if (members.length === 0) {
-    return { sent: 0, failed: 0 };
-  }
-
-  const phones = members.map((m: any) => m.phone).filter(Boolean);
-  return sendBulkSMS(accountSid, authToken, phones, body);
 }

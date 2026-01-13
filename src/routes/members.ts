@@ -41,6 +41,7 @@ import {
   isInGracePeriod,
 } from "../lib/utils";
 import { logAudit } from "../lib/audit";
+import { ValidationError, NotFoundError } from "../lib/errors";
 
 const app = new Hono<{ Bindings: Env; Variables: MemberContext }>();
 
@@ -146,7 +147,7 @@ app.patch("/me", requireMember, async (c) => {
   const parsed = updateMemberSchema.safeParse(body);
 
   if (!parsed.success) {
-    return c.json({ error: "Validation failed", details: parsed.error.issues }, 400);
+    throw new ValidationError("Validation failed", parsed.error.issues);
   }
 
   const [updated] = await db
@@ -177,10 +178,11 @@ app.get("/me/referral-code", requireMember, async (c) => {
       .from(members)
       .where(eq(members.referredBy, member.id));
 
+    const publicUrl = c.env.PUBLIC_URL || 'https://austinrifleclub.org';
     return c.json({
       code: member.referralCode,
       referralCount: referrals[0]?.count ?? 0,
-      referralUrl: `https://austinrifleclub.org/join?ref=${member.referralCode}`,
+      referralUrl: `${publicUrl}/join?ref=${member.referralCode}`,
     });
   }
 
@@ -191,10 +193,11 @@ app.get("/me/referral-code", requireMember, async (c) => {
     .set({ referralCode: code, updatedAt: new Date() })
     .where(eq(members.id, member.id));
 
+  const publicUrl = c.env.PUBLIC_URL || 'https://austinrifleclub.org';
   return c.json({
     code,
     referralCount: 0,
-    referralUrl: `https://austinrifleclub.org/join?ref=${code}`,
+    referralUrl: `${publicUrl}/join?ref=${code}`,
   });
 });
 
@@ -453,7 +456,7 @@ app.get("/:id", requireAdmin, async (c) => {
   });
 
   if (!member) {
-    return c.json({ error: "Member not found" }, 404);
+    throw new NotFoundError("Member", id);
   }
 
   // Get additional data
@@ -496,14 +499,14 @@ app.patch("/:id", requireAdmin, async (c) => {
   });
 
   if (!currentMember) {
-    return c.json({ error: "Member not found" }, 404);
+    throw new NotFoundError("Member", id);
   }
 
   const body = await c.req.json();
   const parsed = adminUpdateMemberSchema.safeParse(body);
 
   if (!parsed.success) {
-    return c.json({ error: "Validation failed", details: parsed.error.issues }, 400);
+    throw new ValidationError("Validation failed", parsed.error.issues);
   }
 
   const [updated] = await db

@@ -305,13 +305,14 @@ export const MEMBERSHIP_PRICES = {
 
 /**
  * Create a payment checkout for membership
+ * @param baseUrl - The public URL for redirects (from env.PUBLIC_URL)
  */
 export async function createMembershipCheckout(
   stripe: StripeService,
   email: string,
   membershipType: keyof typeof MEMBERSHIP_PRICES,
   memberId: string,
-  baseUrl = 'https://austinrifleclub.org'
+  baseUrl: string
 ): Promise<CreateCheckoutResult> {
   const price = MEMBERSHIP_PRICES[membershipType];
 
@@ -337,6 +338,7 @@ export async function createMembershipCheckout(
 
 /**
  * Create a payment checkout for event registration
+ * @param baseUrl - The public URL for redirects (from env.PUBLIC_URL)
  */
 export async function createEventCheckout(
   stripe: StripeService,
@@ -345,7 +347,7 @@ export async function createEventCheckout(
   eventTitle: string,
   amount: number, // in dollars
   memberId: string,
-  baseUrl = 'https://austinrifleclub.org'
+  baseUrl: string
 ): Promise<CreateCheckoutResult> {
   return stripe.createCheckoutSession({
     customerEmail: email,

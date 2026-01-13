@@ -12,6 +12,7 @@ import { createDb } from "../db";
 import { applications, documents } from "../db/schema";
 import { generateId } from "../lib/utils";
 import { logAudit } from "../lib/audit";
+import { ValidationError, NotFoundError } from "../lib/errors";
 
 const app = new Hono<{ Bindings: Env & { R2: R2Bucket } }>();
 
@@ -56,11 +57,11 @@ app.post("/application/:id/government-id", requireAuth, async (c) => {
   });
 
   if (!application || application.userId !== user.id) {
-    return c.json({ error: "Application not found" }, 404);
+    throw new NotFoundError("Application", applicationId);
   }
 
   if (!["draft", "documents_pending"].includes(application.status)) {
-    return c.json({ error: "Application is not accepting documents" }, 400);
+    throw new ValidationError("Application is not accepting documents");
   }
 
   // Parse multipart form data
@@ -68,17 +69,17 @@ app.post("/application/:id/government-id", requireAuth, async (c) => {
   const file = formData.get("file") as File | null;
 
   if (!file) {
-    return c.json({ error: "No file provided" }, 400);
+    throw new ValidationError("No file provided");
   }
 
   // Validate file type and size
   const config = ALLOWED_TYPES.document;
   if (!config.mimes.includes(file.type)) {
-    return c.json({ error: `Invalid file type. Allowed: ${config.mimes.join(", ")}` }, 400);
+    throw new ValidationError(`Invalid file type. Allowed: ${config.mimes.join(", ")}`);
   }
 
   if (file.size > config.maxSize) {
-    return c.json({ error: `File too large. Max size: ${config.maxSize / 1024 / 1024}MB` }, 400);
+    throw new ValidationError(`File too large. Max size: ${config.maxSize / 1024 / 1024}MB`);
   }
 
   // Upload to R2
@@ -131,27 +132,27 @@ app.post("/application/:id/background-consent", requireAuth, async (c) => {
   });
 
   if (!application || application.userId !== user.id) {
-    return c.json({ error: "Application not found" }, 404);
+    throw new NotFoundError("Application", applicationId);
   }
 
   if (!["draft", "documents_pending"].includes(application.status)) {
-    return c.json({ error: "Application is not accepting documents" }, 400);
+    throw new ValidationError("Application is not accepting documents");
   }
 
   const formData = await c.req.formData();
   const file = formData.get("file") as File | null;
 
   if (!file) {
-    return c.json({ error: "No file provided" }, 400);
+    throw new ValidationError("No file provided");
   }
 
   const config = ALLOWED_TYPES.document;
   if (!config.mimes.includes(file.type)) {
-    return c.json({ error: `Invalid file type. Allowed: ${config.mimes.join(", ")}` }, 400);
+    throw new ValidationError(`Invalid file type. Allowed: ${config.mimes.join(", ")}`);
   }
 
   if (file.size > config.maxSize) {
-    return c.json({ error: `File too large. Max size: ${config.maxSize / 1024 / 1024}MB` }, 400);
+    throw new ValidationError(`File too large. Max size: ${config.maxSize / 1024 / 1024}MB`);
   }
 
   const key = generateR2Key(`applications/${applicationId}`, `background-consent-${file.name}`);
@@ -204,16 +205,16 @@ app.post("/document", requireAdmin, async (c) => {
   const accessLevel = (formData.get("accessLevel") as string) || "member";
 
   if (!file) {
-    return c.json({ error: "No file provided" }, 400);
+    throw new ValidationError("No file provided");
   }
 
   const config = ALLOWED_TYPES.any;
   if (!config.mimes.includes(file.type)) {
-    return c.json({ error: `Invalid file type. Allowed: ${config.mimes.join(", ")}` }, 400);
+    throw new ValidationError(`Invalid file type. Allowed: ${config.mimes.join(", ")}`);
   }
 
   if (file.size > config.maxSize) {
-    return c.json({ error: `File too large. Max size: ${config.maxSize / 1024 / 1024}MB` }, 400);
+    throw new ValidationError(`File too large. Max size: ${config.maxSize / 1024 / 1024}MB`);
   }
 
   const key = generateR2Key(`documents/${category}`, file.name);
@@ -279,12 +280,12 @@ app.get("/document/:id", optionalAuth, async (c) => {
   });
 
   if (!document) {
-    return c.json({ error: "Document not found" }, 404);
+    throw new NotFoundError("Document", id);
   }
 
   // Check access based on accessLevel
   if (document.accessLevel !== 'public' && !user) {
-    return c.json({ error: "Document not found" }, 404);
+    throw new NotFoundError("Document", id);
   }
 
   // Extract R2 key from URL
@@ -292,7 +293,7 @@ app.get("/document/:id", optionalAuth, async (c) => {
   const object = await c.env.R2.get(key);
 
   if (!object) {
-    return c.json({ error: "File not found in storage" }, 404);
+    throw new NotFoundError("File in storage");
   }
 
   return new Response(object.body, {
@@ -319,7 +320,7 @@ app.delete("/document/:id", requireAdmin, async (c) => {
   });
 
   if (!document) {
-    return c.json({ error: "Document not found" }, 404);
+    throw new NotFoundError("Document", id);
   }
 
   // Delete from R2

@@ -8,7 +8,13 @@
  * - Certifications (NMO, NMSE, RSO, Instructor)
  */
 
+import { eq, and } from "drizzle-orm";
+import { DrizzleD1Database } from "drizzle-orm/d1";
 import type { Event, Member, Certification } from "../db/schema";
+import { members, certifications, boardMembers } from "../db/schema";
+import type * as schema from "../db/schema";
+
+type DbType = DrizzleD1Database<typeof schema>;
 
 export interface AccessContext {
   user: { id: string } | null;
@@ -198,14 +204,7 @@ export function canRegisterForEvent(event: Event, ctx: AccessContext): Registrat
  * all the information needed for access control decisions.
  */
 export async function buildAccessContext(
-  db: {
-    select: () => any;
-    query: {
-      members: { findFirst: (opts: any) => Promise<Member | undefined> };
-      certifications: { findMany: (opts: any) => Promise<Certification[]> };
-      boardMembers: { findFirst: (opts: any) => Promise<{ id: string } | undefined> };
-    };
-  },
+  db: DbType,
   userId: string | null | undefined,
   memberId?: string | null
 ): Promise<AccessContext> {
@@ -222,11 +221,11 @@ export async function buildAccessContext(
   let member: Member | null = null;
   if (memberId) {
     member = (await db.query.members.findFirst({
-      where: (members: any, { eq }: any) => eq(members.id, memberId),
+      where: eq(members.id, memberId),
     })) ?? null;
   } else {
     member = (await db.query.members.findFirst({
-      where: (members: any, { eq }: any) => eq(members.userId, userId),
+      where: eq(members.userId, userId),
     })) ?? null;
   }
 
@@ -234,7 +233,7 @@ export async function buildAccessContext(
   let memberCertifications: Certification[] = [];
   if (member) {
     memberCertifications = await db.query.certifications.findMany({
-      where: (certs: any, { eq }: any) => eq(certs.memberId, member!.id),
+      where: eq(certifications.memberId, member.id),
     });
   }
 
@@ -242,8 +241,7 @@ export async function buildAccessContext(
   let isBoardMember = false;
   if (member) {
     const boardMember = await db.query.boardMembers.findFirst({
-      where: (bm: any, { and, eq }: any) =>
-        and(eq(bm.memberId, member!.id), eq(bm.isCurrent, true)),
+      where: and(eq(boardMembers.memberId, member.id), eq(boardMembers.isCurrent, true)),
     });
     isBoardMember = !!boardMember;
   }

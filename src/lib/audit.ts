@@ -8,6 +8,9 @@ import { DrizzleD1Database } from "drizzle-orm/d1";
 import { auditLog } from "../db/schema";
 import { generateId } from "./utils";
 import { log } from "./logger";
+import type * as schema from "../db/schema";
+
+type DbType = DrizzleD1Database<typeof schema>;
 
 export type AuditAction =
   | 'member.create'
@@ -37,7 +40,7 @@ export interface AuditEntry {
   performedBy?: string; // Alternative to actorId for convenience
   targetType: string; // Type of entity affected
   targetId: string; // ID of entity affected
-  details?: Record<string, any>; // Additional context
+  details?: Record<string, unknown>; // Additional context
   ipAddress?: string;
   userAgent?: string;
 }
@@ -46,7 +49,7 @@ export interface AuditEntry {
  * Log an audit event
  */
 export async function logAudit(
-  db: any, // Accept any db type to be flexible with schema types
+  db: DbType,
   entry: AuditEntry
 ): Promise<void> {
   try {
@@ -76,7 +79,7 @@ export async function logAudit(
  * Helper to create audit log from Hono context
  */
 export function createAuditLogger(
-  db: any, // Accept any db type to be flexible with schema types
+  db: DbType,
   actorId: string,
   actorType: 'member' | 'admin' | 'system',
   ipAddress?: string,
@@ -86,7 +89,7 @@ export function createAuditLogger(
     action: string,
     targetType: string,
     targetId: string,
-    details?: Record<string, any>
+    details?: Record<string, unknown>
   ) => {
     await logAudit(db, {
       action,

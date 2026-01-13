@@ -25,6 +25,7 @@ import {
 } from "../lib/email";
 import { logAudit } from "../lib/audit";
 import { users } from "../db/schema";
+import { ValidationError, NotFoundError, InternalError } from "../lib/errors";
 
 const app = new Hono<{ Bindings: Env & { STRIPE_SECRET_KEY: string; STRIPE_WEBHOOK_SECRET: string } }>();
 
@@ -39,7 +40,7 @@ app.post("/checkout/membership", requireMember, async (c) => {
   const { membershipType } = body as { membershipType: keyof typeof MEMBERSHIP_PRICES };
 
   if (!membershipType || !MEMBERSHIP_PRICES[membershipType]) {
-    return c.json({ error: "Invalid membership type" }, 400);
+    throw new ValidationError("Invalid membership type");
   }
 
   // Get user email
@@ -48,19 +49,21 @@ app.post("/checkout/membership", requireMember, async (c) => {
   });
 
   if (!user) {
-    return c.json({ error: "User not found" }, 404);
+    throw new NotFoundError("User");
   }
 
   const stripe = new StripeService(c.env.STRIPE_SECRET_KEY);
+  const baseUrl = c.env.PUBLIC_URL || 'https://austinrifleclub.org';
   const result = await createMembershipCheckout(
     stripe,
     user.email,
     membershipType,
-    member.id
+    member.id,
+    baseUrl
   );
 
   if (!result.success) {
-    return c.json({ error: result.error }, 500);
+    throw new InternalError(result.error || "Payment checkout failed");
   }
 
   return c.json({
@@ -84,11 +87,11 @@ app.post("/checkout/event/:eventId", requireMember, async (c) => {
   });
 
   if (!event) {
-    return c.json({ error: "Event not found" }, 404);
+    throw new NotFoundError("Event", eventId);
   }
 
   if (!event.cost || event.cost === 0) {
-    return c.json({ error: "This event is free" }, 400);
+    throw new ValidationError("This event is free");
   }
 
   // Get user email
@@ -97,21 +100,23 @@ app.post("/checkout/event/:eventId", requireMember, async (c) => {
   });
 
   if (!user) {
-    return c.json({ error: "User not found" }, 404);
+    throw new NotFoundError("User");
   }
 
   const stripe = new StripeService(c.env.STRIPE_SECRET_KEY);
+  const baseUrl = c.env.PUBLIC_URL || 'https://austinrifleclub.org';
   const result = await createEventCheckout(
     stripe,
     user.email,
     eventId,
     event.title,
     event.cost,
-    member.id
+    member.id,
+    baseUrl
   );
 
   if (!result.success) {
-    return c.json({ error: result.error }, 500);
+    throw new InternalError(result.error || "Payment checkout failed");
   }
 
   return c.json({
@@ -134,8 +139,8 @@ app.get("/session/:sessionId", requireMember, async (c) => {
       status: session.payment_status,
       metadata: session.metadata,
     });
-  } catch (error) {
-    return c.json({ error: "Session not found" }, 404);
+  } catch {
+    throw new NotFoundError("Checkout session", sessionId);
   }
 });
 
@@ -148,14 +153,14 @@ app.post("/webhook", async (c) => {
   const body = await c.req.text();
 
   if (!signature) {
-    return c.json({ error: "Missing signature" }, 400);
+    throw new ValidationError("Missing Stripe signature");
   }
 
   const stripe = new StripeService(c.env.STRIPE_SECRET_KEY);
 
   // Verify webhook signature
   if (!stripe.verifyWebhookSignature(body, signature, c.env.STRIPE_WEBHOOK_SECRET)) {
-    return c.json({ error: "Invalid signature" }, 400);
+    throw new ValidationError("Invalid webhook signature");
   }
 
   const event = stripe.parseWebhookEvent(body);

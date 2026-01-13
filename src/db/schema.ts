@@ -420,6 +420,8 @@ export const eventRegistrations = sqliteTable("event_registrations", {
 }, (table) => ({
   eventMemberIdx: uniqueIndex("event_registrations_event_member_idx")
     .on(table.eventId, table.memberId),
+  memberIdIdx: index("event_registrations_member_id_idx").on(table.memberId),
+  eventStatusIdx: index("event_registrations_event_status_idx").on(table.eventId, table.status),
 }));
 
 /**

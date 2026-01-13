@@ -43,6 +43,7 @@ import {
   getMissingCertificationNames,
   type AccessContext,
 } from "../lib/eventAccess";
+import { ValidationError, NotFoundError, ConflictError, ForbiddenError } from "../lib/errors";
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -151,14 +152,14 @@ app.get("/:id", optionalAuth, async (c) => {
   });
 
   if (!event) {
-    return c.json({ error: "Event not found" }, 404);
+    throw new NotFoundError("Event", id);
   }
 
   // Build access context and check visibility
   const accessCtx = await buildAccessContext(db, user?.id);
 
   if (!canViewEvent(event, accessCtx)) {
-    return c.json({ error: "Event not found" }, 404);
+    throw new NotFoundError("Event", id);
   }
 
   // Get registration count
@@ -208,7 +209,7 @@ app.post("/:id/register", requireMember, async (c) => {
   });
 
   if (!event) {
-    return c.json({ error: "Event not found" }, 404);
+    throw new NotFoundError("Event", eventId);
   }
 
   // Build access context and check registration permissions
@@ -217,19 +218,16 @@ app.post("/:id/register", requireMember, async (c) => {
 
   if (!registrationInfo.canRegister) {
     const missingCertNames = getMissingCertificationNames(registrationInfo.missingCertifications);
-    return c.json({
-      error: registrationInfo.reason,
-      missingCertifications: missingCertNames,
-    }, 403);
+    throw new ForbiddenError(registrationInfo.reason || "Registration not allowed");
   }
 
   if (event.status !== "published") {
-    return c.json({ error: "Event not open for registration" }, 400);
+    throw new ValidationError("Event not open for registration");
   }
 
   // Check registration deadline
   if (event.registrationDeadline && new Date() > event.registrationDeadline) {
-    return c.json({ error: "Registration deadline has passed" }, 400);
+    throw new ValidationError("Registration deadline has passed");
   }
 
   // Check if already registered
@@ -241,7 +239,7 @@ app.post("/:id/register", requireMember, async (c) => {
   });
 
   if (existing) {
-    return c.json({ error: "Already registered", registration: existing }, 409);
+    throw new ConflictError("Already registered for this event", { registration: existing });
   }
 
   // Check capacity
@@ -333,7 +331,7 @@ app.delete("/:id/register", requireMember, async (c) => {
   });
 
   if (!registration) {
-    return c.json({ error: "Not registered for this event" }, 404);
+    throw new NotFoundError("Event registration");
   }
 
   // Check cancellation policy
@@ -342,7 +340,7 @@ app.delete("/:id/register", requireMember, async (c) => {
   });
 
   if (!event) {
-    return c.json({ error: "Event not found" }, 404);
+    throw new NotFoundError("Event", eventId);
   }
 
   const daysUntilEvent = Math.floor(
@@ -490,23 +488,41 @@ app.get("/my-registrations", requireMember, async (c) => {
   const db = c.get("db");
   const member = c.get("member");
 
-  const registrations = await db.query.eventRegistrations.findMany({
-    where: eq(eventRegistrations.memberId, member.id),
-    orderBy: desc(eventRegistrations.createdAt),
-    limit: 50,
-  });
-
-  // Get event details for each registration
-  const withEvents = await Promise.all(
-    registrations.map(async (reg) => {
-      const event = await db.query.events.findFirst({
-        where: eq(events.id, reg.eventId),
-      });
-      return { ...reg, event };
+  // Use join to avoid N+1 query
+  const registrationsWithEvents = await db
+    .select({
+      id: eventRegistrations.id,
+      eventId: eventRegistrations.eventId,
+      memberId: eventRegistrations.memberId,
+      status: eventRegistrations.status,
+      waitlistPosition: eventRegistrations.waitlistPosition,
+      division: eventRegistrations.division,
+      classification: eventRegistrations.classification,
+      checkedInAt: eventRegistrations.checkedInAt,
+      amountPaid: eventRegistrations.amountPaid,
+      stripePaymentId: eventRegistrations.stripePaymentId,
+      createdAt: eventRegistrations.createdAt,
+      updatedAt: eventRegistrations.updatedAt,
+      event: {
+        id: events.id,
+        title: events.title,
+        description: events.description,
+        eventType: events.eventType,
+        startTime: events.startTime,
+        endTime: events.endTime,
+        location: events.location,
+        cost: events.cost,
+        status: events.status,
+        maxParticipants: events.maxParticipants,
+      },
     })
-  );
+    .from(eventRegistrations)
+    .innerJoin(events, eq(eventRegistrations.eventId, events.id))
+    .where(eq(eventRegistrations.memberId, member.id))
+    .orderBy(desc(eventRegistrations.createdAt))
+    .limit(50);
 
-  return c.json(withEvents);
+  return c.json(registrationsWithEvents);
 });
 
 // =============================================================================
@@ -525,7 +541,7 @@ app.post("/", requireAdmin, async (c) => {
   const parsed = createEventSchema.safeParse(body);
 
   if (!parsed.success) {
-    return c.json({ error: "Validation failed", details: parsed.error.issues }, 400);
+    throw new ValidationError("Validation failed", parsed.error.issues);
   }
 
   const eventId = generateId();
@@ -576,7 +592,7 @@ app.patch("/:id", requireAdmin, async (c) => {
   const parsed = updateEventSchema.safeParse(body);
 
   if (!parsed.success) {
-    return c.json({ error: "Validation failed", details: parsed.error.issues }, 400);
+    throw new ValidationError("Validation failed", parsed.error.issues);
   }
 
   const { rangeIds: updateRangeIds, requiresCertification: updateReqCerts, ...updateData } = parsed.data;
@@ -592,7 +608,7 @@ app.patch("/:id", requireAdmin, async (c) => {
     .returning();
 
   if (!updated) {
-    return c.json({ error: "Event not found" }, 404);
+    throw new NotFoundError("Event", id);
   }
 
   return c.json(updated);
@@ -621,41 +637,43 @@ app.post("/:id/cancel", requireAdmin, async (c) => {
     .returning();
 
   if (!updated) {
-    return c.json({ error: "Event not found" }, 404);
+    throw new NotFoundError("Event", id);
   }
 
-  // Notify all registrants
-  const registrations = await db.query.eventRegistrations.findMany({
-    where: and(
-      eq(eventRegistrations.eventId, id),
-      sql`${eventRegistrations.status} IN ('registered', 'waitlisted')`
-    ),
-  });
+  // Get all registrations with member and user info in a single query (avoid N+1)
+  const registrationsWithInfo = await db
+    .select({
+      id: eventRegistrations.id,
+      memberId: eventRegistrations.memberId,
+      status: eventRegistrations.status,
+      amountPaid: eventRegistrations.amountPaid,
+      stripePaymentId: eventRegistrations.stripePaymentId,
+      memberFirstName: members.firstName,
+      userEmail: users.email,
+    })
+    .from(eventRegistrations)
+    .innerJoin(members, eq(eventRegistrations.memberId, members.id))
+    .innerJoin(users, eq(members.userId, users.id))
+    .where(
+      and(
+        eq(eventRegistrations.eventId, id),
+        sql`${eventRegistrations.status} IN ('registered', 'waitlisted')`
+      )
+    );
 
-  for (const reg of registrations) {
-    const regMember = await db.query.members.findFirst({
-      where: eq(members.id, reg.memberId),
+  for (const reg of registrationsWithInfo) {
+    // Send cancellation email
+    const emailTemplate = eventCancellationEmail(
+      reg.memberFirstName,
+      updated.title,
+      updated.startTime.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
+      reason,
+      reg.amountPaid || undefined
+    );
+    await sendEmail(c.env.RESEND_API_KEY || '', {
+      to: reg.userEmail,
+      ...emailTemplate,
     });
-
-    if (regMember) {
-      const regUser = await db.query.users.findFirst({
-        where: eq(users.id, regMember.userId),
-      });
-
-      if (regUser) {
-        const emailTemplate = eventCancellationEmail(
-          regMember.firstName,
-          updated.title,
-          updated.startTime.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
-          reason,
-          reg.amountPaid || undefined
-        );
-        await sendEmail(c.env.RESEND_API_KEY || '', {
-          to: regUser.email,
-          ...emailTemplate,
-        });
-      }
-    }
 
     // Mark registration as cancelled
     await db
@@ -737,7 +755,7 @@ app.post("/:id/check-in/:memberId", requireAdmin, async (c) => {
     .returning();
 
   if (!updated) {
-    return c.json({ error: "Registration not found" }, 404);
+    throw new NotFoundError("Registration");
   }
 
   return c.json(updated);
@@ -829,8 +847,11 @@ app.get("/calendar.ics", optionalAuth, async (c) => {
       .replace(/\n/g, '\\n');
   };
 
+  const publicUrl = c.env.PUBLIC_URL || 'https://austinrifleclub.org';
+  const domain = new URL(publicUrl).hostname;
+
   const icsEvents = eventList.map((event) => {
-    const uid = `${event.id}@austinrifleclub.org`;
+    const uid = `${event.id}@${domain}`;
     const dtstamp = formatICalDate(new Date());
     const dtstart = formatICalDate(event.startTime);
     const dtend = formatICalDate(event.endTime);
@@ -847,7 +868,7 @@ app.get("/calendar.ics", optionalAuth, async (c) => {
       `SUMMARY:${summary}`,
       description ? `DESCRIPTION:${description}` : '',
       `LOCATION:${location}`,
-      `URL:https://austinrifleclub.org/events/${event.id}`,
+      `URL:${publicUrl}/events/${event.id}`,
       'END:VEVENT',
     ].filter(Boolean).join('\r\n');
   });

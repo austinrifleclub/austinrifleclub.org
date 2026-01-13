@@ -24,6 +24,7 @@ import {
   quickGuestSignInSchema,
 } from "../lib/validation";
 import { generateId } from "../lib/utils";
+import { ValidationError, NotFoundError, ForbiddenError } from "../lib/errors";
 
 const app = new Hono<{ Bindings: Env; Variables: MemberContext }>();
 
@@ -62,7 +63,7 @@ app.post("/", async (c) => {
   const parsed = createGuestSchema.safeParse(body);
 
   if (!parsed.success) {
-    return c.json({ error: "Validation failed", details: parsed.error.issues }, 400);
+    throw new ValidationError("Validation failed", parsed.error.issues);
   }
 
   const guestId = generateId();
@@ -99,7 +100,7 @@ app.get("/:id", async (c) => {
   });
 
   if (!guest) {
-    return c.json({ error: "Guest not found" }, 404);
+    throw new NotFoundError("Guest", id);
   }
 
   // Get visit history
@@ -132,7 +133,7 @@ app.post("/:id/sign-in", async (c) => {
   const parsed = signInGuestSchema.safeParse({ ...body, guestId });
 
   if (!parsed.success) {
-    return c.json({ error: "Validation failed", details: parsed.error.issues }, 400);
+    throw new ValidationError("Validation failed", parsed.error.issues);
   }
 
   // Get guest
@@ -141,12 +142,12 @@ app.post("/:id/sign-in", async (c) => {
   });
 
   if (!guest) {
-    return c.json({ error: "Guest not found" }, 404);
+    throw new NotFoundError("Guest", guestId);
   }
 
   // Check if guest is banned
   if (guest.status === "banned") {
-    return c.json({ error: "Guest is banned", reason: guest.bannedReason }, 403);
+    throw new ForbiddenError(`Guest is banned: ${guest.bannedReason || "No reason provided"}`);
   }
 
   // Check visit limit (reset count if new year)
@@ -158,12 +159,7 @@ app.post("/:id/sign-in", async (c) => {
   }
 
   if (visitCount >= 3) {
-    return c.json({
-      error: "Guest has reached visit limit for this year",
-      visitCount,
-      maxVisits: 3,
-      suggestion: "Guest should consider becoming a member",
-    }, 403);
+    throw new ForbiddenError("Guest has reached visit limit for this year (3 visits max). Guest should consider becoming a member.");
   }
 
   // Check how many guests member has signed in today
@@ -181,10 +177,7 @@ app.post("/:id/sign-in", async (c) => {
     );
 
   if ((todayCount?.count ?? 0) >= 3) {
-    return c.json({
-      error: "Maximum 3 guests per visit",
-      guestsToday: todayCount?.count ?? 0,
-    }, 403);
+    throw new ForbiddenError("Maximum 3 guests per visit");
   }
 
   // Create visit record
@@ -248,7 +241,7 @@ app.post("/quick-sign-in", async (c) => {
   const parsed = quickGuestSignInSchema.safeParse(body);
 
   if (!parsed.success) {
-    return c.json({ error: "Validation failed", details: parsed.error.issues }, 400);
+    throw new ValidationError("Validation failed", parsed.error.issues);
   }
 
   // Check today's guest count
@@ -266,10 +259,7 @@ app.post("/quick-sign-in", async (c) => {
     );
 
   if ((todayCount?.count ?? 0) >= 3) {
-    return c.json({
-      error: "Maximum 3 guests per visit",
-      guestsToday: todayCount?.count ?? 0,
-    }, 403);
+    throw new ForbiddenError("Maximum 3 guests per visit");
   }
 
   const now = new Date();
@@ -291,14 +281,11 @@ app.post("/quick-sign-in", async (c) => {
     }
 
     if (visitCount >= 3) {
-      return c.json({
-        error: "Guest has reached visit limit",
-        existingGuest: true,
-      }, 403);
+      throw new ForbiddenError("Guest has reached visit limit for this year");
     }
 
     if (guest.status === "banned") {
-      return c.json({ error: "Guest is banned" }, 403);
+      throw new ForbiddenError("Guest is banned");
     }
   } else {
     // Create new guest
@@ -381,7 +368,7 @@ app.post("/sync", async (c) => {
   }>;
 
   if (!Array.isArray(signIns)) {
-    return c.json({ error: "signIns must be an array" }, 400);
+    throw new ValidationError("signIns must be an array");
   }
 
   const results = [];

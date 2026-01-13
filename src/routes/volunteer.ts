@@ -11,6 +11,7 @@ import { requireMember, requireAdmin, MemberContext } from "../middleware/auth";
 import { volunteerHours, duesPayments, members } from "../db/schema";
 import { generateId, getCurrentFiscalYear } from "../lib/utils";
 import { logAudit } from "../lib/audit";
+import { ValidationError, NotFoundError } from "../lib/errors";
 
 // Credit rates per activity type (in cents per hour)
 const ACTIVITY_CREDIT_RATES: Record<string, { rate: number; maxPerDay: number }> = {
@@ -105,7 +106,7 @@ app.post("/redeem", requireMember, async (c) => {
   const requestedAmount = body.amount as number; // in cents
 
   if (!requestedAmount || requestedAmount <= 0) {
-    return c.json({ error: "Invalid redemption amount" }, 400);
+    throw new ValidationError("Invalid redemption amount");
   }
 
   // Get available balance
@@ -126,11 +127,10 @@ app.post("/redeem", requireMember, async (c) => {
   const maxCredit = 10000; // $100 max
 
   if (requestedAmount > Math.min(availableBalance, maxCredit)) {
-    return c.json({
-      error: "Insufficient credit balance",
+    throw new ValidationError("Insufficient credit balance", {
       available: Math.min(availableBalance, maxCredit),
       requested: requestedAmount,
-    }, 400);
+    });
   }
 
   // Get unused volunteer hours to deduct from (FIFO)
@@ -246,11 +246,11 @@ app.post("/log", requireAdmin, async (c) => {
   };
 
   if (!memberId || !activity || !date || !hours) {
-    return c.json({ error: "Missing required fields" }, 400);
+    throw new ValidationError("Missing required fields: memberId, activity, date, hours");
   }
 
   if (hours <= 0 || hours > 24) {
-    return c.json({ error: "Invalid hours (must be 1-24)" }, 400);
+    throw new ValidationError("Invalid hours (must be between 1 and 24)");
   }
 
   // Get activity rate config
@@ -262,7 +262,7 @@ app.post("/log", requireAdmin, async (c) => {
   });
 
   if (!targetMember) {
-    return c.json({ error: "Member not found" }, 404);
+    throw new NotFoundError("Member", memberId);
   }
 
   // Calculate credits
@@ -369,11 +369,11 @@ app.delete("/:id", requireAdmin, async (c) => {
   });
 
   if (!hour) {
-    return c.json({ error: "Volunteer record not found" }, 404);
+    throw new NotFoundError("Volunteer record", id);
   }
 
   if ((hour.creditUsed ?? 0) > 0) {
-    return c.json({ error: "Cannot delete record with used credits" }, 400);
+    throw new ValidationError("Cannot delete record with used credits");
   }
 
   await db.delete(volunteerHours).where(eq(volunteerHours.id, id));

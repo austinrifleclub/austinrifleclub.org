@@ -3,10 +3,31 @@ import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { createAuth, Env } from "./lib/auth";
 import openApiSpec from "./openapi.json";
-import { requestLogger } from "./lib/logger";
+import { requestLogger, log } from "./lib/logger";
 import { errorHandler, notFoundHandler } from "./lib/errors";
 import { securityHeaders, requestId } from "./middleware/security";
 import { authRateLimit, apiRateLimit, publicRateLimit } from "./middleware/rateLimit";
+
+/**
+ * Validate required environment variables
+ * Logs warnings for missing optional vars that affect functionality
+ */
+function validateEnv(env: Env): void {
+  const required = ['BETTER_AUTH_SECRET'];
+  const missing = required.filter(key => !env[key as keyof Env]);
+
+  if (missing.length > 0) {
+    throw new Error(`Missing required environment variables: ${missing.join(', ')}`);
+  }
+
+  // Warn about optional but important vars
+  const warnings: string[] = [];
+  if (!env.RESEND_API_KEY) warnings.push('RESEND_API_KEY not set - emails will be logged only');
+  if (!env.STRIPE_SECRET_KEY) warnings.push('STRIPE_SECRET_KEY not set - payments disabled');
+  if (!env.TWILIO_ACCOUNT_SID || !env.TWILIO_AUTH_TOKEN) warnings.push('Twilio credentials not set - SMS disabled');
+
+  warnings.forEach(w => log.warn(w));
+}
 
 // Route imports
 import healthRoutes from "./routes/health";
@@ -22,6 +43,16 @@ import volunteerRoutes from "./routes/volunteer";
 import certificationsRoutes from "./routes/certifications";
 
 const app = new Hono<{ Bindings: Env }>();
+
+// Validate environment on first request
+let envValidated = false;
+app.use("*", async (c, next) => {
+  if (!envValidated) {
+    validateEnv(c.env);
+    envValidated = true;
+  }
+  await next();
+});
 
 // Global middleware
 app.use("*", requestId()); // Add request ID for tracing
