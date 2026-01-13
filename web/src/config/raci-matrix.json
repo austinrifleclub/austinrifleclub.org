@@ -1,0 +1,761 @@
+{
+  "version": "3.0.0",
+  "lastUpdated": "2026-01-12T00:00:00Z",
+  "lastUpdatedBy": "admin@austinrifleclub.org",
+  "source": "Bylaws ratified February 26, 2015; Board meeting minutes 2024",
+  "roleGroups": [
+    {
+      "id": "account",
+      "name": "Account Status",
+      "description": "Pre-membership account types"
+    },
+    {
+      "id": "membership",
+      "name": "Membership Tiers",
+      "description": "Membership levels per Bylaws Article IV"
+    },
+    {
+      "id": "certification",
+      "name": "Certifications",
+      "description": "Additional capabilities - members may hold multiple certifications"
+    },
+    {
+      "id": "board",
+      "name": "Board of Directors",
+      "description": "Elected positions per Bylaws Article IX"
+    }
+  ],
+  "roles": [
+    {
+      "id": "account",
+      "name": "Account Holder",
+      "group": "account",
+      "description": "Registered user without membership"
+    },
+    {
+      "id": "prospect",
+      "name": "Prospect",
+      "group": "account",
+      "description": "Application in progress (requires 3/4 BOD approval per 4.03)"
+    },
+    {
+      "id": "probationary",
+      "name": "Probationary Member",
+      "group": "membership",
+      "description": "Approved by BOD, in probation period awaiting full acceptance"
+    },
+    {
+      "id": "associate",
+      "name": "Associate Member",
+      "group": "membership",
+      "description": "Non-voting member (family member, junior)"
+    },
+    {
+      "id": "full",
+      "name": "Full Member",
+      "group": "membership",
+      "description": "Voting member, 18+ years, current in dues (per 4.02)"
+    },
+    {
+      "id": "life",
+      "name": "Life Member",
+      "group": "membership",
+      "description": "25 years membership or 19 years + 6 prepaid (per 4.04)"
+    },
+    {
+      "id": "rso",
+      "name": "RSO",
+      "group": "certification",
+      "description": "Range Safety Officer - can supervise range operations"
+    },
+    {
+      "id": "instructor",
+      "name": "Instructor",
+      "group": "certification",
+      "description": "Authorized to teach classes and use facilities for instruction"
+    },
+    {
+      "id": "match_director",
+      "name": "Match Director",
+      "group": "certification",
+      "description": "Can organize and run competition matches"
+    },
+    {
+      "id": "dir_memberships",
+      "name": "Dir. of Memberships",
+      "group": "board",
+      "description": "Elected even years - oversees membership processing"
+    },
+    {
+      "id": "dir_range_safety",
+      "name": "Dir. of Range Safety",
+      "group": "board",
+      "description": "Elected even years - complete charge of firing ranges (per 10.05)"
+    },
+    {
+      "id": "dir_site_construction",
+      "name": "Dir. of Site Construction",
+      "group": "board",
+      "description": "Elected odd years - oversees construction projects"
+    },
+    {
+      "id": "dir_maintenance",
+      "name": "Dir. of Maintenance",
+      "group": "board",
+      "description": "Elected odd years - planning/scheduling site maintenance (per 10.06)"
+    },
+    {
+      "id": "dir_education",
+      "name": "Dir. of Education",
+      "group": "board",
+      "description": "Elected odd years - oversees training programs"
+    },
+    {
+      "id": "dir_business_ops",
+      "name": "Dir. of Business Ops",
+      "group": "board",
+      "description": "Elected even years - instructor authorization, business matters"
+    },
+    {
+      "id": "treasurer",
+      "name": "Treasurer",
+      "group": "board",
+      "description": "Elected even years - financial records and custody of funds (per 10.04)"
+    },
+    {
+      "id": "secretary",
+      "name": "Secretary",
+      "group": "board",
+      "description": "Elected odd years - minutes, notices, records custodian (per 10.03)"
+    },
+    {
+      "id": "vice_president",
+      "name": "Vice President",
+      "group": "board",
+      "description": "Elected odd years - acts for President when absent (per 10.02)"
+    },
+    {
+      "id": "president",
+      "name": "President",
+      "group": "board",
+      "description": "Elected even years - principal executive officer (per 10.01)"
+    }
+  ],
+  "permissions": {
+    "description": "What each role CAN do - capabilities and access control",
+    "categories": [
+      { "id": "events", "name": "Events" },
+      { "id": "range", "name": "Range Access" },
+      { "id": "members", "name": "Member Features" },
+      { "id": "governance", "name": "Governance" },
+      { "id": "profile", "name": "Profile" }
+    ],
+    "items": [
+      {
+        "id": "view_public_events",
+        "name": "View Public Events",
+        "category": "events",
+        "description": "View events open to the public"
+      },
+      {
+        "id": "register_public_events",
+        "name": "Register for Public Events",
+        "category": "events",
+        "description": "Sign up for public matches/classes"
+      },
+      {
+        "id": "view_member_events",
+        "name": "View Member-Only Events",
+        "category": "events",
+        "description": "View member-only events"
+      },
+      {
+        "id": "register_member_events",
+        "name": "Register for Member Events",
+        "category": "events",
+        "description": "Sign up for member-only events"
+      },
+      {
+        "id": "view_range_status",
+        "name": "View Range Status",
+        "category": "range",
+        "description": "See which ranges are open/closed"
+      },
+      {
+        "id": "use_range",
+        "name": "Use Range Facilities",
+        "category": "range",
+        "description": "Shoot at the range (members, guests, match participants per 2.02)"
+      },
+      {
+        "id": "sign_in_guests",
+        "name": "Sign In Guests",
+        "category": "range",
+        "description": "Bring and sign in visitors"
+      },
+      {
+        "id": "gate_access",
+        "name": "Gate Access Card",
+        "category": "range",
+        "description": "Electronic gate access to range property"
+      },
+      {
+        "id": "view_member_directory",
+        "name": "View Member Directory",
+        "category": "members",
+        "description": "See list of club members"
+      },
+      {
+        "id": "log_volunteer_hours",
+        "name": "Log Volunteer Hours",
+        "category": "members",
+        "description": "Record volunteer service time"
+      },
+      {
+        "id": "submit_application",
+        "name": "Submit Membership Application",
+        "category": "members",
+        "description": "Apply for club membership"
+      },
+      {
+        "id": "vote_club_matters",
+        "name": "Vote on Club Matters",
+        "category": "governance",
+        "description": "Vote at membership meetings (per Article VI)"
+      },
+      {
+        "id": "attend_board_meetings",
+        "name": "Attend Board Meetings",
+        "category": "governance",
+        "description": "Attend open BOD meetings (per 8.01)"
+      },
+      {
+        "id": "view_governance_docs",
+        "name": "View Governance Documents",
+        "category": "governance",
+        "description": "Access bylaws, minutes, policies (per 13.02c)"
+      },
+      {
+        "id": "edit_own_profile",
+        "name": "Edit Own Profile",
+        "category": "profile",
+        "description": "Update personal contact info"
+      }
+    ],
+    "matrix": {
+      "view_public_events": {
+        "account": true, "prospect": true, "probationary": true, "associate": true, "full": true, "life": true,
+        "rso": true, "instructor": true, "match_director": true,
+        "dir_memberships": true, "dir_range_safety": true, "dir_site_construction": true, "dir_maintenance": true,
+        "dir_education": true, "dir_business_ops": true, "treasurer": true, "secretary": true, "vice_president": true, "president": true
+      },
+      "register_public_events": {
+        "account": true, "prospect": true, "probationary": true, "associate": true, "full": true, "life": true,
+        "rso": true, "instructor": true, "match_director": true,
+        "dir_memberships": true, "dir_range_safety": true, "dir_site_construction": true, "dir_maintenance": true,
+        "dir_education": true, "dir_business_ops": true, "treasurer": true, "secretary": true, "vice_president": true, "president": true
+      },
+      "view_member_events": {
+        "account": false, "prospect": false, "probationary": true, "associate": true, "full": true, "life": true,
+        "rso": true, "instructor": true, "match_director": true,
+        "dir_memberships": true, "dir_range_safety": true, "dir_site_construction": true, "dir_maintenance": true,
+        "dir_education": true, "dir_business_ops": true, "treasurer": true, "secretary": true, "vice_president": true, "president": true
+      },
+      "register_member_events": {
+        "account": false, "prospect": false, "probationary": true, "associate": true, "full": true, "life": true,
+        "rso": true, "instructor": true, "match_director": true,
+        "dir_memberships": true, "dir_range_safety": true, "dir_site_construction": true, "dir_maintenance": true,
+        "dir_education": true, "dir_business_ops": true, "treasurer": true, "secretary": true, "vice_president": true, "president": true
+      },
+      "view_range_status": {
+        "account": true, "prospect": true, "probationary": true, "associate": true, "full": true, "life": true,
+        "rso": true, "instructor": true, "match_director": true,
+        "dir_memberships": true, "dir_range_safety": true, "dir_site_construction": true, "dir_maintenance": true,
+        "dir_education": true, "dir_business_ops": true, "treasurer": true, "secretary": true, "vice_president": true, "president": true
+      },
+      "use_range": {
+        "account": false, "prospect": false, "probationary": true, "associate": true, "full": true, "life": true,
+        "rso": true, "instructor": true, "match_director": true,
+        "dir_memberships": true, "dir_range_safety": true, "dir_site_construction": true, "dir_maintenance": true,
+        "dir_education": true, "dir_business_ops": true, "treasurer": true, "secretary": true, "vice_president": true, "president": true
+      },
+      "sign_in_guests": {
+        "account": false, "prospect": false, "probationary": false, "associate": false, "full": true, "life": true,
+        "rso": true, "instructor": true, "match_director": true,
+        "dir_memberships": true, "dir_range_safety": true, "dir_site_construction": true, "dir_maintenance": true,
+        "dir_education": true, "dir_business_ops": true, "treasurer": true, "secretary": true, "vice_president": true, "president": true
+      },
+      "gate_access": {
+        "account": false, "prospect": false, "probationary": true, "associate": true, "full": true, "life": true,
+        "rso": true, "instructor": true, "match_director": true,
+        "dir_memberships": true, "dir_range_safety": true, "dir_site_construction": true, "dir_maintenance": true,
+        "dir_education": true, "dir_business_ops": true, "treasurer": true, "secretary": true, "vice_president": true, "president": true
+      },
+      "view_member_directory": {
+        "account": false, "prospect": false, "probationary": true, "associate": true, "full": true, "life": true,
+        "rso": true, "instructor": true, "match_director": true,
+        "dir_memberships": true, "dir_range_safety": true, "dir_site_construction": true, "dir_maintenance": true,
+        "dir_education": true, "dir_business_ops": true, "treasurer": true, "secretary": true, "vice_president": true, "president": true
+      },
+      "log_volunteer_hours": {
+        "account": false, "prospect": false, "probationary": true, "associate": true, "full": true, "life": true,
+        "rso": true, "instructor": true, "match_director": true,
+        "dir_memberships": true, "dir_range_safety": true, "dir_site_construction": true, "dir_maintenance": true,
+        "dir_education": true, "dir_business_ops": true, "treasurer": true, "secretary": true, "vice_president": true, "president": true
+      },
+      "submit_application": {
+        "account": true, "prospect": true, "probationary": false, "associate": false, "full": false, "life": false,
+        "rso": false, "instructor": false, "match_director": false,
+        "dir_memberships": false, "dir_range_safety": false, "dir_site_construction": false, "dir_maintenance": false,
+        "dir_education": false, "dir_business_ops": false, "treasurer": false, "secretary": false, "vice_president": false, "president": false
+      },
+      "vote_club_matters": {
+        "account": false, "prospect": false, "probationary": false, "associate": false, "full": true, "life": true,
+        "rso": false, "instructor": false, "match_director": false,
+        "dir_memberships": true, "dir_range_safety": true, "dir_site_construction": true, "dir_maintenance": true,
+        "dir_education": true, "dir_business_ops": true, "treasurer": true, "secretary": true, "vice_president": true, "president": true
+      },
+      "attend_board_meetings": {
+        "account": false, "prospect": false, "probationary": true, "associate": true, "full": true, "life": true,
+        "rso": true, "instructor": true, "match_director": true,
+        "dir_memberships": true, "dir_range_safety": true, "dir_site_construction": true, "dir_maintenance": true,
+        "dir_education": true, "dir_business_ops": true, "treasurer": true, "secretary": true, "vice_president": true, "president": true
+      },
+      "view_governance_docs": {
+        "account": false, "prospect": false, "probationary": true, "associate": true, "full": true, "life": true,
+        "rso": true, "instructor": true, "match_director": true,
+        "dir_memberships": true, "dir_range_safety": true, "dir_site_construction": true, "dir_maintenance": true,
+        "dir_education": true, "dir_business_ops": true, "treasurer": true, "secretary": true, "vice_president": true, "president": true
+      },
+      "edit_own_profile": {
+        "account": true, "prospect": true, "probationary": true, "associate": true, "full": true, "life": true,
+        "rso": true, "instructor": true, "match_director": true,
+        "dir_memberships": true, "dir_range_safety": true, "dir_site_construction": true, "dir_maintenance": true,
+        "dir_education": true, "dir_business_ops": true, "treasurer": true, "secretary": true, "vice_president": true, "president": true
+      }
+    }
+  },
+  "responsibilities": {
+    "description": "Who is Responsible, Accountable, Consulted, or Informed for each process (RACI per Bylaws)",
+    "categories": [
+      { "id": "membership", "name": "Membership Management" },
+      { "id": "safety", "name": "Range Safety" },
+      { "id": "facilities", "name": "Facilities & Construction" },
+      { "id": "events", "name": "Events & Education" },
+      { "id": "finance", "name": "Financial" },
+      { "id": "governance", "name": "Governance" }
+    ],
+    "items": [
+      {
+        "id": "review_applications",
+        "name": "Review Applications",
+        "category": "membership",
+        "description": "Review pending membership applications (3/4 BOD approval per 4.03)"
+      },
+      {
+        "id": "approve_probationary",
+        "name": "Accept Probationary Members",
+        "category": "membership",
+        "description": "Vote to accept new probationary members"
+      },
+      {
+        "id": "issue_badges",
+        "name": "Issue Member Badges",
+        "category": "membership",
+        "description": "Process and issue member ID badges"
+      },
+      {
+        "id": "process_renewals",
+        "name": "Process Renewals",
+        "category": "membership",
+        "description": "Handle annual membership renewals"
+      },
+      {
+        "id": "manage_member_status",
+        "name": "Manage Member Status",
+        "category": "membership",
+        "description": "Suspend/expel members (2/3 BOD vote per 4.07)"
+      },
+      {
+        "id": "confer_life_membership",
+        "name": "Confer Life Membership",
+        "category": "membership",
+        "description": "Award life membership for exceptional contribution (2/3 BOD per 4.05)"
+      },
+      {
+        "id": "conduct_safety_eval",
+        "name": "Conduct Safety Evaluation",
+        "category": "safety",
+        "description": "Evaluate new member safety competency"
+      },
+      {
+        "id": "update_range_status",
+        "name": "Update Range Status",
+        "category": "safety",
+        "description": "Mark ranges open/closed/hot"
+      },
+      {
+        "id": "investigate_incidents",
+        "name": "Investigate Safety Incidents",
+        "category": "safety",
+        "description": "Review and respond to safety violations"
+      },
+      {
+        "id": "issue_safety_warnings",
+        "name": "Issue Safety Warnings",
+        "category": "safety",
+        "description": "Verbal warnings for rule violations"
+      },
+      {
+        "id": "maintain_ranges",
+        "name": "Maintain Ranges",
+        "category": "facilities",
+        "description": "Ongoing range maintenance (rails, targets, etc.)"
+      },
+      {
+        "id": "construction_projects",
+        "name": "Construction Projects",
+        "category": "facilities",
+        "description": "Fencing, baffles, buildings (per Operations Plan 13.07)"
+      },
+      {
+        "id": "building_maintenance",
+        "name": "Building Maintenance",
+        "category": "facilities",
+        "description": "Ed building, stat house, facilities upkeep"
+      },
+      {
+        "id": "authorize_instructors",
+        "name": "Authorize Instructors",
+        "category": "events",
+        "description": "Approve instructors to use ARC facilities"
+      },
+      {
+        "id": "schedule_matches",
+        "name": "Schedule Matches",
+        "category": "events",
+        "description": "Add matches to club calendar"
+      },
+      {
+        "id": "run_match",
+        "name": "Run Competition Match",
+        "category": "events",
+        "description": "Direct a shooting match"
+      },
+      {
+        "id": "schedule_classes",
+        "name": "Schedule Training Classes",
+        "category": "events",
+        "description": "Add courses to calendar (Marksmanship, Hunter Ed)"
+      },
+      {
+        "id": "teach_class",
+        "name": "Teach Training Class",
+        "category": "events",
+        "description": "Instruct a training course"
+      },
+      {
+        "id": "new_member_orientation",
+        "name": "New Member Orientation",
+        "category": "events",
+        "description": "Conduct NMO sessions"
+      },
+      {
+        "id": "verify_volunteer_hours",
+        "name": "Verify Volunteer Hours",
+        "category": "events",
+        "description": "Approve submitted work day hours"
+      },
+      {
+        "id": "manage_budget",
+        "name": "Manage Budget",
+        "category": "finance",
+        "description": "Prepare and present annual budget (per 7.01)"
+      },
+      {
+        "id": "process_payments",
+        "name": "Process Payments",
+        "category": "finance",
+        "description": "Collect dues, event fees, deposits"
+      },
+      {
+        "id": "sign_checks",
+        "name": "Sign Checks",
+        "category": "finance",
+        "description": "Authorize expenditures (per 12.02)"
+      },
+      {
+        "id": "manage_insurance",
+        "name": "Manage Insurance",
+        "category": "finance",
+        "description": "Property and liability insurance"
+      },
+      {
+        "id": "approve_expenditures",
+        "name": "Approve Major Expenditures",
+        "category": "finance",
+        "description": ">$25k requires membership approval (per 12.06)"
+      },
+      {
+        "id": "financial_reporting",
+        "name": "Financial Reporting",
+        "category": "finance",
+        "description": "Monthly reports to BOD"
+      },
+      {
+        "id": "conduct_board_meetings",
+        "name": "Conduct Board Meetings",
+        "category": "governance",
+        "description": "Preside over monthly BOD meetings"
+      },
+      {
+        "id": "record_minutes",
+        "name": "Record Meeting Minutes",
+        "category": "governance",
+        "description": "Document BOD and membership meetings (per 10.03)"
+      },
+      {
+        "id": "send_notices",
+        "name": "Send Official Notices",
+        "category": "governance",
+        "description": "Meeting notices, announcements (per 10.03)"
+      },
+      {
+        "id": "annual_state_filing",
+        "name": "Annual State Filing",
+        "category": "governance",
+        "description": "File with Texas Secretary of State (per 10.03)"
+      },
+      {
+        "id": "vote_board_matters",
+        "name": "Vote on Board Matters",
+        "category": "governance",
+        "description": "Cast vote in BOD decisions"
+      },
+      {
+        "id": "sign_contracts",
+        "name": "Sign Contracts",
+        "category": "governance",
+        "description": "Execute agreements on behalf of club (per 10.01)"
+      },
+      {
+        "id": "five_year_plan",
+        "name": "Maintain 5-Year Plan",
+        "category": "governance",
+        "description": "Operations Plan per 13.07"
+      },
+      {
+        "id": "propose_bylaw_changes",
+        "name": "Propose Bylaw Changes",
+        "category": "governance",
+        "description": "Amendments require 2/3 BOD vote (per 14.01)"
+      }
+    ],
+    "matrix": {
+      "review_applications": {
+        "account": "-", "prospect": "-", "probationary": "-", "associate": "-", "full": "-", "life": "-",
+        "rso": "-", "instructor": "-", "match_director": "-",
+        "dir_memberships": "R", "dir_range_safety": "C", "dir_site_construction": "-", "dir_maintenance": "-",
+        "dir_education": "-", "dir_business_ops": "-", "treasurer": "C", "secretary": "I", "vice_president": "C", "president": "A"
+      },
+      "approve_probationary": {
+        "account": "-", "prospect": "-", "probationary": "-", "associate": "-", "full": "-", "life": "-",
+        "rso": "-", "instructor": "-", "match_director": "-",
+        "dir_memberships": "R", "dir_range_safety": "R", "dir_site_construction": "R", "dir_maintenance": "R",
+        "dir_education": "R", "dir_business_ops": "R", "treasurer": "R", "secretary": "R", "vice_president": "R", "president": "A"
+      },
+      "issue_badges": {
+        "account": "-", "prospect": "-", "probationary": "-", "associate": "-", "full": "-", "life": "-",
+        "rso": "-", "instructor": "-", "match_director": "-",
+        "dir_memberships": "R", "dir_range_safety": "-", "dir_site_construction": "-", "dir_maintenance": "-",
+        "dir_education": "-", "dir_business_ops": "-", "treasurer": "-", "secretary": "I", "vice_president": "-", "president": "I"
+      },
+      "process_renewals": {
+        "account": "-", "prospect": "-", "probationary": "-", "associate": "-", "full": "-", "life": "-",
+        "rso": "-", "instructor": "-", "match_director": "-",
+        "dir_memberships": "R", "dir_range_safety": "-", "dir_site_construction": "-", "dir_maintenance": "-",
+        "dir_education": "-", "dir_business_ops": "C", "treasurer": "C", "secretary": "-", "vice_president": "-", "president": "I"
+      },
+      "manage_member_status": {
+        "account": "-", "prospect": "-", "probationary": "-", "associate": "-", "full": "-", "life": "-",
+        "rso": "-", "instructor": "-", "match_director": "-",
+        "dir_memberships": "R", "dir_range_safety": "C", "dir_site_construction": "-", "dir_maintenance": "-",
+        "dir_education": "-", "dir_business_ops": "-", "treasurer": "-", "secretary": "R", "vice_president": "C", "president": "A"
+      },
+      "confer_life_membership": {
+        "account": "-", "prospect": "-", "probationary": "-", "associate": "-", "full": "-", "life": "-",
+        "rso": "-", "instructor": "-", "match_director": "-",
+        "dir_memberships": "R", "dir_range_safety": "R", "dir_site_construction": "R", "dir_maintenance": "R",
+        "dir_education": "R", "dir_business_ops": "R", "treasurer": "R", "secretary": "R", "vice_president": "R", "president": "A"
+      },
+      "conduct_safety_eval": {
+        "account": "-", "prospect": "-", "probationary": "-", "associate": "-", "full": "-", "life": "-",
+        "rso": "R", "instructor": "R", "match_director": "-",
+        "dir_memberships": "C", "dir_range_safety": "A", "dir_site_construction": "-", "dir_maintenance": "-",
+        "dir_education": "C", "dir_business_ops": "-", "treasurer": "-", "secretary": "I", "vice_president": "-", "president": "I"
+      },
+      "update_range_status": {
+        "account": "-", "prospect": "-", "probationary": "-", "associate": "-", "full": "-", "life": "-",
+        "rso": "R", "instructor": "-", "match_director": "R",
+        "dir_memberships": "-", "dir_range_safety": "A", "dir_site_construction": "-", "dir_maintenance": "C",
+        "dir_education": "-", "dir_business_ops": "-", "treasurer": "-", "secretary": "I", "vice_president": "I", "president": "I"
+      },
+      "investigate_incidents": {
+        "account": "-", "prospect": "-", "probationary": "-", "associate": "-", "full": "-", "life": "-",
+        "rso": "R", "instructor": "-", "match_director": "C",
+        "dir_memberships": "I", "dir_range_safety": "A", "dir_site_construction": "-", "dir_maintenance": "-",
+        "dir_education": "-", "dir_business_ops": "-", "treasurer": "-", "secretary": "I", "vice_president": "I", "president": "I"
+      },
+      "issue_safety_warnings": {
+        "account": "-", "prospect": "-", "probationary": "-", "associate": "-", "full": "-", "life": "-",
+        "rso": "R", "instructor": "R", "match_director": "R",
+        "dir_memberships": "I", "dir_range_safety": "A", "dir_site_construction": "-", "dir_maintenance": "-",
+        "dir_education": "-", "dir_business_ops": "-", "treasurer": "-", "secretary": "I", "vice_president": "-", "president": "I"
+      },
+      "maintain_ranges": {
+        "account": "-", "prospect": "-", "probationary": "-", "associate": "-", "full": "-", "life": "-",
+        "rso": "C", "instructor": "-", "match_director": "C",
+        "dir_memberships": "-", "dir_range_safety": "C", "dir_site_construction": "C", "dir_maintenance": "R",
+        "dir_education": "-", "dir_business_ops": "-", "treasurer": "C", "secretary": "-", "vice_president": "I", "president": "A"
+      },
+      "construction_projects": {
+        "account": "-", "prospect": "-", "probationary": "-", "associate": "-", "full": "-", "life": "-",
+        "rso": "-", "instructor": "-", "match_director": "-",
+        "dir_memberships": "-", "dir_range_safety": "C", "dir_site_construction": "R", "dir_maintenance": "C",
+        "dir_education": "-", "dir_business_ops": "C", "treasurer": "C", "secretary": "I", "vice_president": "C", "president": "A"
+      },
+      "building_maintenance": {
+        "account": "-", "prospect": "-", "probationary": "-", "associate": "-", "full": "-", "life": "-",
+        "rso": "-", "instructor": "-", "match_director": "-",
+        "dir_memberships": "-", "dir_range_safety": "-", "dir_site_construction": "C", "dir_maintenance": "R",
+        "dir_education": "C", "dir_business_ops": "-", "treasurer": "C", "secretary": "-", "vice_president": "A", "president": "I"
+      },
+      "authorize_instructors": {
+        "account": "-", "prospect": "-", "probationary": "-", "associate": "-", "full": "-", "life": "-",
+        "rso": "-", "instructor": "-", "match_director": "-",
+        "dir_memberships": "-", "dir_range_safety": "C", "dir_site_construction": "-", "dir_maintenance": "-",
+        "dir_education": "C", "dir_business_ops": "R", "treasurer": "C", "secretary": "I", "vice_president": "-", "president": "A"
+      },
+      "schedule_matches": {
+        "account": "-", "prospect": "-", "probationary": "-", "associate": "-", "full": "-", "life": "-",
+        "rso": "-", "instructor": "-", "match_director": "R",
+        "dir_memberships": "-", "dir_range_safety": "C", "dir_site_construction": "-", "dir_maintenance": "-",
+        "dir_education": "I", "dir_business_ops": "C", "treasurer": "-", "secretary": "I", "vice_president": "-", "president": "I"
+      },
+      "run_match": {
+        "account": "-", "prospect": "-", "probationary": "-", "associate": "-", "full": "-", "life": "-",
+        "rso": "C", "instructor": "-", "match_director": "R",
+        "dir_memberships": "-", "dir_range_safety": "A", "dir_site_construction": "-", "dir_maintenance": "-",
+        "dir_education": "I", "dir_business_ops": "I", "treasurer": "-", "secretary": "-", "vice_president": "-", "president": "I"
+      },
+      "schedule_classes": {
+        "account": "-", "prospect": "-", "probationary": "-", "associate": "-", "full": "-", "life": "-",
+        "rso": "-", "instructor": "R", "match_director": "-",
+        "dir_memberships": "-", "dir_range_safety": "C", "dir_site_construction": "-", "dir_maintenance": "-",
+        "dir_education": "A", "dir_business_ops": "C", "treasurer": "-", "secretary": "I", "vice_president": "-", "president": "I"
+      },
+      "teach_class": {
+        "account": "-", "prospect": "-", "probationary": "-", "associate": "-", "full": "-", "life": "-",
+        "rso": "C", "instructor": "R", "match_director": "-",
+        "dir_memberships": "-", "dir_range_safety": "C", "dir_site_construction": "-", "dir_maintenance": "-",
+        "dir_education": "A", "dir_business_ops": "I", "treasurer": "-", "secretary": "-", "vice_president": "-", "president": "I"
+      },
+      "new_member_orientation": {
+        "account": "-", "prospect": "-", "probationary": "-", "associate": "-", "full": "-", "life": "-",
+        "rso": "R", "instructor": "R", "match_director": "-",
+        "dir_memberships": "C", "dir_range_safety": "C", "dir_site_construction": "-", "dir_maintenance": "-",
+        "dir_education": "A", "dir_business_ops": "-", "treasurer": "-", "secretary": "I", "vice_president": "-", "president": "I"
+      },
+      "verify_volunteer_hours": {
+        "account": "-", "prospect": "-", "probationary": "-", "associate": "-", "full": "-", "life": "-",
+        "rso": "-", "instructor": "-", "match_director": "R",
+        "dir_memberships": "R", "dir_range_safety": "R", "dir_site_construction": "R", "dir_maintenance": "A",
+        "dir_education": "R", "dir_business_ops": "-", "treasurer": "C", "secretary": "I", "vice_president": "-", "president": "I"
+      },
+      "manage_budget": {
+        "account": "-", "prospect": "-", "probationary": "-", "associate": "-", "full": "-", "life": "-",
+        "rso": "-", "instructor": "-", "match_director": "-",
+        "dir_memberships": "I", "dir_range_safety": "I", "dir_site_construction": "C", "dir_maintenance": "C",
+        "dir_education": "I", "dir_business_ops": "C", "treasurer": "R", "secretary": "I", "vice_president": "C", "president": "A"
+      },
+      "process_payments": {
+        "account": "-", "prospect": "-", "probationary": "-", "associate": "-", "full": "-", "life": "-",
+        "rso": "-", "instructor": "-", "match_director": "-",
+        "dir_memberships": "C", "dir_range_safety": "-", "dir_site_construction": "-", "dir_maintenance": "-",
+        "dir_education": "-", "dir_business_ops": "C", "treasurer": "R", "secretary": "I", "vice_president": "-", "president": "A"
+      },
+      "sign_checks": {
+        "account": "-", "prospect": "-", "probationary": "-", "associate": "-", "full": "-", "life": "-",
+        "rso": "-", "instructor": "-", "match_director": "-",
+        "dir_memberships": "-", "dir_range_safety": "-", "dir_site_construction": "-", "dir_maintenance": "-",
+        "dir_education": "-", "dir_business_ops": "-", "treasurer": "R", "secretary": "I", "vice_president": "-", "president": "A"
+      },
+      "manage_insurance": {
+        "account": "-", "prospect": "-", "probationary": "-", "associate": "-", "full": "-", "life": "-",
+        "rso": "-", "instructor": "-", "match_director": "-",
+        "dir_memberships": "-", "dir_range_safety": "C", "dir_site_construction": "C", "dir_maintenance": "C",
+        "dir_education": "-", "dir_business_ops": "C", "treasurer": "R", "secretary": "I", "vice_president": "C", "president": "A"
+      },
+      "approve_expenditures": {
+        "account": "-", "prospect": "-", "probationary": "-", "associate": "-", "full": "C", "life": "C",
+        "rso": "-", "instructor": "-", "match_director": "-",
+        "dir_memberships": "R", "dir_range_safety": "R", "dir_site_construction": "R", "dir_maintenance": "R",
+        "dir_education": "R", "dir_business_ops": "R", "treasurer": "R", "secretary": "R", "vice_president": "R", "president": "A"
+      },
+      "financial_reporting": {
+        "account": "-", "prospect": "-", "probationary": "-", "associate": "-", "full": "-", "life": "-",
+        "rso": "-", "instructor": "-", "match_director": "-",
+        "dir_memberships": "I", "dir_range_safety": "I", "dir_site_construction": "I", "dir_maintenance": "I",
+        "dir_education": "I", "dir_business_ops": "I", "treasurer": "R", "secretary": "I", "vice_president": "I", "president": "A"
+      },
+      "conduct_board_meetings": {
+        "account": "-", "prospect": "-", "probationary": "-", "associate": "-", "full": "-", "life": "-",
+        "rso": "-", "instructor": "-", "match_director": "-",
+        "dir_memberships": "I", "dir_range_safety": "I", "dir_site_construction": "I", "dir_maintenance": "I",
+        "dir_education": "I", "dir_business_ops": "I", "treasurer": "I", "secretary": "C", "vice_president": "C", "president": "R"
+      },
+      "record_minutes": {
+        "account": "-", "prospect": "-", "probationary": "-", "associate": "-", "full": "-", "life": "-",
+        "rso": "-", "instructor": "-", "match_director": "-",
+        "dir_memberships": "I", "dir_range_safety": "I", "dir_site_construction": "I", "dir_maintenance": "I",
+        "dir_education": "I", "dir_business_ops": "I", "treasurer": "I", "secretary": "R", "vice_president": "I", "president": "A"
+      },
+      "send_notices": {
+        "account": "-", "prospect": "-", "probationary": "-", "associate": "-", "full": "-", "life": "-",
+        "rso": "-", "instructor": "-", "match_director": "-",
+        "dir_memberships": "C", "dir_range_safety": "-", "dir_site_construction": "-", "dir_maintenance": "-",
+        "dir_education": "-", "dir_business_ops": "-", "treasurer": "-", "secretary": "R", "vice_president": "C", "president": "A"
+      },
+      "annual_state_filing": {
+        "account": "-", "prospect": "-", "probationary": "-", "associate": "-", "full": "-", "life": "-",
+        "rso": "-", "instructor": "-", "match_director": "-",
+        "dir_memberships": "-", "dir_range_safety": "-", "dir_site_construction": "-", "dir_maintenance": "-",
+        "dir_education": "-", "dir_business_ops": "-", "treasurer": "C", "secretary": "R", "vice_president": "-", "president": "A"
+      },
+      "vote_board_matters": {
+        "account": "-", "prospect": "-", "probationary": "-", "associate": "-", "full": "-", "life": "-",
+        "rso": "-", "instructor": "-", "match_director": "-",
+        "dir_memberships": "R", "dir_range_safety": "R", "dir_site_construction": "R", "dir_maintenance": "R",
+        "dir_education": "R", "dir_business_ops": "R", "treasurer": "R", "secretary": "R", "vice_president": "R", "president": "R"
+      },
+      "sign_contracts": {
+        "account": "-", "prospect": "-", "probationary": "-", "associate": "-", "full": "-", "life": "-",
+        "rso": "-", "instructor": "-", "match_director": "-",
+        "dir_memberships": "-", "dir_range_safety": "-", "dir_site_construction": "-", "dir_maintenance": "-",
+        "dir_education": "-", "dir_business_ops": "-", "treasurer": "C", "secretary": "R", "vice_president": "C", "president": "R"
+      },
+      "five_year_plan": {
+        "account": "-", "prospect": "-", "probationary": "-", "associate": "-", "full": "C", "life": "C",
+        "rso": "-", "instructor": "-", "match_director": "-",
+        "dir_memberships": "C", "dir_range_safety": "C", "dir_site_construction": "R", "dir_maintenance": "R",
+        "dir_education": "C", "dir_business_ops": "C", "treasurer": "C", "secretary": "I", "vice_president": "C", "president": "A"
+      },
+      "propose_bylaw_changes": {
+        "account": "-", "prospect": "-", "probationary": "-", "associate": "-", "full": "C", "life": "C",
+        "rso": "-", "instructor": "-", "match_director": "-",
+        "dir_memberships": "R", "dir_range_safety": "R", "dir_site_construction": "R", "dir_maintenance": "R",
+        "dir_education": "R", "dir_business_ops": "R", "treasurer": "R", "secretary": "R", "vice_president": "R", "president": "A"
+      }
+    }
+  }
+}

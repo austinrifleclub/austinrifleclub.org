@@ -26,22 +26,22 @@ const timeline = [
 
 <Layout title="About" description="Learn about Austin Rifle Club's history, mission, and leadership">
   <!-- Hero -->
-  <section class="bg-green-800 text-white py-12">
+  <section class="bg-navy-800 text-white py-12">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-      <h1 class="text-3xl md:text-4xl font-bold mb-4">
+      <h1 class="page-title text-white mb-4">
         About Austin Rifle Club
       </h1>
-      <p class="text-xl text-green-100 max-w-2xl mx-auto">
+      <p class="text-lead text-navy-100 max-w-2xl mx-auto">
         Promoting safe and responsible shooting sports in Central Texas since 1894.
       </p>
     </div>
   </section>
 
   <!-- Mission -->
-  <section class="py-12 bg-white">
+  <section class="py-12 bg-white dark:bg-stone-800">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h2 class="text-2xl font-bold text-center mb-8">Our Mission</h2>
-      <div class="prose prose-lg max-w-none text-gray-600">
+      <h2 class="section-title text-center mb-8">Our Mission</h2>
+      <div class="prose prose-lg max-w-none text-gray-600 dark:text-gray-400">
         <p class="text-center">
           Austin Rifle Club is a private, non-profit corporation dedicated to promoting
           the safe and responsible use of firearms through organized shooting sports,
@@ -49,28 +49,28 @@ const timeline = [
         </p>
         <div class="grid md:grid-cols-3 gap-6 mt-8">
           <div class="text-center">
-            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div class="w-16 h-16 bg-forest-100 dark:bg-forest-900/50 rounded-full flex items-center justify-center mx-auto mb-4">
               <span class="text-2xl">🎯</span>
             </div>
-            <h3 class="font-semibold mb-2">Shooting Sports</h3>
+            <h3 class="card-title mb-2">Shooting Sports</h3>
             <p class="text-sm">
               Host competitive matches and provide facilities for recreational shooting.
             </p>
           </div>
           <div class="text-center">
-            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div class="w-16 h-16 bg-forest-100 dark:bg-forest-900/50 rounded-full flex items-center justify-center mx-auto mb-4">
               <span class="text-2xl">📚</span>
             </div>
-            <h3 class="font-semibold mb-2">Education</h3>
+            <h3 class="card-title mb-2">Education</h3>
             <p class="text-sm">
               Offer training programs and safety courses for shooters of all skill levels.
             </p>
           </div>
           <div class="text-center">
-            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div class="w-16 h-16 bg-forest-100 dark:bg-forest-900/50 rounded-full flex items-center justify-center mx-auto mb-4">
               <span class="text-2xl">🤝</span>
             </div>
-            <h3 class="font-semibold mb-2">Community</h3>
+            <h3 class="card-title mb-2">Community</h3>
             <p class="text-sm">
               Foster a welcoming environment for shooting enthusiasts to connect.
             </p>
@@ -81,19 +81,19 @@ const timeline = [
   </section>
 
   <!-- History -->
-  <section class="py-12 bg-gray-50">
+  <section class="py-12 bg-gray-50 dark:bg-stone-900">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h2 class="text-2xl font-bold text-center mb-8">Our History</h2>
+      <h2 class="section-title text-center mb-8">Our History</h2>
       <div class="relative">
-        <div class="absolute left-4 md:left-1/2 top-0 bottom-0 w-0.5 bg-green-200 transform md:-translate-x-1/2"></div>
+        <div class="absolute left-4 md:left-1/2 top-0 bottom-0 w-0.5 timeline-line transform md:-translate-x-1/2"></div>
         <div class="space-y-8">
           {timeline.map((item, index) => (
             <div class={`relative flex items-start ${index % 2 === 0 ? 'md:flex-row-reverse' : ''}`}>
               <div class="flex-1 md:w-1/2"></div>
-              <div class="absolute left-4 md:left-1/2 w-3 h-3 bg-green-600 rounded-full transform -translate-x-1/2 mt-1.5"></div>
+              <div class="absolute left-4 md:left-1/2 w-3 h-3 timeline-dot rounded-full transform -translate-x-1/2 mt-1.5"></div>
               <div class={`flex-1 ml-10 md:ml-0 ${index % 2 === 0 ? 'md:pr-8 md:text-right' : 'md:pl-8'}`}>
-                <span class="text-green-700 font-bold">{item.year}</span>
-                <p class="text-gray-600">{item.event}</p>
+                <span class="text-accent font-bold">{item.year}</span>
+                <p class="text-gray-600 dark:text-gray-300">{item.event}</p>
               </div>
             </div>
           ))}
@@ -103,23 +103,23 @@ const timeline = [
   </section>
 
   <!-- Governance -->
-  <section class="py-12 bg-white">
+  <section class="py-12 bg-white dark:bg-stone-800">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h2 class="text-2xl font-bold text-center mb-8">Club Governance</h2>
+      <h2 class="section-title text-center mb-8">Club Governance</h2>
 
       <div class="grid md:grid-cols-2 gap-8">
         <div>
-          <h3 class="font-semibold text-lg mb-4 text-green-800">Board of Directors</h3>
-          <p class="text-gray-600 text-sm mb-4">
+          <h3 class="font-semibold text-lg mb-4 heading-accent">Board of Directors</h3>
+          <p class="text-gray-600 dark:text-gray-400 text-sm mb-4">
             The club is governed by an elected Board of Directors who serve two-year terms.
             Elections are held annually at the membership meeting.
           </p>
-          <div class="bg-gray-50 rounded-lg p-4">
+          <div class="bg-gray-50 dark:bg-stone-700 rounded-lg p-4">
             <ul class="space-y-2">
               {boardMembers.map((member) => (
                 <li class="flex justify-between text-sm">
-                  <span class="font-medium">{member.position}</span>
-                  <span class="text-gray-600">{member.name}</span>
+                  <span class="font-medium text-gray-900 dark:text-white">{member.position}</span>
+                  <span class="text-gray-600 dark:text-gray-400">{member.name}</span>
                 </li>
               ))}
             </ul>
@@ -127,15 +127,15 @@ const timeline = [
         </div>
 
         <div>
-          <h3 class="font-semibold text-lg mb-4 text-green-800">Non-Profit Status</h3>
-          <p class="text-gray-600 text-sm mb-4">
+          <h3 class="font-semibold text-lg mb-4 heading-accent">Non-Profit Status</h3>
+          <p class="text-gray-600 dark:text-gray-400 text-sm mb-4">
             Austin Rifle Club is a Texas Non-Profit Corporation organized for the purpose
             of promoting shooting sports and firearms safety education.
           </p>
-          <div class="bg-gray-50 rounded-lg p-4 text-sm">
+          <div class="bg-gray-50 dark:bg-stone-700 rounded-lg p-4 text-sm text-gray-900 dark:text-white">
             <p><strong>Charter Number:</strong> 52790</p>
             <p><strong>Incorporated:</strong> State of Texas</p>
-            <p class="mt-2 text-gray-500">
+            <p class="mt-2 text-gray-500 dark:text-gray-400">
               The club is member-owned and operated. All revenue goes directly to
               maintaining and improving our facilities.
             </p>
@@ -146,46 +146,46 @@ const timeline = [
   </section>
 
   <!-- Affiliations -->
-  <section class="py-12 bg-gray-50">
+  <section class="py-12 bg-gray-50 dark:bg-stone-900">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h2 class="text-2xl font-bold text-center mb-8">Affiliations</h2>
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-        <div class="bg-white rounded-lg p-4 shadow-sm">
-          <p class="font-semibold">NRA</p>
-          <p class="text-xs text-gray-600">National Rifle Association</p>
-        </div>
-        <div class="bg-white rounded-lg p-4 shadow-sm">
-          <p class="font-semibold">TSRA</p>
-          <p class="text-xs text-gray-600">Texas State Rifle Association</p>
-        </div>
-        <div class="bg-white rounded-lg p-4 shadow-sm">
-          <p class="font-semibold">USPSA</p>
-          <p class="text-xs text-gray-600">US Practical Shooting Assn.</p>
-        </div>
-        <div class="bg-white rounded-lg p-4 shadow-sm">
-          <p class="font-semibold">IDPA</p>
-          <p class="text-xs text-gray-600">Intl. Defensive Pistol Assn.</p>
-        </div>
+      <h2 class="section-title text-center mb-8">Affiliations</h2>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <a href="https://home.nra.org/" target="_blank" rel="noopener" class="bg-white dark:bg-stone-800 rounded-lg p-4 shadow-sm flex flex-col items-center justify-center hover:shadow-md transition-shadow">
+          <img src="/logos/nra.png" alt="NRA" class="h-16 object-contain mb-2" />
+          <p class="text-xs text-gray-600 dark:text-gray-400 text-center">National Rifle Association</p>
+        </a>
+        <a href="https://www.tsra.com/" target="_blank" rel="noopener" class="bg-white dark:bg-stone-800 rounded-lg p-4 shadow-sm flex flex-col items-center justify-center hover:shadow-md transition-shadow">
+          <img src="/logos/tsra.png" alt="TSRA" class="h-16 object-contain mb-2" />
+          <p class="text-xs text-gray-600 dark:text-gray-400 text-center">Texas State Rifle Association</p>
+        </a>
+        <a href="https://uspsa.org/" target="_blank" rel="noopener" class="bg-white dark:bg-stone-800 rounded-lg p-4 shadow-sm flex flex-col items-center justify-center hover:shadow-md transition-shadow">
+          <img src="/logos/uspsa.avif" alt="USPSA" class="h-16 object-contain mb-2" />
+          <p class="text-xs text-gray-600 dark:text-gray-400 text-center">US Practical Shooting Assn.</p>
+        </a>
+        <a href="https://www.idpa.com/" target="_blank" rel="noopener" class="bg-white dark:bg-stone-800 rounded-lg p-4 shadow-sm flex flex-col items-center justify-center hover:shadow-md transition-shadow">
+          <img src="/logos/idpa.svg" alt="IDPA" class="h-16 object-contain mb-2" />
+          <p class="text-xs text-gray-600 dark:text-gray-400 text-center">Intl. Defensive Pistol Assn.</p>
+        </a>
       </div>
     </div>
   </section>
 
   <!-- Contact -->
-  <section class="py-12 bg-white">
+  <section class="py-12 bg-white dark:bg-stone-800">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h2 class="text-2xl font-bold text-center mb-8">Contact Us</h2>
+      <h2 class="section-title text-center mb-8">Contact Us</h2>
       <div class="grid md:grid-cols-2 gap-8">
         <div>
-          <h3 class="font-semibold mb-3">Mailing Address</h3>
-          <p class="text-gray-600">
+          <h3 class="card-title mb-3">Mailing Address</h3>
+          <p class="text-gray-600 dark:text-gray-400">
             Austin Rifle Club<br />
             PO Box 5432<br />
             Austin, TX 78763
           </p>
         </div>
         <div>
-          <h3 class="font-semibold mb-3">Range Location</h3>
-          <p class="text-gray-600">
+          <h3 class="card-title mb-3">Range Location</h3>
+          <p class="text-gray-600 dark:text-gray-400">
             16312 Littig Rd<br />
             Manor, TX 78653
           </p>
@@ -193,27 +193,27 @@ const timeline = [
             href="https://maps.google.com/?q=16312+Littig+Rd+Manor+TX+78653"
             target="_blank"
             rel="noopener"
-            class="text-green-700 hover:text-green-800 text-sm mt-2 inline-block"
+            class="link-accent text-sm mt-2 inline-block"
           >
             Get Directions →
           </a>
         </div>
         <div>
-          <h3 class="font-semibold mb-3">Email</h3>
+          <h3 class="card-title mb-3">Email</h3>
           <p>
-            <a href="mailto:info@austinrifleclub.org" class="text-green-700 hover:text-green-800">
+            <a href="mailto:info@austinrifleclub.org" class="link-accent">
               info@austinrifleclub.org
             </a>
           </p>
         </div>
         <div>
-          <h3 class="font-semibold mb-3">Range Hours</h3>
-          <p class="text-gray-600">
+          <h3 class="card-title mb-3">Range Hours</h3>
+          <p class="text-gray-600 dark:text-gray-400">
             Sunrise to Sunset<br />
             7 Days a Week
           </p>
-          <a href="/range-status" class="text-green-700 hover:text-green-800 text-sm mt-2 inline-block">
-            Check Range Status →
+          <a href="/ranges" class="link-accent text-sm mt-2 inline-block">
+            Check Ranges →
           </a>
         </div>
       </div>

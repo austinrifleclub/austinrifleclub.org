@@ -111,27 +111,27 @@ const faqs = [
 ---
 
 <Layout title="FAQ" description="Frequently asked questions about Austin Rifle Club membership, ranges, and events">
-  <section class="py-8 md:py-12 bg-gray-50 min-h-screen">
+  <section class="py-8 md:py-12 bg-gray-50 dark:bg-stone-900 min-h-screen">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4 text-center">
+      <h1 class="page-title mb-4 text-center">
         Frequently Asked Questions
       </h1>
-      <p class="text-gray-600 text-center mb-12 max-w-2xl mx-auto">
+      <p class="text-body text-center mb-12 max-w-2xl mx-auto">
         Find answers to common questions about membership, range use, events, and more.
       </p>
 
       <div class="space-y-12">
         {faqs.map((section) => (
           <div>
-            <h2 class="text-2xl font-bold text-green-800 mb-6">{section.category}</h2>
+            <h2 class="section-title text-accent mb-6">{section.category}</h2>
             <div class="space-y-4">
               {section.questions.map((faq) => (
-                <details class="bg-white rounded-lg shadow-md group">
-                  <summary class="p-4 cursor-pointer list-none flex justify-between items-center font-semibold hover:bg-gray-50 rounded-lg">
+                <details class="bg-white dark:bg-stone-800 rounded-lg shadow-md group">
+                  <summary class="p-4 cursor-pointer list-none flex justify-between items-center font-semibold text-primary hover:bg-gray-50 dark:hover:bg-stone-700 rounded-lg">
                     {faq.q}
-                    <span class="text-green-600 group-open:rotate-180 transition-transform ml-4">▼</span>
+                    <span class="text-accent group-open:rotate-180 transition-transform ml-4">▼</span>
                   </summary>
-                  <div class="px-4 pb-4 text-gray-600">
+                  <div class="px-4 pb-4 text-secondary">
                     {faq.a}
                   </div>
                 </details>
@@ -141,14 +141,14 @@ const faqs = [
         ))}
       </div>
 
-      <div class="mt-12 bg-green-50 border border-green-200 rounded-lg p-6 text-center">
-        <h3 class="font-semibold text-green-800 mb-2">Still have questions?</h3>
-        <p class="text-green-700 mb-4">
+      <div class="mt-12 bg-forest-50 dark:bg-forest-900/30 border border-forest-200 dark:border-forest-700 rounded-lg p-6 text-center">
+        <h3 class="card-title text-accent mb-2">Still have questions?</h3>
+        <p class="text-body mb-4">
           We're happy to help! Contact us and we'll get back to you as soon as possible.
         </p>
         <a
           href="mailto:info@austinrifleclub.org"
-          class="inline-block bg-green-700 hover:bg-green-800 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+          class="btn btn-primary"
         >
           Contact Us
         </a>

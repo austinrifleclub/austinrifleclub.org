@@ -1,208 +1,45 @@
 ---
 /**
- * Ranges Information Page
+ * Ranges Page
  *
- * Detailed information about each range at Austin Rifle Club.
+ * Real-time display of all range statuses with full range information.
+ * This is the most-visited page - members check this before driving to the club.
+ *
+ * @see features.md Section 5.2 for requirements
  */
 import Layout from '../layouts/Layout.astro';
-
-const ranges = [
-  {
-    id: 'A',
-    name: 'Range A - Pistol',
-    description: '25-yard pistol range with 20 covered shooting positions.',
-    features: ['Covered positions', 'Target carriers', 'Bench rest available'],
-    allowedFirearms: ['Handguns', 'Rimfire rifles'],
-    maxCaliber: '.45 ACP / 10mm',
-  },
-  {
-    id: 'B',
-    name: 'Range B - Pistol',
-    description: '50-yard pistol range with 10 covered shooting positions.',
-    features: ['Covered positions', 'Steel targets at 50yd'],
-    allowedFirearms: ['Handguns', 'Rimfire rifles'],
-    maxCaliber: '.45 ACP / 10mm',
-  },
-  {
-    id: 'C',
-    name: 'Range C - Rifle',
-    description: '100/200-yard rifle range with covered firing line.',
-    features: ['100yd & 200yd berms', 'Benchrest positions', 'Prone positions'],
-    allowedFirearms: ['All rifles', 'Shotguns (slugs)'],
-    maxCaliber: '.50 BMG (with approval)',
-  },
-  {
-    id: 'D',
-    name: 'Range D - .22 Silhouette',
-    description: 'Metallic silhouette range for .22 rimfire.',
-    features: ['Steel silhouettes', 'Multiple distance lines'],
-    allowedFirearms: ['.22 rimfire only'],
-    maxCaliber: '.22 LR',
-  },
-  {
-    id: 'E',
-    name: 'Range E - Pistol Silhouette',
-    description: 'Metallic silhouette range for handguns.',
-    features: ['Steel silhouettes', 'Production & Revolver classes'],
-    allowedFirearms: ['Handguns'],
-    maxCaliber: '.44 Magnum',
-  },
-  {
-    id: 'F',
-    name: 'Range F - Air Gun',
-    description: 'Indoor 10-meter air gun range.',
-    features: ['Climate controlled', 'Electronic targets', 'Equipment available'],
-    allowedFirearms: ['Air rifles', 'Air pistols'],
-    maxCaliber: '.177',
-  },
-  {
-    id: 'G',
-    name: 'Range G - Education Center',
-    description: 'Classroom and training facility.',
-    features: ['Classroom seating', 'A/V equipment', 'NRA courses held here'],
-    allowedFirearms: ['Training only'],
-    maxCaliber: 'N/A',
-  },
-  {
-    id: 'H',
-    name: 'Range H - Action Bay',
-    description: 'Multi-purpose action shooting bay.',
-    features: ['Steel targets', '180° shooting', 'IDPA/USPSA compatible'],
-    allowedFirearms: ['Handguns', 'PCC'],
-    maxCaliber: '.45 ACP',
-  },
-  {
-    id: 'I',
-    name: 'Range I - Action Bay',
-    description: 'Multi-purpose action shooting bay.',
-    features: ['Steel targets', '180° shooting', 'IDPA/USPSA compatible'],
-    allowedFirearms: ['Handguns', 'PCC'],
-    maxCaliber: '.45 ACP',
-  },
-  {
-    id: 'J',
-    name: 'Range J - Action Bay',
-    description: 'Large action shooting bay for matches.',
-    features: ['Extra large bay', 'Steel & paper targets', 'Club matches held here'],
-    allowedFirearms: ['Handguns', 'PCC', 'Shotguns'],
-    maxCaliber: '.45 ACP',
-  },
-  {
-    id: 'K',
-    name: 'Range K - Action Bay',
-    description: 'Multi-purpose action shooting bay.',
-    features: ['Steel targets', '180° shooting'],
-    allowedFirearms: ['Handguns', 'PCC'],
-    maxCaliber: '.45 ACP',
-  },
-  {
-    id: 'L',
-    name: 'Range L - Multi-Purpose',
-    description: 'Long-range capable multi-purpose bay.',
-    features: ['300yd+ capability', 'Steel & reactive targets'],
-    allowedFirearms: ['All firearms'],
-    maxCaliber: 'Contact RSO',
-  },
-];
+import RangeStatusCombined from '../components/RangeStatusCombined';
 ---
 
-<Layout title="Ranges" description="Detailed information about all ranges at Austin Rifle Club">
-  <section class="py-8 md:py-12 bg-gray-50">
+<Layout title="Ranges" description="Real-time status of all ranges at Austin Rifle Club">
+  <section class="py-8 md:py-12">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center mb-12">
-        <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
-          Our Ranges
-        </h1>
-        <p class="text-gray-600 max-w-2xl mx-auto">
-          Austin Rifle Club offers 12 ranges for various shooting disciplines.
-          Each range has specific rules - always check signage on arrival.
+      <div class="text-center mb-8">
+        <h1 class="page-title mb-2">Ranges</h1>
+        <p class="text-body max-w-2xl mx-auto">
+          Check the current status of all ranges before your visit.<br />
+          Click a letter to jump to range details.
         </p>
-        <a
-          href="/range-status"
-          class="inline-block mt-4 bg-green-700 hover:bg-green-800 text-white px-6 py-2 rounded-lg transition-colors"
-        >
-          Check Current Status
-        </a>
       </div>
 
-      <div class="space-y-6">
-        {ranges.map((range) => (
-          <div class="bg-white rounded-lg shadow-md overflow-hidden">
-            <div class="p-6">
-              <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-                <div class="flex-1">
-                  <div class="flex items-center gap-3 mb-2">
-                    <span class="inline-flex items-center justify-center w-10 h-10 bg-green-100 text-green-800 font-bold rounded-lg">
-                      {range.id}
-                    </span>
-                    <h2 class="text-xl font-semibold">{range.name}</h2>
-                  </div>
-                  <p class="text-gray-600 mb-4">{range.description}</p>
+      <RangeStatusCombined client:load />
 
-                  <div class="grid md:grid-cols-3 gap-4 text-sm">
-                    <div>
-                      <h3 class="font-medium text-gray-900 mb-1">Features</h3>
-                      <ul class="text-gray-600 space-y-1">
-                        {range.features.map((feature) => (
-                          <li class="flex items-center gap-1">
-                            <span class="text-green-600">✓</span> {feature}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                    <div>
-                      <h3 class="font-medium text-gray-900 mb-1">Allowed Firearms</h3>
-                      <ul class="text-gray-600 space-y-1">
-                        {range.allowedFirearms.map((firearm) => (
-                          <li>{firearm}</li>
-                        ))}
-                      </ul>
-                    </div>
-                    <div>
-                      <h3 class="font-medium text-gray-900 mb-1">Max Caliber</h3>
-                      <p class="text-gray-600">{range.maxCaliber}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        ))}
+      <!-- Weather Notice -->
+      <div class="mt-8 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 rounded-lg p-4">
+        <p class="text-amber-800 dark:text-amber-200 text-sm">
+          <strong>Weather Note:</strong> Ranges may close unexpectedly due to severe weather.
+          Always check this page before making the drive. During lightning, all outdoor ranges are closed.
+        </p>
       </div>
 
-      <!-- General Rules -->
-      <div class="mt-12 bg-white rounded-lg shadow-md p-6">
-        <h2 class="text-2xl font-bold mb-4">General Range Rules</h2>
-        <div class="grid md:grid-cols-2 gap-6">
-          <div>
-            <h3 class="font-semibold text-lg mb-2 text-green-800">Safety First</h3>
-            <ul class="text-gray-600 space-y-2 text-sm">
-              <li>• Always keep firearms pointed in a safe direction</li>
-              <li>• Treat all firearms as if they are loaded</li>
-              <li>• Keep finger off trigger until ready to shoot</li>
-              <li>• Know your target and what's beyond it</li>
-              <li>• Eye and ear protection required at all times</li>
-            </ul>
-          </div>
-          <div>
-            <h3 class="font-semibold text-lg mb-2 text-green-800">Range Etiquette</h3>
-            <ul class="text-gray-600 space-y-2 text-sm">
-              <li>• Cease fire immediately when called</li>
-              <li>• Police your brass and clean up targets</li>
-              <li>• No handling firearms during cold range</li>
-              <li>• Report any unsafe behavior to RSO</li>
-              <li>• Sign in at the clubhouse on arrival</li>
-            </ul>
-          </div>
-        </div>
-        <div class="mt-6">
-          <a
-            href="/range-rules"
-            class="text-green-700 hover:text-green-800 font-medium"
-          >
-            View Complete Range Rules →
+      <!-- Contact -->
+      <div class="mt-6 text-center text-sm text-gray-500 dark:text-gray-400">
+        <p>
+          Questions about range availability?{' '}
+          <a href="mailto:info@austinrifleclub.org" class="text-navy-700 dark:text-blue-400 hover:text-navy-800 dark:hover:text-blue-300 underline">
+            Contact Us
           </a>
-        </div>
+        </p>
       </div>
     </div>
   </section>

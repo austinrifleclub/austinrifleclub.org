@@ -145,17 +145,12 @@ export interface Session {
 
 export const auth = {
   getSession: () => request<Session | null>('/api/auth/get-session').catch(() => null),
-  signIn: (email: string, password: string) =>
-    request('/api/auth/sign-in/email', {
-      method: 'POST',
-      body: { email, password },
-    }),
-  signUp: (name: string, email: string, password: string) =>
-    request('/api/auth/sign-up/email', {
-      method: 'POST',
-      body: { name, email, password },
-    }),
   signOut: () => request('/api/auth/sign-out', { method: 'POST' }),
+  sendMagicLink: (email: string, callbackURL = '/dashboard') =>
+    request('/api/auth/sign-in/magic-link', {
+      method: 'POST',
+      body: { email, callbackURL },
+    }),
 };
 
 // =============================================================================

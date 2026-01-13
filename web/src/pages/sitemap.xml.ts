@@ -11,10 +11,9 @@ const BASE_URL = 'https://austinrifleclub.org';
 // Static pages with their priorities
 const staticPages = [
   { url: '/', priority: 1.0, changefreq: 'weekly' },
-  { url: '/range-status', priority: 0.9, changefreq: 'hourly' },
+  { url: '/ranges', priority: 0.9, changefreq: 'hourly' },
   { url: '/calendar', priority: 0.8, changefreq: 'daily' },
   { url: '/membership', priority: 0.8, changefreq: 'monthly' },
-  { url: '/ranges', priority: 0.7, changefreq: 'monthly' },
   { url: '/about', priority: 0.6, changefreq: 'monthly' },
   { url: '/faq', priority: 0.6, changefreq: 'monthly' },
   { url: '/range-rules', priority: 0.7, changefreq: 'monthly' },

@@ -8,6 +8,7 @@
  * - Tailwind styles
  */
 import '../styles/global.css';
+import DarkModeToggle from '../components/ui/DarkModeToggle.tsx';
 
 interface Props {
   title: string;
@@ -23,60 +24,73 @@ const { title, description = "Austin Rifle Club - Private shooting club in Manor
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
-    <link rel="icon" type="image/svg+xml" href="/logo.svg" />
-    <link rel="apple-touch-icon" href="/logo.svg" />
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <link rel="apple-touch-icon" href="/logo.png" />
     <link rel="manifest" href="/manifest.json" />
-    <meta name="theme-color" content="#166534" />
+    <meta name="theme-color" content="#1e3a5f" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <!-- Google Fonts: Oswald (display), Inter (body), JetBrains Mono (code) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet" />
     <title>{title} | Austin Rifle Club</title>
+    <script is:inline>
+      // Prevent flash of wrong theme
+      (function() {
+        const saved = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (saved === 'dark' || (!saved && prefersDark)) {
+          document.documentElement.classList.add('dark');
+        }
+      })();
+    </script>
   </head>
-  <body class="min-h-screen bg-gray-50 flex flex-col">
+  <body class="min-h-screen bg-surface flex flex-col font-body antialiased">
     <a href="#main-content" class="skip-link">Skip to main content</a>
-    <header class="bg-green-800 text-white shadow-lg">
+    <header class="bg-forest-800 text-white shadow-lg">
       <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
+        <div class="flex justify-between items-center h-16 gap-8">
           <!-- Logo -->
-          <div class="flex items-center">
-            <a href="/" class="flex items-center space-x-2">
-              <img src="/logo.svg" alt="ARC" class="h-10 w-10" />
-              <span class="font-bold text-xl hidden sm:block">Austin Rifle Club</span>
+          <div class="flex items-center shrink-0">
+            <a href="/" class="flex items-center space-x-2 group">
+              <img src="/logo.png" alt="Austin Rifle Club" class="h-10 w-10 transition-transform group-hover:scale-105" />
+              <span class="font-display font-bold text-xl hidden sm:block tracking-wide">Austin Rifle Club</span>
             </a>
           </div>
 
           <!-- Desktop Navigation -->
           <div class="hidden md:flex items-center space-x-6">
-            <a href="/range-status" class="hover:text-green-200 transition-colors font-medium">
-              Range Status
-            </a>
-            <a href="/calendar" class="hover:text-green-200 transition-colors">
-              Calendar
-            </a>
-            <a href="/ranges" class="hover:text-green-200 transition-colors">
-              Ranges
-            </a>
-            <a href="/membership" class="hover:text-green-200 transition-colors">
-              Membership
-            </a>
-            <a href="/about" class="hover:text-green-200 transition-colors">
+            <a href="/about" class="hover:text-forest-100 transition-colors">
               About
             </a>
-            <div class="pl-4 border-l border-green-600">
+            <a href="/membership" class="hover:text-forest-100 transition-colors">
+              Membership
+            </a>
+            <a href="/calendar" class="hover:text-forest-100 transition-colors">
+              Calendar
+            </a>
+            <a href="/ranges" class="hover:text-forest-100 transition-colors font-medium">
+              Ranges
+            </a>
+            <div class="pl-4 border-l border-forest-600 flex items-center gap-2">
+              <DarkModeToggle client:load />
               <a
                 href="/login"
-                class="bg-green-600 hover:bg-green-500 px-4 py-2 rounded-md transition-colors"
+                class="bg-forest-600 hover:bg-forest-700 active:scale-95 px-4 py-2 rounded-md transition-all font-medium"
               >
-                Member Login
+                Login
               </a>
             </div>
           </div>
 
           <!-- Mobile menu button -->
-          <div class="md:hidden flex items-center">
+          <div class="md:hidden flex items-center gap-2">
+            <DarkModeToggle client:load />
             <button
               type="button"
               id="mobile-menu-button"
-              class="text-white hover:text-green-200"
+              class="text-white hover:text-navy-200"
               aria-label="Toggle menu"
             >
               <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -89,26 +103,23 @@ const { title, description = "Austin Rifle Club - Private shooting club in Manor
         <!-- Mobile Navigation -->
         <div id="mobile-menu" class="hidden md:hidden pb-4">
           <div class="flex flex-col space-y-2">
-            <a href="/range-status" class="hover:bg-green-700 px-3 py-2 rounded-md font-medium">
-              Range Status
+            <a href="/about" class="hover:bg-forest-700 px-3 py-2 rounded-md transition-colors">
+              About
             </a>
-            <a href="/calendar" class="hover:bg-green-700 px-3 py-2 rounded-md">
-              Calendar
-            </a>
-            <a href="/ranges" class="hover:bg-green-700 px-3 py-2 rounded-md">
-              Ranges
-            </a>
-            <a href="/membership" class="hover:bg-green-700 px-3 py-2 rounded-md">
+            <a href="/membership" class="hover:bg-forest-700 px-3 py-2 rounded-md transition-colors">
               Membership
             </a>
-            <a href="/about" class="hover:bg-green-700 px-3 py-2 rounded-md">
-              About
+            <a href="/calendar" class="hover:bg-forest-700 px-3 py-2 rounded-md transition-colors">
+              Calendar
+            </a>
+            <a href="/ranges" class="hover:bg-forest-700 px-3 py-2 rounded-md font-medium transition-colors">
+              Ranges
             </a>
             <a
               href="/login"
-              class="bg-green-600 hover:bg-green-500 px-3 py-2 rounded-md text-center mt-2"
+              class="bg-forest-600 hover:bg-forest-700 active:scale-95 px-3 py-2 rounded-md text-center mt-2 font-medium transition-all"
             >
-              Member Login
+              Login
             </a>
           </div>
         </div>
@@ -119,16 +130,16 @@ const { title, description = "Austin Rifle Club - Private shooting club in Manor
       <slot />
     </main>
 
-    <footer class="bg-gray-800 text-gray-300 py-8 mt-auto">
+    <footer class="bg-stone-800 text-stone-300 py-8 mt-auto">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
           <!-- Contact -->
           <div>
-            <h3 class="text-white font-semibold mb-3">Contact</h3>
+            <h3 class="text-white font-display font-semibold mb-3 tracking-wide">Contact</h3>
             <p class="text-sm">16312 Littig Rd</p>
             <p class="text-sm">Manor, TX 78653</p>
             <p class="text-sm mt-2">
-              <a href="mailto:info@austinrifleclub.org" class="hover:text-white">
+              <a href="mailto:info@austinrifleclub.org" class="hover:text-white transition-colors">
                 info@austinrifleclub.org
               </a>
             </p>
@@ -136,18 +147,18 @@ const { title, description = "Austin Rifle Club - Private shooting club in Manor
 
           <!-- Quick Links -->
           <div>
-            <h3 class="text-white font-semibold mb-3">Quick Links</h3>
+            <h3 class="text-white font-display font-semibold mb-3 tracking-wide">Quick Links</h3>
             <ul class="space-y-1 text-sm">
-              <li><a href="/range-rules" class="hover:text-white">Range Rules</a></li>
-              <li><a href="/calendar" class="hover:text-white">Event Calendar</a></li>
-              <li><a href="/membership" class="hover:text-white">Join the Club</a></li>
-              <li><a href="/faq" class="hover:text-white">FAQ</a></li>
+              <li><a href="/range-rules" class="hover:text-white transition-colors">Range Rules</a></li>
+              <li><a href="/calendar" class="hover:text-white transition-colors">Event Calendar</a></li>
+              <li><a href="/membership" class="hover:text-white transition-colors">Join the Club</a></li>
+              <li><a href="/faq" class="hover:text-white transition-colors">FAQ</a></li>
             </ul>
           </div>
 
           <!-- About -->
           <div>
-            <h3 class="text-white font-semibold mb-3">About ARC</h3>
+            <h3 class="text-white font-display font-semibold mb-3 tracking-wide">About ARC</h3>
             <p class="text-sm">
               Founded in 1894, Austin Rifle Club is a private, non-profit shooting sports
               organization dedicated to promoting safe and responsible firearms use.
@@ -155,9 +166,9 @@ const { title, description = "Austin Rifle Club - Private shooting club in Manor
           </div>
         </div>
 
-        <div class="border-t border-gray-700 mt-8 pt-6 text-center text-sm">
+        <div class="border-t border-stone-700 mt-8 pt-6 text-center text-sm">
           <p>&copy; {new Date().getFullYear()} Austin Rifle Club, Inc. All rights reserved.</p>
-          <p class="mt-1">Texas Non-Profit Corporation, Charter #52790</p>
+          <p class="mt-1 text-stone-400">Texas Non-Profit Corporation, Charter #52790</p>
         </div>
       </div>
     </footer>

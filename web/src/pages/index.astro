@@ -9,37 +9,40 @@ import Layout from '../layouts/Layout.astro';
 
 <Layout title="Home">
   <!-- Hero Section -->
-  <section class="bg-green-800 text-white py-16 md:py-24">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="grid md:grid-cols-2 gap-8 items-center">
-        <div>
-          <h1 class="text-4xl md:text-5xl font-bold mb-4">
+  <section class="relative bg-navy-800 text-white py-16 md:py-24 overflow-hidden">
+    <!-- Subtle texture overlay -->
+    <div class="absolute inset-0 bg-gradient-to-br from-navy-900/50 to-transparent pointer-events-none"></div>
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid md:grid-cols-2 gap-8 lg:gap-12 items-center">
+        <div class="animate-fade-in">
+          <p class="inline-block bg-crimson-600 text-white font-semibold mb-3 tracking-wider uppercase text-sm px-3 py-1 rounded">Est. 1894</p>
+          <h1 class="page-title text-4xl md:text-5xl lg:text-6xl text-white mb-4">
             Austin Rifle Club
           </h1>
-          <p class="text-xl text-green-100 mb-6">
-            A private, non-profit shooting sports organization serving Central Texas since 1894.
+          <p class="text-lead text-navy-100 mb-8 max-w-lg">
+            A private, non-profit shooting sports organization serving Central Texas for over 130 years.
           </p>
           <div class="flex flex-wrap gap-4">
             <a
-              href="/range-status"
-              class="bg-white text-green-800 px-6 py-3 rounded-lg font-semibold hover:bg-green-50 transition-colors"
+              href="/ranges"
+              class="btn bg-white text-navy-800 px-6 py-3 rounded-lg font-semibold hover:bg-navy-50 active:scale-95 transition-all shadow-lg"
             >
-              Check Range Status
+              Check Ranges
             </a>
             <a
               href="/membership"
-              class="border-2 border-white px-6 py-3 rounded-lg font-semibold hover:bg-white hover:text-green-800 transition-colors"
+              class="btn border-2 border-white px-6 py-3 rounded-lg font-semibold hover:bg-white hover:text-navy-800 active:scale-95 transition-all"
             >
               Join the Club
             </a>
           </div>
         </div>
-        <div class="hidden md:block">
+        <div class="hidden md:flex items-center justify-center">
           <img
-            src="/hero-range.jpg"
-            alt="Austin Rifle Club ranges"
-            class="rounded-lg shadow-xl object-cover"
-            width="600"
+            src="/logo.png"
+            alt="Austin Rifle Club logo - Texas outline with crosshairs, Est. 1894"
+            class="w-80 lg:w-96 drop-shadow-2xl"
+            width="400"
             height="400"
             loading="eager"
           />
@@ -49,19 +52,19 @@ import Layout from '../layouts/Layout.astro';
   </section>
 
   <!-- Quick Info Section -->
-  <section class="py-12 bg-white">
+  <section class="py-16 bg-white dark:bg-stone-900">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="grid md:grid-cols-3 gap-8">
         <!-- Location -->
-        <div class="text-center p-6">
-          <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg class="w-6 h-6 text-green-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="text-center p-6 group">
+          <div class="icon-circle mx-auto mb-4 group-hover:bg-navy-800 group-hover:text-white">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
           </div>
-          <h3 class="font-semibold text-lg mb-2">Location</h3>
-          <p class="text-gray-600">
+          <h3 class="card-title text-lg mb-2">Location</h3>
+          <p class="text-stone-600 dark:text-stone-400">
             16312 Littig Rd<br />
             Manor, TX 78653
           </p>
@@ -69,43 +72,52 @@ import Layout from '../layouts/Layout.astro';
             href="https://maps.google.com/?q=16312+Littig+Rd+Manor+TX+78653"
             target="_blank"
             rel="noopener"
-            class="text-green-700 hover:text-green-800 text-sm mt-2 inline-block"
+            class="text-navy-700 hover:text-navy-800 dark:text-navy-200 dark:hover:text-white text-sm mt-3 inline-flex items-center gap-1 font-medium transition-colors"
           >
-            Get Directions &rarr;
+            Get Directions
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
           </a>
         </div>
 
         <!-- Hours -->
-        <div class="text-center p-6">
-          <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg class="w-6 h-6 text-green-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="text-center p-6 group">
+          <div class="icon-circle mx-auto mb-4 group-hover:bg-navy-800 group-hover:text-white">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <h3 class="font-semibold text-lg mb-2">Range Hours</h3>
-          <p class="text-gray-600">
+          <h3 class="card-title text-lg mb-2">Range Hours</h3>
+          <p class="text-stone-600 dark:text-stone-400">
             Sunrise to Sunset<br />
             7 Days a Week
           </p>
-          <a href="/range-status" class="text-green-700 hover:text-green-800 text-sm mt-2 inline-block">
-            Check Today's Status &rarr;
+          <a href="/ranges" class="text-navy-700 hover:text-navy-800 dark:text-navy-200 dark:hover:text-white text-sm mt-3 inline-flex items-center gap-1 font-medium transition-colors">
+            Check Today's Status
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
           </a>
         </div>
 
         <!-- Members -->
-        <div class="text-center p-6">
-          <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg class="w-6 h-6 text-green-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="text-center p-6 group">
+          <div class="icon-circle mx-auto mb-4 group-hover:bg-navy-800 group-hover:text-white">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
             </svg>
           </div>
-          <h3 class="font-semibold text-lg mb-2">~1,500 Members</h3>
-          <p class="text-gray-600">
+          <h3 class="card-title text-lg mb-2">~1,500 Members</h3>
+          <p class="text-stone-600 dark:text-stone-400">
             Active shooting sports<br />
             community since 1894
           </p>
-          <a href="/membership" class="text-green-700 hover:text-green-800 text-sm mt-2 inline-block">
-            Become a Member &rarr;
+          <a href="/membership" class="text-navy-700 hover:text-navy-800 dark:text-navy-200 dark:hover:text-white text-sm mt-3 inline-flex items-center gap-1 font-medium transition-colors">
+            Become a Member
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
           </a>
         </div>
       </div>
@@ -113,83 +125,94 @@ import Layout from '../layouts/Layout.astro';
   </section>
 
   <!-- Ranges Overview -->
-  <section class="py-16 bg-gray-50">
+  <section class="py-16 bg-stone-50 dark:bg-stone-800">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h2 class="text-3xl font-bold text-center mb-12">Our Ranges</h2>
+      <h2 class="section-title text-center mb-4">Our Ranges</h2>
+      <p class="text-body text-center mb-12 max-w-2xl mx-auto">
+        Over 200 acres of diverse shooting facilities for every discipline
+      </p>
       <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div class="bg-white rounded-lg shadow-md p-6">
-          <h3 class="font-semibold text-lg mb-2">Pistol Ranges</h3>
-          <p class="text-gray-600 text-sm mb-3">
+        <article class="card card-interactive p-6 group">
+          <h3 class="card-title text-lg mb-2 group-hover:text-navy-700 dark:group-hover:text-navy-200 transition-colors">Pistol Ranges</h3>
+          <p class="text-stone-600 dark:text-stone-400 text-sm mb-4">
             25/50 yard ranges for handgun practice and competition.
           </p>
-          <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">Ranges A, B</span>
-        </div>
+          <span class="badge badge-primary">Ranges A, B</span>
+        </article>
 
-        <div class="bg-white rounded-lg shadow-md p-6">
-          <h3 class="font-semibold text-lg mb-2">Rifle Ranges</h3>
-          <p class="text-gray-600 text-sm mb-3">
+        <article class="card card-interactive p-6 group">
+          <h3 class="card-title text-lg mb-2 group-hover:text-navy-700 dark:group-hover:text-navy-200 transition-colors">Rifle Ranges</h3>
+          <p class="text-stone-600 dark:text-stone-400 text-sm mb-4">
             100/200 yard benchrest and high power rifle ranges.
           </p>
-          <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">Range C</span>
-        </div>
+          <span class="badge badge-primary">Range C</span>
+        </article>
 
-        <div class="bg-white rounded-lg shadow-md p-6">
-          <h3 class="font-semibold text-lg mb-2">Silhouette</h3>
-          <p class="text-gray-600 text-sm mb-3">
+        <article class="card card-interactive p-6 group">
+          <h3 class="card-title text-lg mb-2 group-hover:text-navy-700 dark:group-hover:text-navy-200 transition-colors">Silhouette</h3>
+          <p class="text-stone-600 dark:text-stone-400 text-sm mb-4">
             .22 silhouette and pistol silhouette facilities.
           </p>
-          <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">Ranges D, E</span>
-        </div>
+          <span class="badge badge-primary">Ranges D, E</span>
+        </article>
 
-        <div class="bg-white rounded-lg shadow-md p-6">
-          <h3 class="font-semibold text-lg mb-2">Action Bays</h3>
-          <p class="text-gray-600 text-sm mb-3">
+        <article class="card card-interactive p-6 group">
+          <h3 class="card-title text-lg mb-2 group-hover:text-navy-700 dark:group-hover:text-navy-200 transition-colors">Action Bays</h3>
+          <p class="text-stone-600 dark:text-stone-400 text-sm mb-4">
             IDPA/USPSA action shooting bays with steel targets.
           </p>
-          <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">Ranges H-L</span>
-        </div>
+          <span class="badge badge-primary">Ranges H-L</span>
+        </article>
 
-        <div class="bg-white rounded-lg shadow-md p-6">
-          <h3 class="font-semibold text-lg mb-2">Air Gun Range</h3>
-          <p class="text-gray-600 text-sm mb-3">
+        <article class="card card-interactive p-6 group">
+          <h3 class="card-title text-lg mb-2 group-hover:text-navy-700 dark:group-hover:text-navy-200 transition-colors">Air Gun Range</h3>
+          <p class="text-stone-600 dark:text-stone-400 text-sm mb-4">
             Indoor 10-meter air rifle and pistol range.
           </p>
-          <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">Range F</span>
-        </div>
+          <span class="badge badge-primary">Range F</span>
+        </article>
 
-        <div class="bg-white rounded-lg shadow-md p-6">
-          <h3 class="font-semibold text-lg mb-2">Education Center</h3>
-          <p class="text-gray-600 text-sm mb-3">
+        <article class="card card-interactive p-6 group">
+          <h3 class="card-title text-lg mb-2 group-hover:text-navy-700 dark:group-hover:text-navy-200 transition-colors">Education Center</h3>
+          <p class="text-stone-600 dark:text-stone-400 text-sm mb-4">
             Classroom and training facility for courses.
           </p>
-          <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">Range G</span>
-        </div>
+          <span class="badge badge-primary">Range G</span>
+        </article>
       </div>
 
-      <div class="text-center mt-8">
+      <div class="text-center mt-10">
         <a
           href="/ranges"
-          class="text-green-700 hover:text-green-800 font-medium"
+          class="inline-flex items-center gap-2 text-navy-700 hover:text-navy-800 dark:text-navy-200 dark:hover:text-white font-semibold transition-colors"
         >
-          View All Range Details &rarr;
+          View All Range Details
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
         </a>
       </div>
     </div>
   </section>
 
   <!-- CTA Section -->
-  <section class="py-16 bg-green-800 text-white">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-      <h2 class="text-3xl font-bold mb-4">Ready to Join?</h2>
-      <p class="text-xl text-green-100 mb-8">
+  <section class="py-20 bg-navy-800 text-white relative overflow-hidden">
+    <!-- Background accent -->
+    <div class="absolute inset-0 bg-gradient-to-br from-navy-900/50 to-transparent pointer-events-none"></div>
+    <div class="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="section-title text-white mb-4">Ready to Join?</h2>
+      <p class="text-lead text-navy-100 mb-8 max-w-2xl mx-auto">
         Become part of Central Texas's premier shooting sports community.
-        Annual membership starts at $150.
+        Annual membership starts at <span class="mono font-semibold">$150</span>.
       </p>
       <a
         href="/membership"
-        class="inline-block bg-white text-green-800 px-8 py-4 rounded-lg font-semibold text-lg hover:bg-green-50 transition-colors"
+        class="btn inline-flex items-center gap-2 bg-white text-navy-800 px-8 py-4 rounded-lg font-semibold text-lg hover:bg-navy-50 active:scale-95 transition-all shadow-lg"
       >
         Start Your Application
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
       </a>
     </div>
   </section>
