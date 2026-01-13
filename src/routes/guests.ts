@@ -22,6 +22,7 @@ import {
   createGuestSchema,
   signInGuestSchema,
   quickGuestSignInSchema,
+  uuidSchema,
 } from "../lib/validation";
 import { generateId } from "../lib/utils";
 import { ValidationError, NotFoundError, ForbiddenError } from "../lib/errors";
@@ -93,7 +94,7 @@ app.post("/", async (c) => {
 app.get("/:id", async (c) => {
   const member = c.get("member");
   const db = c.get("db");
-  const id = c.req.param("id");
+  const id = uuidSchema.parse(c.req.param("id"));
 
   const guest = await db.query.guests.findFirst({
     where: eq(guests.id, id),
@@ -132,7 +133,7 @@ app.get("/:id", async (c) => {
 app.post("/:id/sign-in", async (c) => {
   const member = c.get("member");
   const db = c.get("db");
-  const guestId = c.req.param("id");
+  const guestId = uuidSchema.parse(c.req.param("id"));
 
   const body = await c.req.json();
   const parsed = signInGuestSchema.safeParse({ ...body, guestId });
@@ -275,11 +276,14 @@ app.post("/quick-sign-in", async (c) => {
   const now = new Date();
   const currentYear = now.getFullYear();
 
-  // Check if guest with same email already exists
+  // Check if guest with same email already exists for this member
   let guest;
   if (parsed.data.email) {
     guest = await db.query.guests.findFirst({
-      where: eq(guests.email, parsed.data.email),
+      where: and(
+        eq(guests.email, parsed.data.email),
+        eq(guests.createdByMemberId, member.id)
+      ),
     });
   }
 
@@ -394,11 +398,14 @@ app.post("/sync", async (c) => {
       continue;
     }
 
-    // Find or create guest
+    // Find or create guest (scoped to this member)
     let guest;
     if (signIn.guestEmail) {
       guest = await db.query.guests.findFirst({
-        where: eq(guests.email, signIn.guestEmail),
+        where: and(
+          eq(guests.email, signIn.guestEmail),
+          eq(guests.createdByMemberId, member.id)
+        ),
       });
     }
 

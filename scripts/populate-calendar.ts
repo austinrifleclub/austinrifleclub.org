@@ -8,10 +8,34 @@
 
 import rrule from 'rrule';
 const { RRule } = rrule;
-import { readFile, writeFile } from 'fs/promises';
+import { writeFile } from 'fs/promises';
+
+interface CalendarEvent {
+  id: string;
+  title: string;
+  description: string;
+  eventType: string;
+  startTime: number;
+  endTime: number;
+  location: string;
+  rangeIds: string | null;
+  isRecurring: number;
+  isPublic: number;
+  status: string;
+  createdAt: number;
+  updatedAt: number;
+}
+
+interface ScheduleConfig {
+  rule: string;
+  type: string;
+  ranges: string[] | null;
+  start: number;
+  duration: number;
+}
 
 // Common event schedules (what typically happens each month)
-const MONTHLY_SCHEDULE = {
+const MONTHLY_SCHEDULE: Record<string, ScheduleConfig> = {
   // Matches
   'USPSA Pistol Match': { rule: 'FREQ=MONTHLY;BYDAY=1SA,3SA', type: 'match', ranges: ['H','I','J','K','L'], start: 8, duration: 6 },
   'Steel Challenge Match': { rule: 'FREQ=MONTHLY;BYDAY=4SU', type: 'match', ranges: ['H','I','J','K','L'], start: 8, duration: 5 },
@@ -46,7 +70,7 @@ async function main() {
   const endDate = new Date('2026-12-31T23:59:59');
   const now = new Date();
 
-  const events: any[] = [];
+  const events: CalendarEvent[] = [];
 
   console.log('Generating calendar events for 2025-2026...\n');
 

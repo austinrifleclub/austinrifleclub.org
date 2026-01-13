@@ -524,7 +524,8 @@ app.post("/:id/renew", requireAdmin, async (c) => {
  */
 app.get("/reports/expiring", requireAdmin, async (c) => {
   const db = c.get("db");
-  const daysAhead = parseInt(c.req.query("days") ?? "30", 10);
+  const daysParam = parseInt(c.req.query("days") ?? "30", 10);
+  const daysAhead = Number.isNaN(daysParam) ? 30 : Math.max(1, Math.min(365, daysParam));
 
   const now = Date.now();
   const futureDate = now + (daysAhead * 24 * 60 * 60 * 1000);

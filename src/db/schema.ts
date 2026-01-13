@@ -124,7 +124,7 @@ export const members = sqliteTable("members", {
 
   // Family membership
   primaryMemberId: text("primary_member_id")            // If dependent, points to primary
-    .references((): AnySQLiteColumn => members.id),
+    .references((): AnySQLiteColumn => members.id, { onDelete: "set null" }),
   familyRole: text("family_role"),                      // primary, spouse, junior
 
   // Dates
@@ -156,7 +156,7 @@ export const members = sqliteTable("members", {
   // Referral tracking
   referralCode: text("referral_code").unique(),         // Unique code for sharing
   referredBy: text("referred_by")                       // Member ID who referred
-    .references((): AnySQLiteColumn => members.id),
+    .references((): AnySQLiteColumn => members.id, { onDelete: "set null" }),
 
   // Texas LTC (for background check waiver)
   hasTexasLtc: integer("has_texas_ltc", { mode: "boolean" }).default(false),
@@ -218,16 +218,16 @@ export const applications = sqliteTable("applications", {
 
   // Safety evaluation
   safetyEvalEventId: text("safety_eval_event_id")
-    .references(() => events.id),
+    .references(() => events.id, { onDelete: "set null" }),
   safetyEvalDate: integer("safety_eval_date", { mode: "timestamp" }),
   safetyEvalResult: text("safety_eval_result"),         // pass, fail
   safetyEvalNotes: text("safety_eval_notes"),
   safetyEvalBy: text("safety_eval_by")
-    .references(() => members.id),
+    .references(() => members.id, { onDelete: "set null" }),
 
   // Orientation
   orientationEventId: text("orientation_event_id")
-    .references(() => events.id),
+    .references(() => events.id, { onDelete: "set null" }),
   orientationDate: integer("orientation_date", { mode: "timestamp" }),
   orientationCompleted: integer("orientation_completed", { mode: "boolean" }).default(false),
 
@@ -240,10 +240,10 @@ export const applications = sqliteTable("applications", {
   // Approval/rejection
   approvedAt: integer("approved_at", { mode: "timestamp" }),
   approvedBy: text("approved_by")
-    .references(() => members.id),
+    .references(() => members.id, { onDelete: "set null" }),
   rejectedAt: integer("rejected_at", { mode: "timestamp" }),
   rejectedBy: text("rejected_by")
-    .references(() => members.id),
+    .references(() => members.id, { onDelete: "set null" }),
   rejectionReason: text("rejection_reason"),
 
   // Timeouts (180 days total from submission)
@@ -289,6 +289,7 @@ export const duesPayments = sqliteTable("dues_payments", {
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
 }, (table) => ({
   memberIdIdx: index("dues_payments_member_id_idx").on(table.memberId),
+  stripePaymentIdx: uniqueIndex("dues_payments_stripe_payment_idx").on(table.stripePaymentId),
 }));
 
 // =============================================================================
@@ -354,7 +355,7 @@ export const events = sqliteTable("events", {
 
   // Recurrence - Occurrence fields
   parentEventId: text("parent_event_id")                // Points to template for generated occurrences
-    .references((): AnySQLiteColumn => events.id),
+    .references((): AnySQLiteColumn => events.id, { onDelete: "cascade" }),
   occurrenceDate: integer("occurrence_date", { mode: "timestamp" }), // The specific date this occurrence is for
 
   // MEC Import tracking
@@ -363,7 +364,7 @@ export const events = sqliteTable("events", {
 
   // Management
   directorId: text("director_id")                       // Match director, instructor
-    .references(() => members.id),
+    .references(() => members.id, { onDelete: "set null" }),
   contactEmail: text("contact_email"),
 
   // Status
@@ -376,7 +377,7 @@ export const events = sqliteTable("events", {
   boardOnly: integer("board_only", { mode: "boolean" }).default(false),
 
   createdBy: text("created_by")
-    .references(() => members.id),
+    .references(() => members.id, { onDelete: "set null" }),
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
   updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
 }, (table) => ({
@@ -415,7 +416,7 @@ export const eventRegistrations = sqliteTable("event_registrations", {
   // Attendance
   checkedInAt: integer("checked_in_at", { mode: "timestamp" }),
   checkedInBy: text("checked_in_by")
-    .references(() => members.id),
+    .references(() => members.id, { onDelete: "set null" }),
 
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
   updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
@@ -435,7 +436,7 @@ export const matchResults = sqliteTable("match_results", {
     .notNull()
     .references(() => events.id, { onDelete: "cascade" }),
   memberId: text("member_id")
-    .references(() => members.id),                      // Null for non-member shooters
+    .references(() => members.id, { onDelete: "set null" }),  // Null for non-member shooters
 
   // Shooter info (for non-members)
   shooterName: text("shooter_name"),
@@ -490,7 +491,7 @@ export const guests = sqliteTable("guests", {
 
   // Conversion tracking
   convertedToMemberId: text("converted_to_member_id")
-    .references(() => members.id),
+    .references(() => members.id, { onDelete: "set null" }),
 
   // Status
   status: text("status").notNull().default("active"),   // active, should_join, limit_reached, banned
@@ -501,6 +502,8 @@ export const guests = sqliteTable("guests", {
   updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
 }, (table) => ({
   emailIdx: index("guests_email_idx").on(table.email),
+  createdByIdx: index("guests_created_by_idx").on(table.createdByMemberId),
+  memberEmailIdx: index("guests_member_email_idx").on(table.createdByMemberId, table.email),
 }));
 
 /**
@@ -683,7 +686,7 @@ export const announcements = sqliteTable("announcements", {
   smsSentAt: integer("sms_sent_at", { mode: "timestamp" }),
 
   createdBy: text("created_by")
-    .references(() => members.id),
+    .references(() => members.id, { onDelete: "set null" }),
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
   updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
 }, (table) => ({
@@ -709,7 +712,7 @@ export const documents = sqliteTable("documents", {
   downloadCount: integer("download_count").default(0),
 
   createdBy: text("created_by")
-    .references(() => members.id),
+    .references(() => members.id, { onDelete: "set null" }),
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
   updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
 }, (table) => ({
@@ -744,10 +747,10 @@ export const rangeStatus = sqliteTable("range_status", {
 
   // Calendar sync
   calendarEventId: text("calendar_event_id")
-    .references(() => events.id),
+    .references(() => events.id, { onDelete: "set null" }),
 
   updatedBy: text("updated_by")
-    .references(() => members.id),
+    .references(() => members.id, { onDelete: "set null" }),
   updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
 });
 
@@ -771,12 +774,12 @@ export const volunteerHours = sqliteTable("volunteer_hours", {
   hours: real("hours").notNull(),
   activity: text("activity").notNull(),                 // work_day, match_director, rso, etc.
   eventId: text("event_id")
-    .references(() => events.id),
+    .references(() => events.id, { onDelete: "set null" }),
   notes: text("notes"),
 
   // Verification
   verifiedBy: text("verified_by")
-    .references(() => members.id),
+    .references(() => members.id, { onDelete: "set null" }),
   verifiedAt: integer("verified_at", { mode: "timestamp" }),
 
   // Credit calculation
@@ -822,7 +825,7 @@ export const certifications = sqliteTable("certifications", {
   documentUrl: text("document_url"),                    // Supporting doc
 
   verifiedBy: text("verified_by")
-    .references(() => members.id),
+    .references(() => members.id, { onDelete: "set null" }),
   verifiedAt: integer("verified_at", { mode: "timestamp" }),
 
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
@@ -830,6 +833,8 @@ export const certifications = sqliteTable("certifications", {
 }, (table) => ({
   memberCertIdx: index("certifications_member_cert_idx")
     .on(table.memberId, table.certificationTypeId),
+  memberIdIdx: index("certifications_member_id_idx").on(table.memberId),
+  expiresAtIdx: index("certifications_expires_at_idx").on(table.expiresAt),
 }));
 
 // =============================================================================
@@ -893,7 +898,7 @@ export const disciplineCases = sqliteTable("discipline_cases", {
 
   // Notification (required: certified mail)
   filedBy: text("filed_by")
-    .references(() => members.id),
+    .references(() => members.id, { onDelete: "set null" }),
   filedAt: integer("filed_at", { mode: "timestamp" }).notNull(),
   certifiedMailSentAt: integer("certified_mail_sent_at", { mode: "timestamp" }),
   certifiedMailTracking: text("certified_mail_tracking"),
@@ -932,7 +937,7 @@ export const settings = sqliteTable("settings", {
   description: text("description"),
   category: text("category").notNull(),                 // membership, events, shop, etc.
   updatedBy: text("updated_by")
-    .references(() => members.id),
+    .references(() => members.id, { onDelete: "set null" }),
   updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
 });
 
@@ -943,7 +948,7 @@ export const auditLog = sqliteTable("audit_log", {
   id: text("id").primaryKey(),
 
   userId: text("user_id")
-    .references(() => users.id),
+    .references(() => users.id, { onDelete: "set null" }),
   action: text("action").notNull(),                     // create, update, delete, login, etc.
 
   targetType: text("target_type"),                      // member, event, order, etc.

@@ -25,11 +25,14 @@ export default function ReferralProgram() {
   const [duesCurrent, setDuesCurrent] = useState(false);
 
   useEffect(() => {
+    const abortController = new AbortController();
+
     const fetchData = async () => {
       try {
         // Fetch member status first
         const memberRes = await fetch(`${API_BASE}/api/members/me`, {
           credentials: 'include',
+          signal: abortController.signal,
         });
         if (memberRes.ok) {
           const memberData = await memberRes.json();
@@ -40,20 +43,31 @@ export default function ReferralProgram() {
         // Fetch referral code
         const res = await fetch(`${API_BASE}/api/members/me/referral-code`, {
           credentials: 'include',
+          signal: abortController.signal,
         });
         if (res.ok) {
           setReferralData(await res.json());
         } else if (res.status !== 404) {
           setError('Unable to load referral data');
         }
-      } catch {
+      } catch (err) {
+        // Ignore abort errors (component unmounted)
+        if (err instanceof Error && err.name === 'AbortError') {
+          return;
+        }
         setError('Unable to connect to server');
       } finally {
-        setLoading(false);
+        if (!abortController.signal.aborted) {
+          setLoading(false);
+        }
       }
     };
 
     fetchData();
+
+    return () => {
+      abortController.abort();
+    };
   }, []);
 
   const copyToClipboard = async () => {

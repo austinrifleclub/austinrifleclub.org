@@ -29,6 +29,8 @@ import {
   updateApplicationSchema,
   adminUpdateApplicationSchema,
   paginationSchema,
+  uuidSchema,
+  validStatusTransitions,
 } from "../lib/validation";
 import {
   generateId,
@@ -49,6 +51,7 @@ import {
 } from "../lib/email";
 import { logAudit } from "../lib/audit";
 import { ValidationError, NotFoundError, ConflictError, InternalError } from "../lib/errors";
+import { getPublicUrl, getAdminEmail } from "../lib/config";
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -154,8 +157,8 @@ app.post("/", async (c) => {
   });
 
   // Notify admins of new application
-  const publicUrl = c.env.PUBLIC_URL || 'https://austinrifleclub.org';
-  const adminEmailAddr = c.env.ADMIN_EMAIL || 'membership@austinrifleclub.org';
+  const publicUrl = getPublicUrl(c.env);
+  const adminEmailAddr = getAdminEmail(c.env);
   const adminEmail = adminNotificationEmail(
     'New Membership Application',
     `A new membership application has been submitted by ${firstName} ${lastName} (${email}).`,
@@ -308,8 +311,8 @@ app.post("/mine/submit", requireAuth, async (c) => {
     .returning();
 
   // Notify admin of submission
-  const publicUrl = c.env.PUBLIC_URL || 'https://austinrifleclub.org';
-  const adminEmailAddr = c.env.ADMIN_EMAIL || 'membership@austinrifleclub.org';
+  const publicUrl = getPublicUrl(c.env);
+  const adminEmailAddr = getAdminEmail(c.env);
   const adminEmail = adminNotificationEmail(
     'Application Documents Submitted',
     `Application documents have been submitted and are ready for review.`,
@@ -376,7 +379,7 @@ app.get("/", requireAdmin, async (c) => {
  */
 app.get("/:id", requireAdmin, async (c) => {
   const db = c.get("db");
-  const id = c.req.param("id");
+  const id = uuidSchema.parse(c.req.param("id"));
 
   const application = await db.query.applications.findFirst({
     where: eq(applications.id, id),
@@ -404,7 +407,7 @@ app.get("/:id", requireAdmin, async (c) => {
 app.patch("/:id", requireAdmin, async (c) => {
   const db = c.get("db");
   const admin = c.get("member");
-  const id = c.req.param("id");
+  const id = uuidSchema.parse(c.req.param("id"));
 
   const body = await c.req.json();
   const parsed = adminUpdateApplicationSchema.safeParse(body);
@@ -419,6 +422,17 @@ app.patch("/:id", requireAdmin, async (c) => {
 
   if (!application) {
     throw new NotFoundError("Application", id);
+  }
+
+  // Validate status transition if status is being changed
+  if (parsed.data.status && parsed.data.status !== application.status) {
+    const allowedTransitions = validStatusTransitions[application.status] || [];
+    if (!allowedTransitions.includes(parsed.data.status)) {
+      throw new ValidationError(
+        `Invalid status transition: ${application.status} → ${parsed.data.status}. ` +
+        `Allowed: ${allowedTransitions.join(", ") || "none (terminal state)"}`
+      );
+    }
   }
 
   const [updated] = await db
@@ -466,7 +480,7 @@ app.patch("/:id", requireAdmin, async (c) => {
 app.post("/:id/approve", requireAdmin, async (c) => {
   const db = c.get("db");
   const admin = c.get("member");
-  const id = c.req.param("id");
+  const id = uuidSchema.parse(c.req.param("id"));
 
   const application = await db.query.applications.findFirst({
     where: eq(applications.id, id),
@@ -590,7 +604,7 @@ app.post("/:id/approve", requireAdmin, async (c) => {
 app.post("/:id/reject", requireAdmin, async (c) => {
   const db = c.get("db");
   const admin = c.get("member");
-  const id = c.req.param("id");
+  const id = uuidSchema.parse(c.req.param("id"));
 
   const body = await c.req.json();
   const reason = body.reason as string;

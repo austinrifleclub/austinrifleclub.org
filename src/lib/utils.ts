@@ -30,12 +30,15 @@ export function generateBadgeNumber(lastBadgeNumber: string | null): string {
 /**
  * Generate a referral code for members
  * Format: 8 alphanumeric characters
+ * Uses cryptographically secure random generation
  */
 export function generateReferralCode(): string {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // No I, O, 0, 1 to avoid confusion
+  const randomBytes = new Uint8Array(8);
+  crypto.getRandomValues(randomBytes);
   let code = "";
   for (let i = 0; i < 8; i++) {
-    code += chars.charAt(Math.floor(Math.random() * chars.length));
+    code += chars.charAt(randomBytes[i] % chars.length);
   }
   return code;
 }

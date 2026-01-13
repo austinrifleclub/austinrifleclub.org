@@ -42,6 +42,7 @@ import {
 } from "../lib/utils";
 import { logAudit } from "../lib/audit";
 import { ValidationError, NotFoundError } from "../lib/errors";
+import { getPublicUrl } from "../lib/config";
 
 const app = new Hono<{ Bindings: Env; Variables: MemberContext }>();
 
@@ -178,7 +179,7 @@ app.get("/me/referral-code", requireMember, async (c) => {
       .from(members)
       .where(eq(members.referredBy, member.id));
 
-    const publicUrl = c.env.PUBLIC_URL || 'https://austinrifleclub.org';
+    const publicUrl = getPublicUrl(c.env);
     return c.json({
       code: member.referralCode,
       referralCount: referrals[0]?.count ?? 0,
@@ -193,7 +194,7 @@ app.get("/me/referral-code", requireMember, async (c) => {
     .set({ referralCode: code, updatedAt: new Date() })
     .where(eq(members.id, member.id));
 
-  const publicUrl = c.env.PUBLIC_URL || 'https://austinrifleclub.org';
+  const publicUrl = getPublicUrl(c.env);
   return c.json({
     code,
     referralCount: 0,
@@ -302,7 +303,11 @@ app.get("/", requireAdmin, async (c) => {
   const status = query.status;
   const search = query.search;
   const membershipType = query.type;
-  const expiresWithin = query.expiresWithin ? parseInt(query.expiresWithin, 10) : undefined;
+  const expiresWithinRaw = query.expiresWithin ? parseInt(query.expiresWithin, 10) : undefined;
+  // Validate expiresWithin is reasonable (1-365 days)
+  const expiresWithin = expiresWithinRaw && !Number.isNaN(expiresWithinRaw) && expiresWithinRaw >= 1 && expiresWithinRaw <= 365
+    ? expiresWithinRaw
+    : undefined;
   const expiredAfter = query.expiredAfter;
   const hasCertification = query.hasCertification;
   const hasVolunteerHours = query.hasVolunteerHours;
@@ -546,7 +551,8 @@ app.patch("/:id", requireAdmin, async (c) => {
  */
 app.get("/reports/expiring", requireAdmin, async (c) => {
   const db = c.get("db");
-  const daysAhead = parseInt(c.req.query("days") ?? "30", 10);
+  const daysParam = parseInt(c.req.query("days") ?? "30", 10);
+  const daysAhead = Number.isNaN(daysParam) ? 30 : Math.max(1, Math.min(365, daysParam));
 
   const cutoffDate = new Date();
   cutoffDate.setDate(cutoffDate.getDate() + daysAhead);

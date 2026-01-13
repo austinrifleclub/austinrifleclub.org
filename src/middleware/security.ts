@@ -5,6 +5,11 @@
  */
 
 import type { Context, Next } from 'hono';
+import { ValidationError } from '../lib/errors';
+
+// Maximum request body sizes (in bytes)
+const MAX_JSON_BODY_SIZE = 1024 * 1024; // 1MB for JSON
+const MAX_FORM_BODY_SIZE = 10 * 1024 * 1024; // 10MB for form uploads
 
 /**
  * Security headers middleware
@@ -169,4 +174,32 @@ export function validateHoneypot(data: Record<string, unknown>): boolean {
   }
 
   return true; // Passed honeypot check
+}
+
+/**
+ * Request body size limit middleware
+ * Prevents DoS attacks via extremely large payloads
+ */
+export function bodySizeLimit() {
+  return async (c: Context, next: Next) => {
+    const contentLength = c.req.header('content-length');
+    const contentType = c.req.header('content-type') || '';
+
+    if (contentLength) {
+      const size = parseInt(contentLength, 10);
+
+      // Determine max size based on content type
+      const maxSize = contentType.includes('multipart/form-data')
+        ? MAX_FORM_BODY_SIZE
+        : MAX_JSON_BODY_SIZE;
+
+      if (!Number.isNaN(size) && size > maxSize) {
+        throw new ValidationError(
+          `Request body too large. Maximum size is ${Math.round(maxSize / 1024 / 1024)}MB`
+        );
+      }
+    }
+
+    await next();
+  };
 }

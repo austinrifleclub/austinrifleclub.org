@@ -15,9 +15,31 @@ interface EventTemplate {
   eventType: string;
   location: string | null;
   rangeIds: string | null;
-  recurrenceRule: string;
+  isRecurring: number;
+  recurrenceRule: string | null;
   mecPostId: number;
   mecSourceUrl: string;
+}
+
+interface EventOccurrence {
+  id: string;
+  title: string;
+  description: string | null;
+  eventType: string;
+  startTime: number;
+  endTime: number;
+  location: string | null;
+  rangeIds: string | null;
+  isRecurring: number;
+  recurrenceRule: null;
+  parentEventId: string;
+  occurrenceDate: number;
+  mecPostId: number;
+  mecSourceUrl: string;
+  isPublic: number;
+  status: string;
+  createdAt: number;
+  updatedAt: number;
 }
 
 // Default event times by type (hour in 24h format)
@@ -43,7 +65,7 @@ async function main() {
   const allTemplates = JSON.parse(templatesData);
 
   // Filter to only recurring templates
-  const recurringTemplates = allTemplates.filter((t: any) => t.isRecurring && t.recurrenceRule);
+  const recurringTemplates = (allTemplates as EventTemplate[]).filter((t) => t.isRecurring && t.recurrenceRule);
 
   console.log(`Found ${recurringTemplates.length} recurring templates\n`);
 
@@ -51,7 +73,7 @@ async function main() {
   const startDate = new Date('2025-01-01T00:00:00');
   const endDate = new Date('2026-12-31T23:59:59');
 
-  const occurrences: any[] = [];
+  const occurrences: EventOccurrence[] = [];
   const now = new Date();
 
   for (const template of recurringTemplates) {
@@ -101,7 +123,7 @@ async function main() {
   }
 
   // Also add non-recurring templates as single events (with placeholder dates spread across 2025-2026)
-  const nonRecurring = allTemplates.filter((t: any) => !t.isRecurring);
+  const nonRecurring = (allTemplates as EventTemplate[]).filter((t) => !t.isRecurring);
   console.log(`\nAdding ${nonRecurring.length} non-recurring events as templates...`);
 
   // For non-recurring, we'll create them as "draft" templates that can be scheduled later

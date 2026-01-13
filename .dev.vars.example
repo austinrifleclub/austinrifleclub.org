@@ -1,6 +1,35 @@
 # Copy this file to .dev.vars and fill in the values
 # This file is used by wrangler for local development
+# See wrangler.toml for non-sensitive configuration
 
-# Required: Secret for better-auth session encryption
+# =============================================================================
+# REQUIRED
+# =============================================================================
+
+# Secret for better-auth session encryption
 # Generate with: openssl rand -base64 32
 BETTER_AUTH_SECRET=your-secret-here-generate-with-openssl-rand-base64-32
+
+# =============================================================================
+# OPTIONAL (for full functionality)
+# =============================================================================
+
+# Stripe (for payments)
+# Get from: https://dashboard.stripe.com/test/apikeys
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+
+# Resend (for emails)
+# Get from: https://resend.com/api-keys
+RESEND_API_KEY=re_...
+
+# Twilio (for SMS)
+# Get from: https://console.twilio.com
+TWILIO_ACCOUNT_SID=AC...
+TWILIO_AUTH_TOKEN=...
+FROM_PHONE=+15125550100
+
+# Google OAuth (optional)
+# Get from: https://console.cloud.google.com/apis/credentials
+GOOGLE_CLIENT_ID=...
+GOOGLE_CLIENT_SECRET=...

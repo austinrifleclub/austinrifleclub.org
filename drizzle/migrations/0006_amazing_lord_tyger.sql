@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX `dues_payments_stripe_payment_idx` ON `dues_payments` (`stripe_payment_id`);

@@ -40,13 +40,18 @@ export default function ApplicationsManager() {
       const params = new URLSearchParams();
       if (statusFilter !== 'all') params.set('status', statusFilter);
 
-      const response = await fetch(`${API_BASE}/api/applications?${params}`);
+      const response = await fetch(`${API_BASE}/api/applications?${params}`, {
+        credentials: 'include',
+      });
       if (response.ok) {
         const data = await response.json();
         setApplications(data.applications || []);
+      } else {
+        setMessage({ type: 'error', text: 'Failed to load applications' });
       }
-    } catch {
-      // silent
+    } catch (error) {
+      console.error('Applications fetch error:', error);
+      setMessage({ type: 'error', text: 'Unable to connect to server' });
     } finally {
       setLoading(false);
     }
@@ -64,6 +69,7 @@ export default function ApplicationsManager() {
       const response = await fetch(`${API_BASE}/api/applications/${appId}/${action}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
       });
 
       if (response.ok) {
@@ -72,10 +78,13 @@ export default function ApplicationsManager() {
         setSelectedApp(null);
         fetchApplications();
       } else {
-        throw new Error('Failed to process');
+        const errorData = await response.json().catch(() => ({}));
+        const errorMsg = errorData.error?.message || errorData.error || 'Failed to process';
+        throw new Error(errorMsg);
       }
     } catch (error) {
-      setMessage({ type: 'error', text: 'Failed to process application' });
+      const errorMessage = error instanceof Error ? error.message : 'Failed to process application';
+      setMessage({ type: 'error', text: errorMessage });
     } finally {
       setProcessing(false);
     }

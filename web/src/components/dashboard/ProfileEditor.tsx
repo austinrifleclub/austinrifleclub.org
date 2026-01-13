@@ -21,13 +21,15 @@ interface MemberProfile {
   inGracePeriod: boolean;
   email?: string;
   phone?: string;
-  address?: string;
+  addressLine1?: string;
+  addressLine2?: string;
   city?: string;
   state?: string;
   zip?: string;
-  emergencyContact?: string;
-  emergencyPhone?: string;
-  nraNumber?: string;
+  emergencyContactName?: string;
+  emergencyContactPhone?: string;
+  vehicleDescription?: string;
+  licensePlate?: string;
 }
 
 export default function ProfileEditor() {
@@ -36,15 +38,17 @@ export default function ProfileEditor() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
-  // Form fields
+  // Form fields - must match API schema (updateMemberSchema)
   const [phone, setPhone] = useState('');
-  const [address, setAddress] = useState('');
+  const [addressLine1, setAddressLine1] = useState('');
+  const [addressLine2, setAddressLine2] = useState('');
   const [city, setCity] = useState('');
   const [state, setState] = useState('');
   const [zip, setZip] = useState('');
-  const [emergencyContact, setEmergencyContact] = useState('');
-  const [emergencyPhone, setEmergencyPhone] = useState('');
-  const [nraNumber, setNraNumber] = useState('');
+  const [emergencyContactName, setEmergencyContactName] = useState('');
+  const [emergencyContactPhone, setEmergencyContactPhone] = useState('');
+  const [vehicleDescription, setVehicleDescription] = useState('');
+  const [licensePlate, setLicensePlate] = useState('');
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -57,16 +61,19 @@ export default function ProfileEditor() {
           setProfile(data);
           // Initialize form fields
           setPhone(data.phone || '');
-          setAddress(data.address || '');
+          setAddressLine1(data.addressLine1 || '');
+          setAddressLine2(data.addressLine2 || '');
           setCity(data.city || '');
           setState(data.state || '');
           setZip(data.zip || '');
-          setEmergencyContact(data.emergencyContact || '');
-          setEmergencyPhone(data.emergencyPhone || '');
-          setNraNumber(data.nraNumber || '');
+          setEmergencyContactName(data.emergencyContactName || '');
+          setEmergencyContactPhone(data.emergencyContactPhone || '');
+          setVehicleDescription(data.vehicleDescription || '');
+          setLicensePlate(data.licensePlate || '');
         }
-      } catch {
-        // Profile will remain empty, user can enter new data
+      } catch (err) {
+        console.error('Failed to load profile:', err);
+        setMessage({ type: 'error', text: 'Failed to load profile data' });
       } finally {
         setLoading(false);
       }
@@ -88,24 +95,29 @@ export default function ProfileEditor() {
         },
         credentials: 'include',
         body: JSON.stringify({
-          phone,
-          address,
-          city,
-          state,
-          zip,
-          emergencyContact,
-          emergencyPhone,
-          nraNumber,
+          phone: phone || undefined,
+          addressLine1: addressLine1 || undefined,
+          addressLine2: addressLine2 || undefined,
+          city: city || undefined,
+          state: state || undefined,
+          zip: zip || undefined,
+          emergencyContactName: emergencyContactName || undefined,
+          emergencyContactPhone: emergencyContactPhone || undefined,
+          vehicleDescription: vehicleDescription || undefined,
+          licensePlate: licensePlate || undefined,
         }),
       });
 
       if (!res.ok) {
-        throw new Error('Failed to update profile');
+        const errorData = await res.json().catch(() => ({}));
+        const errorMsg = errorData.error?.message || errorData.error || 'Failed to update profile';
+        throw new Error(errorMsg);
       }
 
       setMessage({ type: 'success', text: 'Profile updated successfully!' });
     } catch (err) {
-      setMessage({ type: 'error', text: 'Failed to update profile. Please try again.' });
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update profile. Please try again.';
+      setMessage({ type: 'error', text: errorMessage });
     } finally {
       setSaving(false);
     }
@@ -185,26 +197,27 @@ export default function ProfileEditor() {
               />
             </div>
 
-            <div>
-              <label className="form-label">NRA Number (Optional)</label>
-              <input
-                type="text"
-                value={nraNumber}
-                onChange={(e) => setNraNumber(e.target.value)}
-                className="form-input w-full"
-                placeholder="NRA membership number"
-              />
-            </div>
           </div>
 
           <div className="mb-4">
             <label className="form-label">Street Address</label>
             <input
               type="text"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
+              value={addressLine1}
+              onChange={(e) => setAddressLine1(e.target.value)}
               className="form-input w-full"
               placeholder="123 Main St"
+            />
+          </div>
+
+          <div className="mb-4">
+            <label className="form-label">Address Line 2 (Optional)</label>
+            <input
+              type="text"
+              value={addressLine2}
+              onChange={(e) => setAddressLine2(e.target.value)}
+              className="form-input w-full"
+              placeholder="Apt, Suite, Unit, etc."
             />
           </div>
 
@@ -248,8 +261,8 @@ export default function ProfileEditor() {
               <label className="form-label">Contact Name</label>
               <input
                 type="text"
-                value={emergencyContact}
-                onChange={(e) => setEmergencyContact(e.target.value)}
+                value={emergencyContactName}
+                onChange={(e) => setEmergencyContactName(e.target.value)}
                 className="form-input w-full"
                 placeholder="Jane Doe"
               />
@@ -258,10 +271,34 @@ export default function ProfileEditor() {
               <label className="form-label">Contact Phone</label>
               <input
                 type="tel"
-                value={emergencyPhone}
-                onChange={(e) => setEmergencyPhone(e.target.value)}
+                value={emergencyContactPhone}
+                onChange={(e) => setEmergencyContactPhone(e.target.value)}
                 className="form-input w-full"
                 placeholder="(512) 555-5678"
+              />
+            </div>
+          </div>
+
+          <h3 className="font-medium text-primary mb-3">Vehicle Information (Optional)</h3>
+          <div className="grid md:grid-cols-2 gap-4 mb-6">
+            <div>
+              <label className="form-label">Vehicle Description</label>
+              <input
+                type="text"
+                value={vehicleDescription}
+                onChange={(e) => setVehicleDescription(e.target.value)}
+                className="form-input w-full"
+                placeholder="Blue Ford F-150"
+              />
+            </div>
+            <div>
+              <label className="form-label">License Plate</label>
+              <input
+                type="text"
+                value={licensePlate}
+                onChange={(e) => setLicensePlate(e.target.value)}
+                className="form-input w-full"
+                placeholder="ABC-1234"
               />
             </div>
           </div>

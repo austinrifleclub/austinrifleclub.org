@@ -20,13 +20,17 @@ interface Event {
   isPublic: boolean;
 }
 
+// Event types must match backend validation schema
 const eventTypes = [
   { value: 'match', label: 'Match' },
   { value: 'class', label: 'Class' },
-  { value: 'meeting', label: 'Meeting' },
-  { value: 'workday', label: 'Work Day' },
-  { value: 'social', label: 'Social' },
-  { value: 'other', label: 'Other' },
+  { value: 'arc_education', label: 'Education' },
+  { value: 'arc_event', label: 'Club Event' },
+  { value: 'arc_meeting', label: 'Meeting' },
+  { value: 'organized_practice', label: 'Organized Practice' },
+  { value: 'work_day', label: 'Work Day' },
+  { value: 'youth_event', label: 'Youth Event' },
+  { value: 'range_unavailable', label: 'Range Unavailable' },
 ];
 
 const emptyEvent: Omit<Event, 'id'> = {
@@ -51,13 +55,19 @@ export default function EventsManager() {
 
   const fetchEvents = async () => {
     try {
-      const response = await fetch(`${API_BASE}/api/events`);
+      const response = await fetch(`${API_BASE}/api/events`, {
+        credentials: 'include',
+      });
       if (response.ok) {
         const data = await response.json();
         setEvents(data.events || []);
+      } else {
+        console.error('Failed to fetch events:', response.status, response.statusText);
+        setMessage({ type: 'error', text: 'Failed to load events. Please refresh the page.' });
       }
-    } catch {
-      // silent
+    } catch (error) {
+      console.error('Error fetching events:', error);
+      setMessage({ type: 'error', text: 'Unable to connect to server. Please check your connection.' });
     } finally {
       setLoading(false);
     }
@@ -79,6 +89,7 @@ export default function EventsManager() {
       const response = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify(editingEvent),
       });
 
@@ -88,10 +99,13 @@ export default function EventsManager() {
         setIsCreating(false);
         fetchEvents();
       } else {
-        throw new Error('Failed to save');
+        const errorData = await response.json().catch(() => ({}));
+        const errorMsg = errorData.error?.message || errorData.error || `Failed to save (${response.status})`;
+        throw new Error(errorMsg);
       }
     } catch (error) {
-      setMessage({ type: 'error', text: 'Failed to save event' });
+      const errorMessage = error instanceof Error ? error.message : 'Failed to save event';
+      setMessage({ type: 'error', text: errorMessage });
     } finally {
       setSaving(false);
     }
@@ -101,13 +115,21 @@ export default function EventsManager() {
     if (!confirm('Are you sure you want to delete this event?')) return;
 
     try {
-      const response = await fetch(`${API_BASE}/api/events/${id}`, { method: 'DELETE' });
+      const response = await fetch(`${API_BASE}/api/events/${id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
       if (response.ok) {
         setMessage({ type: 'success', text: 'Event deleted successfully' });
         fetchEvents();
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        const errorMsg = errorData.error?.message || errorData.error || `Failed to delete (${response.status})`;
+        setMessage({ type: 'error', text: errorMsg });
       }
     } catch (error) {
-      setMessage({ type: 'error', text: 'Failed to delete event' });
+      console.error('Error deleting event:', error);
+      setMessage({ type: 'error', text: 'Failed to delete event. Please try again.' });
     }
   };
 

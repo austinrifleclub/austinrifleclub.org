@@ -24,6 +24,8 @@ import {
   updateEventSchema,
   eventRegistrationSchema,
   eventsQuerySchema,
+  cancelEventSchema,
+  uuidSchema,
 } from "../lib/validation";
 import { generateId } from "../lib/utils";
 import {
@@ -44,6 +46,7 @@ import {
   type AccessContext,
 } from "../lib/eventAccess";
 import { ValidationError, NotFoundError, ConflictError, ForbiddenError } from "../lib/errors";
+import { getPublicUrl } from "../lib/config";
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -141,7 +144,7 @@ app.get("/", optionalAuth, async (c) => {
 app.get("/:id", optionalAuth, async (c) => {
   const db = c.get("db")!;
   const user = c.get("user");
-  const id = c.req.param("id");
+  const id = uuidSchema.parse(c.req.param("id"));
 
   const event = await db.query.events.findFirst({
     where: eq(events.id, id),
@@ -238,20 +241,6 @@ app.post("/:id/register", requireMember, async (c) => {
     throw new ConflictError("Already registered for this event", { registration: existing });
   }
 
-  // Check capacity
-  const [countResult] = await db
-    .select({ count: sql<number>`COUNT(*)` })
-    .from(eventRegistrations)
-    .where(
-      and(
-        eq(eventRegistrations.eventId, eventId),
-        eq(eventRegistrations.status, "registered")
-      )
-    );
-
-  const currentCount = countResult?.count ?? 0;
-  const isFull = !!(event.maxParticipants && currentCount >= event.maxParticipants);
-
   // Parse optional body for division/classification
   let division: string | undefined;
   let classification: string | undefined;
@@ -264,6 +253,8 @@ app.post("/:id/register", requireMember, async (c) => {
     // No body is fine
   }
 
+  // Insert registration first, then verify capacity (handles race condition)
+  // This approach: insert as registered, then check if over capacity and update to waitlist
   const registrationId = generateId();
   const [registration] = await db
     .insert(eventRegistrations)
@@ -271,14 +262,43 @@ app.post("/:id/register", requireMember, async (c) => {
       id: registrationId,
       eventId,
       memberId: member.id,
-      status: isFull ? "waitlisted" : "registered",
-      waitlistPosition: isFull ? currentCount - (event.maxParticipants ?? 0) + 1 : null,
+      status: "registered", // Optimistically register
       division,
       classification,
       createdAt: new Date(),
       updatedAt: new Date(),
     })
     .returning();
+
+  // Now check actual count including our insert (atomic read)
+  const [countResult] = await db
+    .select({ count: sql<number>`COUNT(*)` })
+    .from(eventRegistrations)
+    .where(
+      and(
+        eq(eventRegistrations.eventId, eventId),
+        eq(eventRegistrations.status, "registered")
+      )
+    );
+
+  const currentCount = countResult?.count ?? 0;
+  const isFull = !!(event.maxParticipants && currentCount > event.maxParticipants);
+
+  // If over capacity, move this registration to waitlist
+  if (isFull) {
+    const waitlistPosition = currentCount - (event.maxParticipants ?? 0);
+    await db
+      .update(eventRegistrations)
+      .set({
+        status: "waitlisted",
+        waitlistPosition,
+        updatedAt: new Date(),
+      })
+      .where(eq(eventRegistrations.id, registrationId));
+
+    registration.status = "waitlisted";
+    registration.waitlistPosition = waitlistPosition;
+  }
 
   // Send confirmation email
   const emailTemplate = eventRegistrationEmail(
@@ -358,7 +378,7 @@ app.delete("/:id/register", requireMember, async (c) => {
     .where(eq(eventRegistrations.id, registration.id));
 
   const refundAmount = registration.amountPaid
-    ? Math.floor((registration.amountPaid * refundPercent) / 100)
+    ? Math.round((registration.amountPaid * refundPercent) / 100)
     : 0;
 
   // Send cancellation confirmation
@@ -619,7 +639,13 @@ app.post("/:id/cancel", requireAdmin, async (c) => {
   const id = c.req.param("id");
 
   const body = await c.req.json();
-  const reason = body.reason as string;
+  const parsed = cancelEventSchema.safeParse(body);
+
+  if (!parsed.success) {
+    throw new ValidationError("Validation failed", parsed.error.issues);
+  }
+
+  const { reason } = parsed.data;
 
   const [updated] = await db
     .update(events)
@@ -843,7 +869,7 @@ app.get("/calendar.ics", optionalAuth, async (c) => {
       .replace(/\n/g, '\\n');
   };
 
-  const publicUrl = c.env.PUBLIC_URL || 'https://austinrifleclub.org';
+  const publicUrl = getPublicUrl(c.env);
   const domain = new URL(publicUrl).hostname;
 
   const icsEvents = eventList.map((event) => {

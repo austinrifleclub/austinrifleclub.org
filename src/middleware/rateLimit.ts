@@ -111,3 +111,12 @@ export const publicRateLimit = rateLimit({
   windowSeconds: 60, // 300 requests per minute
   keyPrefix: 'ratelimit:public',
 });
+
+/**
+ * Strict rate limit for file uploads (prevent storage abuse)
+ */
+export const uploadRateLimit = rateLimit({
+  limit: 10,
+  windowSeconds: 60, // 10 uploads per minute
+  keyPrefix: 'ratelimit:upload',
+});

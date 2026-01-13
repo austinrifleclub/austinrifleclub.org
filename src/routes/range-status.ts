@@ -26,7 +26,7 @@ import {
 } from "../middleware/auth";
 import { createDb } from "../db";
 import { rangeStatus, events, notificationPreferences, members } from "../db/schema";
-import { updateRangeStatusSchema } from "../lib/validation";
+import { updateRangeStatusSchema, closeRangeSchema, safetyAlertSchema } from "../lib/validation";
 import { logAudit } from "../lib/audit";
 import {
   sendSMS,
@@ -257,13 +257,13 @@ app.post("/:id/close", requireAdmin, async (c) => {
   const id = c.req.param("id");
 
   const body = await c.req.json();
-  const reason = body.reason as string;
-  const duration = body.duration as number; // Minutes
-  const sendNotifications = body.sendNotifications !== false;
+  const parsed = closeRangeSchema.safeParse(body);
 
-  if (!reason) {
-    throw new ValidationError("Reason required");
+  if (!parsed.success) {
+    throw new ValidationError("Validation failed", parsed.error.issues);
   }
+
+  const { reason, duration, sendNotifications } = parsed.data;
 
   // Get current status for audit log
   const existing = await db.query.rangeStatus.findFirst({
@@ -338,7 +338,10 @@ app.post("/:id/open", requireAdmin, async (c) => {
   const admin = c.get("member");
   const id = c.req.param("id");
 
-  const body = await c.req.json().catch(() => ({}));
+  const body = await c.req.json().catch((err) => {
+    log.debug('Failed to parse request body in range open endpoint', { error: err instanceof Error ? err.message : String(err) });
+    return {};
+  });
   const sendNotifications = body.sendNotifications !== false;
 
   // Get current status for audit log
@@ -625,15 +628,13 @@ app.post("/safety-alert", requireAdmin, async (c) => {
   const admin = c.get("member");
 
   const body = await c.req.json();
-  const message = body.message as string;
+  const parsed = safetyAlertSchema.safeParse(body);
 
-  if (!message) {
-    throw new ValidationError("Message required");
+  if (!parsed.success) {
+    throw new ValidationError("Validation failed", parsed.error.issues);
   }
 
-  if (message.length > 140) {
-    throw new ValidationError("Message too long (max 140 characters)");
-  }
+  const { message } = parsed.data;
 
   // Get all notification preferences with safetyAlerts SMS enabled
   const prefs = await db.query.notificationPreferences.findMany() as NotificationPref[];

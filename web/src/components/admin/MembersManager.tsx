@@ -41,13 +41,18 @@ export default function MembersManager() {
       if (search) params.set('search', search);
       if (statusFilter !== 'all') params.set('status', statusFilter);
 
-      const response = await fetch(`${API_BASE}/api/members?${params}`);
+      const response = await fetch(`${API_BASE}/api/members?${params}`, {
+        credentials: 'include',
+      });
       if (response.ok) {
         const data = await response.json();
         setMembers(data.members || []);
+      } else {
+        setMessage({ type: 'error', text: 'Failed to load members' });
       }
-    } catch {
-      // silent
+    } catch (error) {
+      console.error('Members fetch error:', error);
+      setMessage({ type: 'error', text: 'Unable to connect to server' });
     } finally {
       setLoading(false);
     }
@@ -62,6 +67,7 @@ export default function MembersManager() {
       const response = await fetch(`${API_BASE}/api/members/${memberId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ membershipStatus: newStatus }),
       });
 
@@ -70,10 +76,13 @@ export default function MembersManager() {
         fetchMembers();
         setSelectedMember(null);
       } else {
-        throw new Error('Failed to update');
+        const errorData = await response.json().catch(() => ({}));
+        const errorMsg = errorData.error?.message || errorData.error || 'Failed to update';
+        throw new Error(errorMsg);
       }
     } catch (error) {
-      setMessage({ type: 'error', text: 'Failed to update member status' });
+      const errorMessage = error instanceof Error ? error.message : 'Failed to update member status';
+      setMessage({ type: 'error', text: errorMessage });
     }
   };
 

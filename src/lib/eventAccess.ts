@@ -13,6 +13,7 @@ import { DrizzleD1Database } from "drizzle-orm/d1";
 import type { Event, Member, Certification } from "../db/schema";
 import { members, certifications, boardMembers } from "../db/schema";
 import type * as schema from "../db/schema";
+import { log } from "./logger";
 
 type DbType = DrizzleD1Database<typeof schema>;
 
@@ -163,12 +164,12 @@ export function canRegisterForEvent(event: Event, ctx: AccessContext): Registrat
       requiredCerts = JSON.parse(event.requiresCertification);
       if (!Array.isArray(requiredCerts)) {
         // Log warning for malformed data but continue
-        console.warn(`Event ${event.id} has non-array requiresCertification: ${event.requiresCertification}`);
+        log.warn('Event has non-array requiresCertification', { eventId: event.id, value: event.requiresCertification });
         requiredCerts = [];
       }
     } catch {
       // Log warning for corrupted data but allow registration to proceed
-      console.warn(`Event ${event.id} has invalid JSON in requiresCertification: ${event.requiresCertification}`);
+      log.warn('Event has invalid JSON in requiresCertification', { eventId: event.id, value: event.requiresCertification });
       requiredCerts = [];
     }
 

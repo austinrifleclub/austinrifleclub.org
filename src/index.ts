@@ -5,7 +5,7 @@ import { createAuth, Env } from "./lib/auth";
 import openApiSpec from "./openapi.json";
 import { requestLogger, log } from "./lib/logger";
 import { errorHandler, notFoundHandler } from "./lib/errors";
-import { securityHeaders, requestId } from "./middleware/security";
+import { securityHeaders, requestId, bodySizeLimit } from "./middleware/security";
 import { authRateLimit, apiRateLimit, publicRateLimit } from "./middleware/rateLimit";
 
 /**
@@ -60,6 +60,7 @@ app.use("*", async (c, next) => {
 // Global middleware
 app.use("*", requestId()); // Add request ID for tracing
 app.use("*", securityHeaders()); // Add security headers
+app.use("*", bodySizeLimit()); // Limit request body size
 app.use("*", logger()); // Keep Hono's logger for development
 app.use("*", requestLogger()); // Add structured JSON logging
 // CORS middleware - origins configured via environment variables
@@ -87,6 +88,12 @@ app.route("/health", healthRoutes);
 // Public endpoints with lenient rate limiting
 app.use("/api/range-status/*", publicRateLimit);
 app.use("/api/events", publicRateLimit); // GET events list is public
+
+// Applications endpoint with rate limiting (public but sensitive)
+app.use("/api/applications", authRateLimit);
+
+// Guest routes with API rate limiting (prevent spam)
+app.use("/api/guests/*", apiRateLimit);
 
 // Auth endpoints with strict rate limiting
 app.use("/api/auth/*", authRateLimit);

@@ -5,6 +5,7 @@
  */
 
 import { log } from './logger';
+import { DEFAULTS } from './config';
 
 /**
  * Escape HTML special characters to prevent XSS in email templates
@@ -31,16 +32,30 @@ interface ResendResponse {
   error?: string;
 }
 
-const DEFAULT_FROM_EMAIL = 'Austin Rifle Club <noreply@austinrifleclub.org>';
+const DEFAULT_FROM_EMAIL = DEFAULTS.FROM_EMAIL;
 
 export async function sendEmail(
   apiKey: string,
   options: EmailOptions
 ): Promise<{ success: boolean; id?: string; error?: string }> {
   const fromEmail = options.fromEmail || DEFAULT_FROM_EMAIL;
+
+  // Validate API key exists
   if (!apiKey) {
-    log.debug('Email not sent (no API key)', { to: options.to, subject: options.subject });
+    log.warn('Email not sent - RESEND_API_KEY not configured', {
+      to: options.to,
+      subject: options.subject,
+      hint: 'Set RESEND_API_KEY environment variable to enable email sending'
+    });
     return { success: true, id: 'dev-mode' };
+  }
+
+  // Validate API key format (Resend keys start with 're_')
+  if (!apiKey.startsWith('re_')) {
+    log.error('Invalid RESEND_API_KEY format', new Error('API key should start with re_'), {
+      to: options.to
+    });
+    return { success: false, error: 'Invalid API key configuration' };
   }
 
   try {

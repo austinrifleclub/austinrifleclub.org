@@ -81,7 +81,10 @@ app.get("/history", requireMember, async (c) => {
 
   let whereClause = eq(volunteerHours.memberId, member.id);
   if (fiscalYear) {
-    whereClause = and(whereClause, eq(volunteerHours.fiscalYear, parseInt(fiscalYear)))!;
+    const parsedYear = parseInt(fiscalYear, 10);
+    if (!Number.isNaN(parsedYear) && parsedYear >= 2000 && parsedYear <= 2100) {
+      whereClause = and(whereClause, eq(volunteerHours.fiscalYear, parsedYear))!;
+    }
   }
 
   const hours = await db.query.volunteerHours.findMany({
@@ -326,7 +329,10 @@ app.get("/member/:id", requireAdmin, async (c) => {
 
   let whereClause = eq(volunteerHours.memberId, memberId);
   if (fiscalYear) {
-    whereClause = and(whereClause, eq(volunteerHours.fiscalYear, parseInt(fiscalYear)))!;
+    const parsedYear = parseInt(fiscalYear, 10);
+    if (!Number.isNaN(parsedYear) && parsedYear >= 2000 && parsedYear <= 2100) {
+      whereClause = and(whereClause, eq(volunteerHours.fiscalYear, parsedYear))!;
+    }
   }
 
   const hours = await db.query.volunteerHours.findMany({

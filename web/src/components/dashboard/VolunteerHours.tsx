@@ -59,8 +59,8 @@ export default function VolunteerHours() {
         setEntries(data.entries || []);
         setStats(data.stats || { totalHours: 0, totalCredits: 0, pendingHours: 0 });
       }
-    } catch {
-      // silent
+    } catch (err) {
+      console.error('Failed to load volunteer data:', err);
     } finally {
       setLoading(false);
     }

@@ -8,6 +8,7 @@ import { Hono } from "hono";
 import { eq, and } from "drizzle-orm";
 import { Env } from "../lib/auth";
 import { requireAuth, requireAdmin, optionalAuth, AuthContext } from "../middleware/auth";
+import { uploadRateLimit } from "../middleware/rateLimit";
 import { createDb } from "../db";
 import { applications, documents } from "../db/schema";
 import { generateId } from "../lib/utils";
@@ -15,6 +16,9 @@ import { logAudit } from "../lib/audit";
 import { ValidationError, NotFoundError } from "../lib/errors";
 
 const app = new Hono<{ Bindings: Env & { R2: R2Bucket } }>();
+
+// Apply rate limiting to all upload endpoints
+app.use("*", uploadRateLimit);
 
 // Allowed file types with MIME types AND extensions for security
 const ALLOWED_TYPES: Record<string, { mimes: string[]; extensions: string[]; maxSize: number }> = {

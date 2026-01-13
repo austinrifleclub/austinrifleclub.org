@@ -72,8 +72,8 @@ export default function GuestSignIn() {
         if (res.ok) {
           setGuests(await res.json());
         }
-      } catch {
-        // silent
+      } catch (err) {
+        console.error('Failed to load guests:', err);
       } finally {
         setLoading(false);
       }

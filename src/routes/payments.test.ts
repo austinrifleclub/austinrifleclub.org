@@ -70,7 +70,60 @@ describe('Payments API', () => {
         }),
       }, mockEnv);
 
+      // Should fail - missing signature
+      expect([400, 401, 500]).toContain(response.status);
+    });
+
+    it('should reject requests with invalid stripe signature', async () => {
+      const response = await app.request('/api/payments/webhook', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'stripe-signature': 't=invalid,v1=invalid',
+        },
+        body: JSON.stringify({
+          type: 'checkout.session.completed',
+          data: { object: {} },
+        }),
+      }, mockEnv);
+
       // Should fail signature verification
+      expect([400, 401, 500]).toContain(response.status);
+    });
+
+    it('should reject requests with expired timestamp', async () => {
+      // Timestamp from 10 minutes ago (beyond 5 min tolerance)
+      const oldTimestamp = Math.floor(Date.now() / 1000) - 600;
+      const response = await app.request('/api/payments/webhook', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'stripe-signature': `t=${oldTimestamp},v1=fakesignature`,
+        },
+        body: JSON.stringify({
+          type: 'checkout.session.completed',
+          data: { object: {} },
+        }),
+      }, mockEnv);
+
+      // Should fail - timestamp too old
+      expect([400, 401, 500]).toContain(response.status);
+    });
+
+    it('should reject malformed signature header', async () => {
+      const response = await app.request('/api/payments/webhook', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'stripe-signature': 'malformed-header-no-parts',
+        },
+        body: JSON.stringify({
+          type: 'checkout.session.completed',
+          data: { object: {} },
+        }),
+      }, mockEnv);
+
+      // Should fail - can't parse signature
       expect([400, 401, 500]).toContain(response.status);
     });
   });

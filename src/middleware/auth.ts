@@ -59,7 +59,7 @@ export const requireMember: MiddlewareHandler<{ Bindings: Env; Variables: Member
   });
 
   if (!member) {
-    return c.json({ error: "Member profile not found" }, 403);
+    return c.json({ error: "Member profile not found. Please complete your membership application." }, 404);
   }
 
   // Check member is active or probationary
@@ -96,7 +96,7 @@ export const requireAdmin: MiddlewareHandler<{ Bindings: Env; Variables: MemberC
   });
 
   if (!member) {
-    return c.json({ error: "Member profile not found" }, 403);
+    return c.json({ error: "Member profile not found" }, 404);
   }
 
   // Check if member is on the board (has a current board position)

@@ -46,20 +46,26 @@ export default function DashboardHome() {
   const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([]);
   const [rangeStatus, setRangeStatus] = useState<RangeStatus[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    const abortController = new AbortController();
+
     const fetchData = async () => {
       try {
         // Fetch member profile
         const memberRes = await fetch(`${API_BASE}/api/members/me`, {
           credentials: 'include',
+          signal: abortController.signal,
         });
         if (memberRes.ok) {
           setMember(await memberRes.json());
         }
 
         // Fetch range status
-        const rangeRes = await fetch(`${API_BASE}/api/range-status`);
+        const rangeRes = await fetch(`${API_BASE}/api/range-status`, {
+          signal: abortController.signal,
+        });
         if (rangeRes.ok) {
           const data = await rangeRes.json();
           setRangeStatus(data.ranges || []);
@@ -68,6 +74,7 @@ export default function DashboardHome() {
         // Fetch member's registered events
         const eventsRes = await fetch(`${API_BASE}/api/events/my-registrations`, {
           credentials: 'include',
+          signal: abortController.signal,
         });
         if (eventsRes.ok) {
           const data = await eventsRes.json();
@@ -78,15 +85,25 @@ export default function DashboardHome() {
             .map((reg: { event: Event }) => reg.event);
           setUpcomingEvents(upcoming);
         }
-      } catch (error) {
-        // Log error for debugging, but show empty state to user
-        console.error('Dashboard data fetch failed:', error);
+      } catch (err) {
+        // Ignore abort errors (component unmounted)
+        if (err instanceof Error && err.name === 'AbortError') {
+          return;
+        }
+        console.error('Dashboard data fetch failed:', err);
+        setError('Unable to load dashboard data. Please try again.');
       } finally {
-        setLoading(false);
+        if (!abortController.signal.aborted) {
+          setLoading(false);
+        }
       }
     };
 
     fetchData();
+
+    return () => {
+      abortController.abort();
+    };
   }, []);
 
   const daysUntilExpiration = member?.expirationDate
@@ -99,6 +116,19 @@ export default function DashboardHome() {
   return (
     <DashboardLayout activeTab="home">
       <div className="max-w-6xl mx-auto">
+        {/* Error Alert */}
+        {error && (
+          <div className="alert alert-error mb-6">
+            <p>{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="text-sm underline hover:no-underline ml-2"
+            >
+              Retry
+            </button>
+          </div>
+        )}
+
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-primary">
@@ -183,7 +213,7 @@ export default function DashboardHome() {
                   {member.duesCurrent
                     ? `Your membership expires on ${new Date(member.expirationDate!).toLocaleDateString()}. Renew early to maintain uninterrupted access.`
                     : member.inGracePeriod
-                      ? 'You are in a 30-day grace period. Renew now to avoid losing access.'
+                      ? 'You are in a 60-day grace period. Renew now to avoid losing access.'
                       : 'Your membership has expired. Renew to restore access.'}
                 </p>
                 {member.volunteerCreditBalance > 0 && (

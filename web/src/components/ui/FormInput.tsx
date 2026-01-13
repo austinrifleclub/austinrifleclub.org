@@ -50,6 +50,7 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
           onChange={handleChange}
           className={`form-input w-full ${hasError ? 'has-error' : ''}`}
           aria-invalid={hasError}
+          aria-required={props.required}
           aria-describedby={hasError ? `${inputId}-error` : helpText ? `${inputId}-help` : undefined}
           {...props}
         />
@@ -102,6 +103,7 @@ export const FormSelect = forwardRef<HTMLSelectElement, FormSelectProps>(
             id={selectId}
             className={`form-input w-full appearance-none cursor-pointer pr-10 ${hasError ? 'has-error' : ''}`}
             aria-invalid={hasError}
+            aria-required={props.required}
             aria-describedby={hasError ? `${selectId}-error` : helpText ? `${selectId}-help` : undefined}
             {...props}
           >
@@ -176,6 +178,7 @@ export const FormTextarea = forwardRef<HTMLTextAreaElement, FormTextareaProps>(
           onChange={handleChange}
           className={`form-input w-full resize-y min-h-[100px] ${hasError ? 'has-error' : ''}`}
           aria-invalid={hasError}
+          aria-required={props.required}
           aria-describedby={hasError ? `${textareaId}-error` : helpText ? `${textareaId}-help` : undefined}
           {...props}
         />

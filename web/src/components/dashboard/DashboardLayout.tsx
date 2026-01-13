@@ -63,11 +63,14 @@ export default function DashboardLayout({ children, activeTab = 'home' }: Dashbo
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
+    const abortController = new AbortController();
+
     const fetchUserData = async () => {
       try {
         // Fetch session
         const sessionRes = await fetch(`${API_BASE}/api/auth/get-session`, {
           credentials: 'include',
+          signal: abortController.signal,
         });
 
         if (!sessionRes.ok) {
@@ -86,21 +89,32 @@ export default function DashboardLayout({ children, activeTab = 'home' }: Dashbo
         // Fetch member profile
         const memberRes = await fetch(`${API_BASE}/api/members/me`, {
           credentials: 'include',
+          signal: abortController.signal,
         });
 
         if (memberRes.ok) {
           const memberData = await memberRes.json();
           setMember(memberData);
         }
-      } catch {
+      } catch (err) {
+        // Ignore abort errors
+        if (err instanceof Error && err.name === 'AbortError') {
+          return;
+        }
         // Authentication failed, redirect to login
         window.location.href = '/login';
       } finally {
-        setLoading(false);
+        if (!abortController.signal.aborted) {
+          setLoading(false);
+        }
       }
     };
 
     fetchUserData();
+
+    return () => {
+      abortController.abort();
+    };
   }, []);
 
   const handleSignOut = async () => {

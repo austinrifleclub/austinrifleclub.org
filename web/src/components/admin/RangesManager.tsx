@@ -33,13 +33,18 @@ export default function RangesManager() {
 
   const fetchRanges = async () => {
     try {
-      const response = await fetch(`${API_BASE}/api/range-status`);
+      const response = await fetch(`${API_BASE}/api/range-status`, {
+        credentials: 'include',
+      });
       if (response.ok) {
         const data = await response.json();
         setRanges(data.ranges);
+      } else {
+        setMessage({ type: 'error', text: 'Failed to load ranges' });
       }
-    } catch {
-      // silent
+    } catch (error) {
+      console.error('Ranges fetch error:', error);
+      setMessage({ type: 'error', text: 'Unable to connect to server' });
     } finally {
       setLoading(false);
     }
@@ -58,6 +63,7 @@ export default function RangesManager() {
       const response = await fetch(`${API_BASE}/api/range-status/${editingRange.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           status: editingRange.status,
           statusNote: editingRange.statusNote,
@@ -70,10 +76,13 @@ export default function RangesManager() {
         setEditingRange(null);
         fetchRanges();
       } else {
-        throw new Error('Failed to update');
+        const errorData = await response.json().catch(() => ({}));
+        const errorMsg = errorData.error?.message || errorData.error || 'Failed to update';
+        throw new Error(errorMsg);
       }
     } catch (error) {
-      setMessage({ type: 'error', text: 'Failed to update range status' });
+      const errorMessage = error instanceof Error ? error.message : 'Failed to update range status';
+      setMessage({ type: 'error', text: errorMessage });
     } finally {
       setSaving(false);
     }
@@ -84,12 +93,17 @@ export default function RangesManager() {
       const response = await fetch(`${API_BASE}/api/range-status/${rangeId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ status }),
       });
 
       if (response.ok) {
         setMessage({ type: 'success', text: `Range ${rangeId} set to ${status}` });
         fetchRanges();
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        const errorMsg = errorData.error?.message || errorData.error || 'Failed to update';
+        setMessage({ type: 'error', text: errorMsg });
       }
     } catch (error) {
       setMessage({ type: 'error', text: 'Failed to update range status' });

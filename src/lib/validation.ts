@@ -63,12 +63,22 @@ export const addressSchema = z.object({
 });
 
 /**
+ * UUID schema for route params
+ */
+export const uuidSchema = z.string().uuid("Invalid ID format");
+
+/**
  * Pagination params
+ * Page max prevents unreasonable offsets, limit max prevents large responses
+ * Max offset (page * limit) is capped at 10,000 to prevent performance issues
  */
 export const paginationSchema = z.object({
-  page: z.coerce.number().int().min(1).default(1),
+  page: z.coerce.number().int().min(1).max(10000).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(20),
-});
+}).refine(
+  (data) => (data.page - 1) * data.limit <= 10000,
+  { message: "Pagination offset too large (max 10,000 results)", path: ["page"] }
+);
 
 /**
  * Events list query params
@@ -87,7 +97,10 @@ export const eventsQuerySchema = paginationSchema.extend({
     "youth_event",
     "range_unavailable",
   ]).optional(),
-});
+}).refine(
+  (data) => !data.start || !data.end || data.start <= data.end,
+  { message: "Start date must be before or equal to end date", path: ["end"] }
+);
 
 // =============================================================================
 // MEMBER SCHEMAS
@@ -180,6 +193,26 @@ export const applicationStatuses = [
   "rejected",
   "expired",
 ] as const;
+
+/**
+ * Valid application status transitions
+ * Key: current status, Value: array of valid next statuses
+ */
+export const validStatusTransitions: Record<string, string[]> = {
+  draft: ["submitted", "expired"],
+  submitted: ["documents_pending", "expired"],
+  documents_pending: ["documents_approved", "rejected", "expired"],
+  documents_approved: ["paid", "rejected", "expired"],
+  paid: ["safety_scheduled", "rejected"],
+  safety_scheduled: ["safety_complete", "rejected"],
+  safety_complete: ["orientation_scheduled", "rejected"],
+  orientation_scheduled: ["orientation_complete", "rejected"],
+  orientation_complete: ["pending_vote", "rejected"],
+  pending_vote: ["approved", "rejected"],
+  approved: [], // Terminal state
+  rejected: [], // Terminal state
+  expired: [], // Terminal state
+};
 
 /**
  * Start application schema
@@ -290,9 +323,9 @@ export const updateEventSchema = createEventSchema.partial().extend({
  */
 export const eventRegistrationSchema = z.object({
   eventId: z.string().uuid(),
-  // For matches - optional division/class
-  division: z.string().max(50).optional(),
-  classification: z.string().max(10).optional(),
+  // For matches - optional division/class with validation
+  division: z.string().min(1).max(50).regex(/^[A-Za-z0-9\s\-]+$/, "Invalid division format").optional(),
+  classification: z.string().min(1).max(10).regex(/^[A-Z0-9]+$/, "Classification must be uppercase letters/numbers").optional(),
 });
 
 // =============================================================================
@@ -362,6 +395,29 @@ export const updateRangeStatusSchema = z.object({
   statusNote: z.string().max(255).optional(),
   expiresAt: z.coerce.date().optional(), // Auto-revert time
   calendarEventId: z.string().uuid().optional(), // Link to event
+});
+
+/**
+ * Close range schema
+ */
+export const closeRangeSchema = z.object({
+  reason: z.string().min(1, "Reason is required").max(255),
+  duration: z.number().int().min(0).max(1440).optional(), // Max 24 hours in minutes
+  sendNotifications: z.boolean().default(true),
+});
+
+/**
+ * Safety alert schema
+ */
+export const safetyAlertSchema = z.object({
+  message: z.string().min(1, "Message is required").max(140, "Message too long (max 140 characters)"),
+});
+
+/**
+ * Cancel event schema
+ */
+export const cancelEventSchema = z.object({
+  reason: z.string().min(1, "Reason is required").max(1000),
 });
 
 // =============================================================================

@@ -37,6 +37,24 @@ interface MECEvent {
   guid: string;
 }
 
+interface RSSItemGuid {
+  _?: string;
+}
+
+interface RSSItem {
+  title?: string;
+  link?: string;
+  description?: string;
+  'content:encoded'?: string;
+  'mec:startDate'?: string;
+  'mec:startHour'?: string;
+  'mec:endDate'?: string;
+  'mec:endHour'?: string;
+  'mec:location'?: string;
+  'mec:category'?: string;
+  guid?: string | RSSItemGuid;
+}
+
 interface ParsedEvent {
   id: string;
   title: string;
@@ -183,7 +201,7 @@ async function fetchRSSPage(page: number): Promise<MECEvent[]> {
       ? result.rss.channel.item
       : [result.rss.channel.item];
 
-    return items.map((item: any) => ({
+    return items.map((item: RSSItem): MECEvent => ({
       title: item.title || '',
       link: item.link || '',
       description: item.description || '',
@@ -194,7 +212,7 @@ async function fetchRSSPage(page: number): Promise<MECEvent[]> {
       endHour: item['mec:endHour'] || '5:00 PM',
       location: item['mec:location'] || '',
       category: item['mec:category'] || '',
-      guid: item.guid?._ || item.guid || '',
+      guid: typeof item.guid === 'object' ? (item.guid as RSSItemGuid)?._ || '' : item.guid || '',
     }));
   } catch (error) {
     console.error(`Failed to parse page ${page}:`, error);

@@ -5,12 +5,12 @@
  */
 
 import { Hono } from "hono";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { Env } from "../lib/auth";
 import { log } from "../lib/logger";
 import { requireMember, MemberContext } from "../middleware/auth";
 import { createDb } from "../db";
-import { members, eventRegistrations, duesPayments } from "../db/schema";
+import { members, eventRegistrations, duesPayments, events } from "../db/schema";
 import {
   StripeService,
   createMembershipCheckout,
@@ -26,6 +26,7 @@ import {
 import { logAudit } from "../lib/audit";
 import { users } from "../db/schema";
 import { ValidationError, NotFoundError, InternalError } from "../lib/errors";
+import { getPublicUrl } from "../lib/config";
 
 const app = new Hono<{ Bindings: Env & { STRIPE_SECRET_KEY: string; STRIPE_WEBHOOK_SECRET: string } }>();
 
@@ -53,7 +54,7 @@ app.post("/checkout/membership", requireMember, async (c) => {
   }
 
   const stripe = new StripeService(c.env.STRIPE_SECRET_KEY);
-  const baseUrl = c.env.PUBLIC_URL || 'https://austinrifleclub.org';
+  const baseUrl = getPublicUrl(c.env);
   const result = await createMembershipCheckout(
     stripe,
     user.email,
@@ -104,7 +105,7 @@ app.post("/checkout/event/:eventId", requireMember, async (c) => {
   }
 
   const stripe = new StripeService(c.env.STRIPE_SECRET_KEY);
-  const baseUrl = c.env.PUBLIC_URL || 'https://austinrifleclub.org';
+  const baseUrl = getPublicUrl(c.env);
   const result = await createEventCheckout(
     stripe,
     user.email,
@@ -358,8 +359,5 @@ app.get("/history", requireMember, async (c) => {
 
   return c.json(paymentHistory);
 });
-
-import { events } from "../db/schema";
-import { and } from "drizzle-orm";
 
 export default app;

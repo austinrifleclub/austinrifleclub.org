@@ -29,6 +29,27 @@
       "when": 1768160352183,
       "tag": "0003_colorful_komodo",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1768316002497,
+      "tag": "0004_heavy_steve_rogers",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1768316365187,
+      "tag": "0005_chilly_lord_tyger",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1768317701231,
+      "tag": "0006_amazing_lord_tyger",
+      "breakpoints": true
     }
   ]
 }

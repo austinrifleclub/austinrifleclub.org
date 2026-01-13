@@ -52,9 +52,13 @@ export default function EventDetail({ eventId }: Props) {
   const [regMessage, setRegMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   useEffect(() => {
+    const abortController = new AbortController();
+
     async function fetchEvent() {
       try {
-        const response = await fetch(`${API_BASE}/api/events/${eventId}`);
+        const response = await fetch(`${API_BASE}/api/events/${eventId}`, {
+          signal: abortController.signal,
+        });
         if (!response.ok) {
           if (response.status === 404) {
             setError('Event not found');
@@ -66,16 +70,26 @@ export default function EventDetail({ eventId }: Props) {
         const data = await response.json();
         setEvent(data);
       } catch (error) {
+        // Ignore abort errors (component unmounted)
+        if (error instanceof Error && error.name === 'AbortError') {
+          return;
+        }
         console.error('Event fetch failed:', error);
         setError('Unable to load event details');
       } finally {
-        setLoading(false);
+        if (!abortController.signal.aborted) {
+          setLoading(false);
+        }
       }
     }
 
     if (eventId) {
       fetchEvent();
     }
+
+    return () => {
+      abortController.abort();
+    };
   }, [eventId]);
 
   const handleRegister = async () => {

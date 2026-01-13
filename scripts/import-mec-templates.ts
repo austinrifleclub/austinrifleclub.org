@@ -17,6 +17,25 @@ interface ScannedEvent {
   description: string;
 }
 
+interface EventTemplate {
+  id: string;
+  title: string;
+  description: string | null;
+  eventType: string;
+  startTime: number;
+  endTime: number;
+  location: string | null;
+  rangeIds: string | null;
+  isRecurring: number;
+  recurrenceRule: string | null;
+  mecPostId: number;
+  mecSourceUrl: string;
+  isPublic: number;
+  status: string;
+  createdAt: number;
+  updatedAt: number;
+}
+
 // Map MEC categories/patterns to our event types
 function mapEventType(title: string, category: string): string {
   const titleLower = title.toLowerCase();
@@ -153,7 +172,7 @@ async function main() {
   console.log(`Processing ${scannedEvents.length} scanned events...\n`);
 
   const now = new Date();
-  const templates: any[] = [];
+  const templates: EventTemplate[] = [];
 
   for (const event of scannedEvents) {
     const title = decodeEntities(event.title);

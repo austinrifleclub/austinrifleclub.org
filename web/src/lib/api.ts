@@ -20,6 +20,7 @@ interface ApiError {
   error: string;
   details?: unknown;
   status?: number;
+  requestId?: string; // Server request ID for debugging
 }
 
 /**
@@ -48,6 +49,11 @@ async function request<T>(endpoint: string, options: ApiOptions = {}): Promise<T
       error: 'Request failed',
       status: response.status,
     }));
+    // Capture request ID for debugging support issues
+    const requestId = response.headers.get('X-Request-ID');
+    if (requestId) {
+      error.requestId = requestId;
+    }
     throw error;
   }
 

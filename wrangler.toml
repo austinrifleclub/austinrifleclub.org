@@ -4,29 +4,34 @@ compatibility_date = "2024-12-01"
 compatibility_flags = ["nodejs_compat"]
 
 # D1 Database binding
+# Create with: wrangler d1 create austinrifleclub-db
+# Then update the database_id below with the output
 [[d1_databases]]
 binding = "DB"
 database_name = "austinrifleclub-db"
-database_id = "placeholder-id"  # Replace with actual D1 database ID after creation
+database_id = ""  # Set via: wrangler d1 create austinrifleclub-db
 
 # KV Namespace binding (for rate limiting and caching)
+# Create with: wrangler kv:namespace create KV
+# Then update the id below with the output
 [[kv_namespaces]]
 binding = "KV"
-id = "placeholder-id"  # Replace with actual KV namespace ID after creation
+id = ""  # Set via: wrangler kv:namespace create KV
 
 # R2 Bucket binding (for file storage)
 [[r2_buckets]]
 binding = "R2"
 bucket_name = "austinrifleclub-files"
 
-# Environment variables (non-sensitive)
+# Development environment variables
+# Sensitive secrets (BETTER_AUTH_SECRET, STRIPE_*, etc.) go in .dev.vars
 [vars]
+# These are overridden in .dev.vars for local development
 BETTER_AUTH_URL = "http://localhost:8787"
 CORS_ALLOWED_ORIGINS = "http://localhost:4321,http://localhost:3000"
 PUBLIC_URL = "http://localhost:4321"
-FROM_EMAIL = "Austin Rifle Club <noreply@localhost>"
-ADMIN_EMAIL = "admin@localhost"
-FROM_PHONE = "+15125550100"
+FROM_EMAIL = "Austin Rifle Club <noreply@austinrifleclub.org>"
+ADMIN_EMAIL = "admin@austinrifleclub.org"
 
 # Local development settings
 [dev]
@@ -45,15 +50,17 @@ routes = [
 ]
 
 # Production D1 Database
+# Set via Cloudflare dashboard or wrangler CLI
 [[env.production.d1_databases]]
 binding = "DB"
 database_name = "austinrifleclub-db-prod"
-database_id = "REPLACE_WITH_PROD_D1_ID"
+database_id = ""  # Set in Cloudflare dashboard
 
 # Production KV Namespace
+# Set via Cloudflare dashboard or wrangler CLI
 [[env.production.kv_namespaces]]
 binding = "KV"
-id = "REPLACE_WITH_PROD_KV_ID"
+id = ""  # Set in Cloudflare dashboard
 
 # Production R2 Bucket
 [[env.production.r2_buckets]]
@@ -76,15 +83,17 @@ name = "austinrifleclub-api-staging"
 workers_dev = true
 
 # Staging D1 Database
+# Set via Cloudflare dashboard or wrangler CLI
 [[env.staging.d1_databases]]
 binding = "DB"
 database_name = "austinrifleclub-db-staging"
-database_id = "REPLACE_WITH_STAGING_D1_ID"
+database_id = ""  # Set in Cloudflare dashboard
 
 # Staging KV Namespace
+# Set via Cloudflare dashboard or wrangler CLI
 [[env.staging.kv_namespaces]]
 binding = "KV"
-id = "REPLACE_WITH_STAGING_KV_ID"
+id = ""  # Set in Cloudflare dashboard
 
 # Staging R2 Bucket
 [[env.staging.r2_buckets]]
