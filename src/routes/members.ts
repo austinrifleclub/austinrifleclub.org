@@ -12,8 +12,10 @@ import { Hono } from "hono";
 import { eq, and, like, desc, asc, gte, lte, or, sql } from "drizzle-orm";
 import { Env } from "../lib/auth";
 import {
+  requireAuth,
   requireMember,
   requireAdmin,
+  AuthContext,
   MemberContext,
 } from "../middleware/auth";
 import {
@@ -23,6 +25,8 @@ import {
   certifications,
   guestVisits,
   users,
+  boardMembers,
+  boardPositions,
 } from "../db/schema";
 import {
   updateMemberSchema,
@@ -46,10 +50,21 @@ const app = new Hono<{ Bindings: Env; Variables: MemberContext }>();
 /**
  * GET /api/members/me
  * Get current member's profile with related data
+ * Returns null if user has no member profile (allows dashboard to show apply flow)
  */
-app.get("/me", requireMember, async (c) => {
-  const member = c.get("member");
+app.get("/me", requireAuth, async (c) => {
+  const user = c.get("user");
   const db = c.get("db");
+
+  // Look up member profile for authenticated user
+  const member = await db.query.members.findFirst({
+    where: eq(members.userId, user.id),
+  });
+
+  // Return null if no member profile - user can still access dashboard to apply
+  if (!member) {
+    return c.json(null);
+  }
 
   // Get volunteer credit balance for current fiscal year
   const fiscalYear = getCurrentFiscalYear();
@@ -81,6 +96,22 @@ app.get("/me", requireMember, async (c) => {
     });
   }
 
+  // Get current board position (if any)
+  const boardPosition = await db
+    .select({
+      positionId: boardPositions.id,
+      title: boardPositions.title,
+    })
+    .from(boardMembers)
+    .innerJoin(boardPositions, eq(boardMembers.positionId, boardPositions.id))
+    .where(
+      and(
+        eq(boardMembers.memberId, member.id),
+        eq(boardMembers.isCurrent, true)
+      )
+    )
+    .limit(1);
+
   return c.json({
     ...member,
     volunteerCreditBalance: credits[0]?.total ?? 0,
@@ -92,6 +123,7 @@ app.get("/me", requireMember, async (c) => {
     inGracePeriod: member.expirationDate
       ? isInGracePeriod(member.expirationDate)
       : false,
+    boardPosition: boardPosition[0] ?? null,
   });
 });
 

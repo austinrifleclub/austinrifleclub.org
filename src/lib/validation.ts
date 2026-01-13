@@ -253,6 +253,8 @@ export const createEventSchema = z.object({
   cost: z.number().int().min(0).default(0), // Cents
   membersOnly: z.boolean().default(true),
   isPublic: z.boolean().default(false),
+  boardOnly: z.boolean().default(false),
+  requiresCertification: z.array(z.string()).optional(),
   contactEmail: emailSchema.optional(),
 });
 

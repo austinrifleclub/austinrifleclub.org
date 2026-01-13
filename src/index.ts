@@ -60,8 +60,8 @@ app.use("/api/events", publicRateLimit); // GET events list is public
 // Auth endpoints with strict rate limiting
 app.use("/api/auth/*", authRateLimit);
 
-// Mount better-auth at /api/auth/**
-app.on(["POST", "GET"], "/api/auth/**", async (c) => {
+// Mount better-auth at /api/auth/*
+app.on(["POST", "GET"], "/api/auth/*", (c) => {
   const auth = createAuth(c.env);
   return auth.handler(c.req.raw);
 });
