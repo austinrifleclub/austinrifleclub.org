@@ -19,7 +19,9 @@ interface ReferralData {
 export default function ReferralProgram() {
   const [referralData, setReferralData] = useState<ReferralData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [copyError, setCopyError] = useState(false);
   const [memberStatus, setMemberStatus] = useState<MemberStatus>(null);
   const [duesCurrent, setDuesCurrent] = useState(false);
 
@@ -42,9 +44,11 @@ export default function ReferralProgram() {
         });
         if (res.ok) {
           setReferralData(await res.json());
+        } else if (res.status !== 404) {
+          setError('Unable to load referral data');
         }
       } catch {
-        // silent
+        setError('Unable to connect to server');
       } finally {
         setLoading(false);
       }
@@ -59,9 +63,11 @@ export default function ReferralProgram() {
     try {
       await navigator.clipboard.writeText(referralData.referralUrl);
       setCopied(true);
+      setCopyError(false);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      // silent
+      setCopyError(true);
+      setTimeout(() => setCopyError(false), 2000);
     }
   };
 
@@ -70,6 +76,24 @@ export default function ReferralProgram() {
       <DashboardLayout activeTab="referrals">
         <div className="flex items-center justify-center py-12">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-navy-700"></div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <DashboardLayout activeTab="referrals">
+        <div className="max-w-3xl mx-auto">
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+            <p className="text-red-700 dark:text-red-400">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="mt-2 text-sm text-red-600 dark:text-red-400 underline hover:no-underline"
+            >
+              Try again
+            </button>
+          </div>
         </div>
       </DashboardLayout>
     );
@@ -120,10 +144,12 @@ export default function ReferralProgram() {
               className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                 copied
                   ? 'bg-navy-100 text-navy-700'
+                  : copyError
+                  ? 'bg-red-100 text-red-700'
                   : 'bg-navy-700 hover:bg-navy-800 text-white'
               }`}
             >
-              {copied ? 'Copied!' : 'Copy'}
+              {copied ? 'Copied!' : copyError ? 'Failed to copy' : 'Copy'}
             </button>
           </div>
 

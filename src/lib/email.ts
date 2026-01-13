@@ -6,6 +6,18 @@
 
 import { log } from './logger';
 
+/**
+ * Escape HTML special characters to prevent XSS in email templates
+ */
+function escapeHtml(unsafe: string): string {
+  return unsafe
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 interface EmailOptions {
   to: string;
   subject: string;
@@ -168,7 +180,7 @@ export function welcomeEmail(firstName: string): { subject: string; html: string
         <div style="text-align: center; margin-bottom: 30px;">
           <h1 style="color: #166534; margin: 0;">Austin Rifle Club</h1>
         </div>
-        <h2 style="color: #166534;">Welcome, ${firstName}!</h2>
+        <h2 style="color: #166534;">Welcome, ${escapeHtml(firstName)}!</h2>
         <p>Your membership application has been approved. Welcome to the Austin Rifle Club family!</p>
         <h3>What's Next?</h3>
         <ul>
@@ -235,12 +247,12 @@ export function eventRegistrationEmail(
           <h1 style="color: #166534; margin: 0;">Austin Rifle Club</h1>
         </div>
         <h2 style="color: #166534;">${status}</h2>
-        <p>Hi ${firstName},</p>
+        <p>Hi ${escapeHtml(firstName)},</p>
         <p>${isWaitlisted ? "You've been added to the waitlist for:" : "You're registered for:"}</p>
         <div style="background-color: #f8fafc; border-left: 4px solid #166534; padding: 15px; margin: 20px 0;">
-          <h3 style="margin: 0 0 10px 0; color: #166534;">${eventTitle}</h3>
-          <p style="margin: 5px 0;"><strong>Date:</strong> ${eventDate}</p>
-          <p style="margin: 5px 0;"><strong>Location:</strong> ${eventLocation}</p>
+          <h3 style="margin: 0 0 10px 0; color: #166534;">${escapeHtml(eventTitle)}</h3>
+          <p style="margin: 5px 0;"><strong>Date:</strong> ${escapeHtml(eventDate)}</p>
+          <p style="margin: 5px 0;"><strong>Location:</strong> ${escapeHtml(eventLocation)}</p>
         </div>
         ${isWaitlisted ? '<p>We\'ll notify you if a spot opens up.</p>' : '<p>See you there!</p>'}
         <p>
@@ -289,7 +301,7 @@ export function applicationReceivedEmail(firstName: string): { subject: string; 
           <h1 style="color: #166534; margin: 0;">Austin Rifle Club</h1>
         </div>
         <h2 style="color: #166534;">Application Received</h2>
-        <p>Hi ${firstName},</p>
+        <p>Hi ${escapeHtml(firstName)},</p>
         <p>Thank you for applying to join Austin Rifle Club! We've received your membership application.</p>
         <h3>What happens next?</h3>
         <ol>
@@ -371,10 +383,10 @@ export function applicationStatusUpdateEmail(
         <div style="text-align: center; margin-bottom: 30px;">
           <h1 style="color: #166534; margin: 0;">Austin Rifle Club</h1>
         </div>
-        <h2 style="color: #166534;">${statusInfo.title}</h2>
-        <p>Hi ${firstName},</p>
-        <p>${statusInfo.body}</p>
-        ${message ? `<p><strong>Note:</strong> ${message}</p>` : ''}
+        <h2 style="color: #166534;">${escapeHtml(statusInfo.title)}</h2>
+        <p>Hi ${escapeHtml(firstName)},</p>
+        <p>${escapeHtml(statusInfo.body)}</p>
+        ${message ? `<p><strong>Note:</strong> ${escapeHtml(message)}</p>` : ''}
         <div style="text-align: center; margin: 30px 0;">
           <a href="https://austinrifleclub.org/apply/status" style="background-color: #166534; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: 600;">View Application</a>
         </div>
@@ -423,10 +435,10 @@ export function applicationRejectedEmail(
           <h1 style="color: #166534; margin: 0;">Austin Rifle Club</h1>
         </div>
         <h2 style="color: #166534;">Application Update</h2>
-        <p>Hi ${firstName},</p>
+        <p>Hi ${escapeHtml(firstName)},</p>
         <p>Thank you for your interest in joining Austin Rifle Club. After careful consideration, we regret to inform you that we are unable to approve your membership application at this time.</p>
         <div style="background-color: #fef2f2; border-left: 4px solid #dc2626; padding: 15px; margin: 20px 0;">
-          <p style="margin: 0;"><strong>Reason:</strong> ${reason}</p>
+          <p style="margin: 0;"><strong>Reason:</strong> ${escapeHtml(reason)}</p>
         </div>
         <p>If you have any questions or believe this decision was made in error, please contact us at info@austinrifleclub.org.</p>
         <p>If applicable, any payments made will be refunded within 5-10 business days.</p>
@@ -477,12 +489,12 @@ export function eventCancellationEmail(
           <h1 style="color: #166534; margin: 0;">Austin Rifle Club</h1>
         </div>
         <h2 style="color: #dc2626;">Event Cancelled</h2>
-        <p>Hi ${firstName},</p>
+        <p>Hi ${escapeHtml(firstName)},</p>
         <p>We regret to inform you that the following event has been cancelled:</p>
         <div style="background-color: #fef2f2; border-left: 4px solid #dc2626; padding: 15px; margin: 20px 0;">
-          <h3 style="margin: 0 0 10px 0; color: #333;">${eventTitle}</h3>
-          <p style="margin: 5px 0;"><strong>Originally scheduled:</strong> ${eventDate}</p>
-          ${reason ? `<p style="margin: 5px 0;"><strong>Reason:</strong> ${reason}</p>` : ''}
+          <h3 style="margin: 0 0 10px 0; color: #333;">${escapeHtml(eventTitle)}</h3>
+          <p style="margin: 5px 0;"><strong>Originally scheduled:</strong> ${escapeHtml(eventDate)}</p>
+          ${reason ? `<p style="margin: 5px 0;"><strong>Reason:</strong> ${escapeHtml(reason)}</p>` : ''}
         </div>
         ${refundAmount ? `<p><strong>Refund:</strong> $${(refundAmount / 100).toFixed(2)} will be credited to your original payment method within 5-10 business days.</p>` : ''}
         <p>We apologize for any inconvenience. Please check our calendar for other upcoming events.</p>
@@ -538,8 +550,8 @@ export function registrationCancelledEmail(
           <h1 style="color: #166534; margin: 0;">Austin Rifle Club</h1>
         </div>
         <h2 style="color: #166534;">Registration Cancelled</h2>
-        <p>Hi ${firstName},</p>
-        <p>Your registration for <strong>${eventTitle}</strong> has been cancelled.</p>
+        <p>Hi ${escapeHtml(firstName)},</p>
+        <p>Your registration for <strong>${escapeHtml(eventTitle)}</strong> has been cancelled.</p>
         ${refundAmount > 0 ? `
         <div style="background-color: #f0fdf4; border-left: 4px solid #166534; padding: 15px; margin: 20px 0;">
           <p style="margin: 0;"><strong>Refund:</strong> $${(refundAmount / 100).toFixed(2)} (${refundPercent}% of registration fee)</p>
@@ -594,12 +606,12 @@ export function waitlistPromotionEmail(
           <h1 style="color: #166534; margin: 0;">Austin Rifle Club</h1>
         </div>
         <h2 style="color: #166534;">You're In!</h2>
-        <p>Hi ${firstName},</p>
+        <p>Hi ${escapeHtml(firstName)},</p>
         <p>Great news! A spot has opened up and you've been moved from the waitlist to confirmed registration for:</p>
         <div style="background-color: #f0fdf4; border-left: 4px solid #166534; padding: 15px; margin: 20px 0;">
-          <h3 style="margin: 0 0 10px 0; color: #166534;">${eventTitle}</h3>
-          <p style="margin: 5px 0;"><strong>Date:</strong> ${eventDate}</p>
-          <p style="margin: 5px 0;"><strong>Location:</strong> ${eventLocation}</p>
+          <h3 style="margin: 0 0 10px 0; color: #166534;">${escapeHtml(eventTitle)}</h3>
+          <p style="margin: 5px 0;"><strong>Date:</strong> ${escapeHtml(eventDate)}</p>
+          <p style="margin: 5px 0;"><strong>Location:</strong> ${escapeHtml(eventLocation)}</p>
         </div>
         <p>See you there!</p>
         <div style="text-align: center; margin: 30px 0;">
@@ -652,8 +664,8 @@ export function adminNotificationEmail(
         <div style="background-color: #166534; color: white; padding: 15px; text-align: center; margin-bottom: 20px;">
           <h1 style="margin: 0; font-size: 18px;">Austin Rifle Club - Admin Notification</h1>
         </div>
-        <h2 style="color: #333;">${subject}</h2>
-        <p>${body}</p>
+        <h2 style="color: #333;">${escapeHtml(subject)}</h2>
+        <p>${escapeHtml(body)}</p>
         ${actionUrl ? `
         <div style="text-align: center; margin: 30px 0;">
           <a href="${actionUrl}" style="background-color: #166534; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: 600;">${actionText || 'View Details'}</a>
@@ -709,7 +721,7 @@ export function duesReminderEmail(
           <h1 style="color: #166534; margin: 0;">Austin Rifle Club</h1>
         </div>
         <h2 style="color: #166534;">Membership Renewal Reminder</h2>
-        <p>Hi ${firstName},</p>
+        <p>Hi ${escapeHtml(firstName)},</p>
         <p>This is a friendly reminder that your Austin Rifle Club membership is coming up for renewal.</p>
         <div style="background-color: ${colors.bg}; border-left: 4px solid ${colors.border}; padding: 15px; margin: 20px 0;">
           <p style="margin: 0; font-weight: bold;">${colors.text}</p>

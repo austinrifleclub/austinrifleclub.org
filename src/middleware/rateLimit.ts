@@ -7,6 +7,7 @@
 import { Context, Next } from "hono";
 import { Env } from "../lib/auth";
 import { log } from "../lib/logger";
+import { RateLimitError, errorResponse } from "../lib/errors";
 
 interface RateLimitOptions {
   /** Maximum requests per window */
@@ -71,14 +72,9 @@ export function rateLimit(options: RateLimitOptions) {
 
       // Check if rate limit exceeded
       if (info.count > limit) {
-        c.header('Retry-After', (info.resetAt - now).toString());
-        return c.json(
-          {
-            error: 'Too many requests',
-            retryAfter: info.resetAt - now,
-          },
-          429
-        );
+        const retryAfter = info.resetAt - now;
+        c.header('Retry-After', retryAfter.toString());
+        return c.json(errorResponse(new RateLimitError(retryAfter)), 429);
       }
     } catch (error) {
       // If KV fails, allow the request but log the error

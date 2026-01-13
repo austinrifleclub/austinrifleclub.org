@@ -16,21 +16,32 @@ import { ValidationError, NotFoundError } from "../lib/errors";
 
 const app = new Hono<{ Bindings: Env & { R2: R2Bucket } }>();
 
-// Allowed file types and max sizes
-const ALLOWED_TYPES: Record<string, { mimes: string[]; maxSize: number }> = {
+// Allowed file types with MIME types AND extensions for security
+const ALLOWED_TYPES: Record<string, { mimes: string[]; extensions: string[]; maxSize: number }> = {
   image: {
     mimes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
+    extensions: ['.jpg', '.jpeg', '.png', '.gif', '.webp'],
     maxSize: 5 * 1024 * 1024, // 5MB
   },
   document: {
     mimes: ['application/pdf', 'image/jpeg', 'image/png'],
+    extensions: ['.pdf', '.jpg', '.jpeg', '.png'],
     maxSize: 10 * 1024 * 1024, // 10MB
   },
   any: {
     mimes: ['application/pdf', 'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
+    extensions: ['.pdf', '.jpg', '.jpeg', '.png', '.gif', '.webp', '.doc', '.docx'],
     maxSize: 25 * 1024 * 1024, // 25MB
   },
 };
+
+/**
+ * Validate file extension matches allowed types
+ */
+function validateFileExtension(filename: string, allowedExtensions: string[]): boolean {
+  const ext = filename.toLowerCase().substring(filename.lastIndexOf('.'));
+  return allowedExtensions.includes(ext);
+}
 
 /**
  * Generate a unique filename for R2 using cryptographically secure random
@@ -75,10 +86,14 @@ app.post("/application/:id/government-id", requireAuth, async (c) => {
     throw new ValidationError("No file provided");
   }
 
-  // Validate file type and size
+  // Validate file type, extension, and size
   const config = ALLOWED_TYPES.document;
   if (!config.mimes.includes(file.type)) {
     throw new ValidationError(`Invalid file type. Allowed: ${config.mimes.join(", ")}`);
+  }
+
+  if (!validateFileExtension(file.name, config.extensions)) {
+    throw new ValidationError(`Invalid file extension. Allowed: ${config.extensions.join(", ")}`);
   }
 
   if (file.size > config.maxSize) {
@@ -154,6 +169,10 @@ app.post("/application/:id/background-consent", requireAuth, async (c) => {
     throw new ValidationError(`Invalid file type. Allowed: ${config.mimes.join(", ")}`);
   }
 
+  if (!validateFileExtension(file.name, config.extensions)) {
+    throw new ValidationError(`Invalid file extension. Allowed: ${config.extensions.join(", ")}`);
+  }
+
   if (file.size > config.maxSize) {
     throw new ValidationError(`File too large. Max size: ${config.maxSize / 1024 / 1024}MB`);
   }
@@ -214,6 +233,10 @@ app.post("/document", requireAdmin, async (c) => {
   const config = ALLOWED_TYPES.any;
   if (!config.mimes.includes(file.type)) {
     throw new ValidationError(`Invalid file type. Allowed: ${config.mimes.join(", ")}`);
+  }
+
+  if (!validateFileExtension(file.name, config.extensions)) {
+    throw new ValidationError(`Invalid file extension. Allowed: ${config.extensions.join(", ")}`);
   }
 
   if (file.size > config.maxSize) {

@@ -155,7 +155,7 @@ export class StripeService {
 
       const flatLineItems = lineItems.reduce((acc, item) => ({ ...acc, ...item }), {});
 
-      const sessionData: Record<string, any> = {
+      const sessionData: Record<string, string | number> = {
         mode: options.mode || 'payment',
         success_url: options.successUrl,
         cancel_url: options.cancelUrl,
@@ -197,15 +197,17 @@ export class StripeService {
   }
 
   /**
-   * Verify webhook signature
+   * Verify webhook signature using HMAC-SHA256
+   * @param payload - Raw request body
+   * @param signature - Stripe-Signature header value
+   * @param secret - Webhook signing secret
+   * @returns Promise resolving to true if signature is valid
    */
-  verifyWebhookSignature(
+  async verifyWebhookSignature(
     payload: string,
     signature: string,
     secret: string
-  ): boolean {
-    // In production, implement proper HMAC verification
-    // For now, basic check that signature header exists
+  ): Promise<boolean> {
     if (!signature || !secret) return false;
 
     // Stripe signature format: t=timestamp,v1=signature
@@ -219,7 +221,38 @@ export class StripeService {
     const age = Math.floor(Date.now() / 1000) - parseInt(timestamp);
     if (age > 300) return false;
 
-    return true;
+    // Compute expected signature using HMAC-SHA256
+    const signedPayload = `${timestamp}.${payload}`;
+    const encoder = new TextEncoder();
+
+    const key = await crypto.subtle.importKey(
+      'raw',
+      encoder.encode(secret),
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['sign']
+    );
+
+    const signatureBytes = await crypto.subtle.sign(
+      'HMAC',
+      key,
+      encoder.encode(signedPayload)
+    );
+
+    // Convert to hex string
+    const expectedSig = Array.from(new Uint8Array(signatureBytes))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
+
+    // Timing-safe comparison
+    if (expectedSig.length !== sig.length) return false;
+
+    let mismatch = 0;
+    for (let i = 0; i < expectedSig.length; i++) {
+      mismatch |= expectedSig.charCodeAt(i) ^ sig.charCodeAt(i);
+    }
+
+    return mismatch === 0;
   }
 
   /**
@@ -241,7 +274,7 @@ export class StripeService {
     }
   ): Promise<RefundResult> {
     try {
-      const refundData: Record<string, any> = {
+      const refundData: Record<string, string | number> = {
         payment_intent: paymentIntentId,
       };
 

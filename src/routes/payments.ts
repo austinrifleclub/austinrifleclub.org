@@ -158,8 +158,9 @@ app.post("/webhook", async (c) => {
 
   const stripe = new StripeService(c.env.STRIPE_SECRET_KEY);
 
-  // Verify webhook signature
-  if (!stripe.verifyWebhookSignature(body, signature, c.env.STRIPE_WEBHOOK_SECRET)) {
+  // Verify webhook signature (async HMAC-SHA256)
+  const isValid = await stripe.verifyWebhookSignature(body, signature, c.env.STRIPE_WEBHOOK_SECRET);
+  if (!isValid) {
     throw new ValidationError("Invalid webhook signature");
   }
 
@@ -170,6 +171,19 @@ app.post("/webhook", async (c) => {
     case "checkout.session.completed": {
       const session = event.data.object;
       const metadata = session.metadata || {};
+
+      // Validate required metadata fields
+      if (metadata.type === "membership") {
+        if (!metadata.memberId || !metadata.membershipType) {
+          log.error('Invalid membership webhook metadata', new Error('Missing required fields'), { metadata });
+          throw new ValidationError("Invalid payment metadata: missing memberId or membershipType");
+        }
+      } else if (metadata.type === "event") {
+        if (!metadata.memberId || !metadata.eventId) {
+          log.error('Invalid event webhook metadata', new Error('Missing required fields'), { metadata });
+          throw new ValidationError("Invalid payment metadata: missing memberId or eventId");
+        }
+      }
 
       // Record payment for membership dues
       if (metadata.type === "membership") {

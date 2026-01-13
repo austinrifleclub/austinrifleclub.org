@@ -24,6 +24,9 @@ function validateEnv(env: Env): void {
   const warnings: string[] = [];
   if (!env.RESEND_API_KEY) warnings.push('RESEND_API_KEY not set - emails will be logged only');
   if (!env.STRIPE_SECRET_KEY) warnings.push('STRIPE_SECRET_KEY not set - payments disabled');
+  if (env.STRIPE_SECRET_KEY && !env.STRIPE_WEBHOOK_SECRET) {
+    warnings.push('STRIPE_WEBHOOK_SECRET not set - webhook verification will fail');
+  }
   if (!env.TWILIO_ACCOUNT_SID || !env.TWILIO_AUTH_TOKEN) warnings.push('Twilio credentials not set - SMS disabled');
 
   warnings.forEach(w => log.warn(w));

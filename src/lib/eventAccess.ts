@@ -161,7 +161,14 @@ export function canRegisterForEvent(event: Event, ctx: AccessContext): Registrat
     let requiredCerts: string[];
     try {
       requiredCerts = JSON.parse(event.requiresCertification);
+      if (!Array.isArray(requiredCerts)) {
+        // Log warning for malformed data but continue
+        console.warn(`Event ${event.id} has non-array requiresCertification: ${event.requiresCertification}`);
+        requiredCerts = [];
+      }
     } catch {
+      // Log warning for corrupted data but allow registration to proceed
+      console.warn(`Event ${event.id} has invalid JSON in requiresCertification: ${event.requiresCertification}`);
       requiredCerts = [];
     }
 
