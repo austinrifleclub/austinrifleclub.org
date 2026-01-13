@@ -288,7 +288,12 @@ app.post("/quick-sign-in", async (c) => {
   }
 
   if (guest) {
-    // Existing guest - check limits
+    // Check if guest is banned first
+    if (guest.status === "banned") {
+      throw new ForbiddenError("Guest is banned");
+    }
+
+    // Check limits (will be enforced atomically below)
     let visitCount = guest.visitCountCurrentYear ?? 0;
     if (guest.visitCountYear !== currentYear) {
       visitCount = 0;
@@ -296,10 +301,6 @@ app.post("/quick-sign-in", async (c) => {
 
     if (visitCount >= 3) {
       throw new ForbiddenError("Guest has reached visit limit for this year");
-    }
-
-    if (guest.status === "banned") {
-      throw new ForbiddenError("Guest is banned");
     }
   } else {
     // Create new guest
@@ -321,7 +322,42 @@ app.post("/quick-sign-in", async (c) => {
       .returning();
   }
 
-  // Create visit
+  // Atomic increment with limit check to prevent race conditions
+  // Only increment if visit count is still under limit
+  const updateResult = await db
+    .update(guests)
+    .set({
+      visitCountCurrentYear: sql`CASE
+        WHEN ${guests.visitCountYear} != ${currentYear} THEN 1
+        WHEN ${guests.visitCountCurrentYear} < 3 THEN ${guests.visitCountCurrentYear} + 1
+        ELSE ${guests.visitCountCurrentYear}
+      END`,
+      visitCountYear: currentYear,
+      lastVisitAt: now,
+      status: sql`CASE
+        WHEN ${guests.visitCountYear} != ${currentYear} THEN 'active'
+        WHEN ${guests.visitCountCurrentYear} >= 2 THEN 'limit_reached'
+        WHEN ${guests.visitCountCurrentYear} >= 1 THEN 'should_join'
+        ELSE 'active'
+      END`,
+      updatedAt: now,
+    })
+    .where(and(
+      eq(guests.id, guest.id),
+      // Only allow update if under limit or new year
+      sql`(${guests.visitCountYear} != ${currentYear} OR ${guests.visitCountCurrentYear} < 3)`
+    ))
+    .returning();
+
+  // If no rows updated, limit was reached by concurrent request
+  if (updateResult.length === 0) {
+    throw new ForbiddenError("Guest has reached visit limit for this year");
+  }
+
+  const updatedGuest = updateResult[0];
+  const newVisitCount = updatedGuest.visitCountCurrentYear ?? 1;
+
+  // Create visit record
   const visitId = generateId();
   const [visit] = await db
     .insert(guestVisits)
@@ -331,8 +367,8 @@ app.post("/quick-sign-in", async (c) => {
       hostMemberId: member.id,
       waiverAgreedAt: now,
       waiverSignatureUrl: parsed.data.waiverSignatureUrl,
-      waiverIpAddress: c.req.header("CF-Connecting-IP"),
-      waiverUserAgent: c.req.header("User-Agent"),
+      waiverIpAddress: c.req.header("CF-Connecting-IP") ?? c.req.header("X-Forwarded-For") ?? "unknown",
+      waiverUserAgent: c.req.header("User-Agent") ?? "unknown",
       signedInAt: now,
       offlineId: parsed.data.offlineId,
       syncedAt: parsed.data.offlineId ? now : null,
@@ -340,21 +376,8 @@ app.post("/quick-sign-in", async (c) => {
     })
     .returning();
 
-  // Update guest
-  const newVisitCount = (guest.visitCountCurrentYear ?? 0) + 1;
-  await db
-    .update(guests)
-    .set({
-      visitCountCurrentYear: newVisitCount,
-      visitCountYear: currentYear,
-      lastVisitAt: now,
-      status: newVisitCount >= 3 ? "limit_reached" : newVisitCount >= 2 ? "should_join" : "active",
-      updatedAt: now,
-    })
-    .where(eq(guests.id, guest.id));
-
   return c.json({
-    guest,
+    guest: updatedGuest,
     visit,
     visitNumber: newVisitCount,
     visitsRemaining: 3 - newVisitCount,

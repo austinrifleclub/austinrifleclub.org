@@ -1,0 +1,1 @@
+ALTER TABLE `members` ADD `is_admin` integer DEFAULT false;

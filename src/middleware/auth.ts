@@ -99,14 +99,16 @@ export const requireAdmin: MiddlewareHandler<{ Bindings: Env; Variables: MemberC
     return c.json({ error: "Member profile not found" }, 404);
   }
 
-  // Check if member is on the board (has a current board position)
-  const boardMember = await db.query.boardMembers.findFirst({
-    where: (bm, { eq, and }) =>
-      and(eq(bm.memberId, member.id), eq(bm.isCurrent, true)),
-  });
+  // Check if member has admin access (either isAdmin flag or current board member)
+  if (!member.isAdmin) {
+    const boardMember = await db.query.boardMembers.findFirst({
+      where: (bm, { eq, and }) =>
+        and(eq(bm.memberId, member.id), eq(bm.isCurrent, true)),
+    });
 
-  if (!boardMember) {
-    return c.json({ error: "Admin access required" }, 403);
+    if (!boardMember) {
+      return c.json({ error: "Admin access required" }, 403);
+    }
   }
 
   c.set("user", session.user as User);

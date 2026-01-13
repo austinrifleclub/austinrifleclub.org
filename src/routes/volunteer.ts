@@ -146,8 +146,9 @@ app.post("/redeem", requireMember, async (c) => {
     orderBy: volunteerHours.date,
   });
 
+  // Calculate deductions first (no DB writes yet)
   let remainingToDeduct = requestedAmount;
-  const deductions: Array<{ id: string; amount: number }> = [];
+  const deductions: Array<{ id: string; amount: number; newCreditUsed: number }> = [];
 
   for (const hour of unusedHours) {
     if (remainingToDeduct <= 0) break;
@@ -156,19 +157,15 @@ app.post("/redeem", requireMember, async (c) => {
     const availableInRecord = hour.creditAmount - currentUsed;
     const deductFromRecord = Math.min(availableInRecord, remainingToDeduct);
 
-    await db
-      .update(volunteerHours)
-      .set({
-        creditUsed: currentUsed + deductFromRecord,
-        updatedAt: new Date(),
-      })
-      .where(eq(volunteerHours.id, hour.id));
-
-    deductions.push({ id: hour.id, amount: deductFromRecord });
+    deductions.push({
+      id: hour.id,
+      amount: deductFromRecord,
+      newCreditUsed: currentUsed + deductFromRecord,
+    });
     remainingToDeduct -= deductFromRecord;
   }
 
-  // Create a dues payment record for the credit redemption
+  // Create payment record first - if this fails, no credits are deducted
   const paymentId = generateId();
   await db.insert(duesPayments).values({
     id: paymentId,
@@ -180,6 +177,42 @@ app.post("/redeem", requireMember, async (c) => {
     status: "completed",
     createdAt: new Date(),
   });
+
+  // Apply deductions atomically using conditional updates
+  // Each update only succeeds if the record hasn't been modified (optimistic locking)
+  const now = new Date();
+  for (const deduction of deductions) {
+    const result = await db
+      .update(volunteerHours)
+      .set({
+        creditUsed: deduction.newCreditUsed,
+        updatedAt: now,
+      })
+      .where(and(
+        eq(volunteerHours.id, deduction.id),
+        // Optimistic lock: only update if credit_used hasn't changed
+        sql`credit_used = ${deduction.newCreditUsed - deduction.amount}`
+      ))
+      .returning();
+
+    // If update failed due to concurrent modification, log but continue
+    // The payment is already recorded, manual reconciliation may be needed
+    if (result.length === 0) {
+      await logAudit(db, {
+        action: 'volunteer.redeem.conflict',
+        targetType: 'volunteer_hours',
+        targetId: deduction.id,
+        actorId: member.id,
+        actorType: 'member',
+        details: {
+          paymentId,
+          expectedDeduction: deduction.amount,
+          message: 'Concurrent modification detected - manual review required',
+        },
+        ipAddress: c.req.header('cf-connecting-ip'),
+      });
+    }
+  }
 
   // Log to audit
   await logAudit(db, {

@@ -151,6 +151,12 @@ app.get("/session/:sessionId", requireMember, async (c) => {
  * Handle Stripe webhooks
  */
 app.post("/webhook", async (c) => {
+  // Validate Stripe configuration before processing
+  if (!c.env.STRIPE_SECRET_KEY || !c.env.STRIPE_WEBHOOK_SECRET) {
+    log.error('Stripe webhook called without configuration', new Error('Missing STRIPE_SECRET_KEY or STRIPE_WEBHOOK_SECRET'));
+    throw new InternalError("Stripe configuration incomplete");
+  }
+
   const signature = c.req.header("stripe-signature");
   const body = await c.req.text();
 
@@ -174,17 +180,21 @@ app.post("/webhook", async (c) => {
       const session = event.data.object;
       const metadata = session.metadata || {};
 
-      // Validate required metadata fields
-      if (metadata.type === "membership") {
+      // Validate payment type and required metadata fields
+      const paymentType = metadata.type as string | undefined;
+      if (paymentType === "membership") {
         if (!metadata.memberId || !metadata.membershipType) {
           log.error('Invalid membership webhook metadata', new Error('Missing required fields'), { metadata });
           throw new ValidationError("Invalid payment metadata: missing memberId or membershipType");
         }
-      } else if (metadata.type === "event") {
+      } else if (paymentType === "event") {
         if (!metadata.memberId || !metadata.eventId) {
           log.error('Invalid event webhook metadata', new Error('Missing required fields'), { metadata });
           throw new ValidationError("Invalid payment metadata: missing memberId or eventId");
         }
+      } else {
+        log.error('Unknown payment type in webhook', new Error(`Unknown type: ${paymentType}`), { metadata });
+        throw new ValidationError(`Unknown payment type: ${paymentType}`);
       }
 
       // Record payment for membership dues
@@ -196,7 +206,7 @@ app.post("/webhook", async (c) => {
           amount: session.amount_total ?? 0, // Already in cents
           paymentType: metadata.membershipType === 'life' ? 'life' : 'annual',
           paymentMethod: "stripe",
-          stripePaymentId: (session.payment_intent as string) ?? null,
+          stripePaymentId: session.payment_intent ? String(session.payment_intent) : null,
           periodStart: new Date(),
           periodEnd: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
           status: "completed",
@@ -290,10 +300,11 @@ app.post("/webhook", async (c) => {
           });
 
           if (eventUser) {
+            const startDate = new Date(eventInfo.startTime);
             const emailTemplate = eventRegistrationEmail(
               eventMember.firstName,
               eventInfo.title,
-              eventInfo.startTime.toLocaleDateString('en-US', {
+              startDate.toLocaleDateString('en-US', {
                 weekday: 'long',
                 year: 'numeric',
                 month: 'long',

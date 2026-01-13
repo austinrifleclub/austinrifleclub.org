@@ -247,10 +247,26 @@ app.post("/:id/register", requireMember, async (c) => {
 
   try {
     const body = await c.req.json();
-    division = body.division;
-    classification = body.classification;
-  } catch {
-    // No body is fine
+    // Validate division format if provided (alphanumeric, spaces, hyphens only)
+    if (body.division) {
+      if (typeof body.division !== 'string' || body.division.length > 50 || !/^[A-Za-z0-9\s\-]+$/.test(body.division)) {
+        throw new ValidationError("Invalid division format");
+      }
+      division = body.division;
+    }
+    // Validate classification format if provided (uppercase letters/numbers only)
+    if (body.classification) {
+      if (typeof body.classification !== 'string' || body.classification.length > 10 || !/^[A-Z0-9]+$/.test(body.classification)) {
+        throw new ValidationError("Classification must be uppercase letters/numbers only");
+      }
+      classification = body.classification;
+    }
+  } catch (err) {
+    // Only ignore JSON parsing errors (no body is acceptable)
+    // Re-throw validation errors and other real errors
+    if (!(err instanceof SyntaxError)) {
+      throw err;
+    }
   }
 
   // Insert registration first, then verify capacity (handles race condition)

@@ -169,6 +169,9 @@ export const members = sqliteTable("members", {
   // Work day tracking (probation requirement)
   workDaysCompleted: integer("work_days_completed").default(0), // Need 3 during probation
 
+  // Admin flag (allows non-board members to have admin access)
+  isAdmin: integer("is_admin", { mode: "boolean" }).default(false),
+
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
   updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
 }, (table) => ({
