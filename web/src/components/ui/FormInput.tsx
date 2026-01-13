@@ -40,36 +40,29 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
 
     return (
       <div className={`form-group ${className}`}>
-        <label
-          htmlFor={inputId}
-          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-        >
+        <label htmlFor={inputId} className="form-label">
           {label}
-          {props.required && <span className="text-red-500 ml-1">*</span>}
+          {props.required && <span className="required">*</span>}
         </label>
         <input
           ref={ref}
           id={inputId}
           onChange={handleChange}
-          className={`
-            block w-full px-3 py-2 border rounded-md shadow-sm
-            focus:outline-none focus:ring-2 focus:ring-offset-0
-            ${hasError
-              ? 'border-red-300 text-red-900 placeholder-red-300 focus:ring-red-500 focus:border-red-500'
-              : 'border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-blue-500 focus:border-blue-500'
-            }
-          `}
+          className={`form-input w-full ${hasError ? 'has-error' : ''}`}
           aria-invalid={hasError}
           aria-describedby={hasError ? `${inputId}-error` : helpText ? `${inputId}-help` : undefined}
           {...props}
         />
         {hasError && (
-          <p id={`${inputId}-error`} className="mt-1 text-sm text-red-600 dark:text-red-400">
+          <p id={`${inputId}-error`} className="form-error">
+            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+            </svg>
             {error}
           </p>
         )}
         {helpText && !hasError && (
-          <p id={`${inputId}-help`} className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          <p id={`${inputId}-help`} className="form-help">
             {helpText}
           </p>
         )}
@@ -99,46 +92,46 @@ export const FormSelect = forwardRef<HTMLSelectElement, FormSelectProps>(
 
     return (
       <div className={`form-group ${className}`}>
-        <label
-          htmlFor={selectId}
-          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-        >
+        <label htmlFor={selectId} className="form-label">
           {label}
-          {props.required && <span className="text-red-500 ml-1">*</span>}
+          {props.required && <span className="required">*</span>}
         </label>
-        <select
-          ref={ref}
-          id={selectId}
-          className={`
-            block w-full px-3 py-2 border rounded-md shadow-sm
-            focus:outline-none focus:ring-2 focus:ring-offset-0
-            ${hasError
-              ? 'border-red-300 text-red-900 focus:ring-red-500 focus:border-red-500'
-              : 'border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-blue-500 focus:border-blue-500'
-            }
-          `}
-          aria-invalid={hasError}
-          aria-describedby={hasError ? `${selectId}-error` : helpText ? `${selectId}-help` : undefined}
-          {...props}
-        >
-          {placeholder && (
-            <option value="" disabled>
-              {placeholder}
-            </option>
-          )}
-          {options.map((option) => (
-            <option key={option.value} value={option.value} disabled={option.disabled}>
-              {option.label}
-            </option>
-          ))}
-        </select>
+        <div className="relative">
+          <select
+            ref={ref}
+            id={selectId}
+            className={`form-input w-full appearance-none cursor-pointer pr-10 ${hasError ? 'has-error' : ''}`}
+            aria-invalid={hasError}
+            aria-describedby={hasError ? `${selectId}-error` : helpText ? `${selectId}-help` : undefined}
+            {...props}
+          >
+            {placeholder && (
+              <option value="" disabled>
+                {placeholder}
+              </option>
+            )}
+            {options.map((option) => (
+              <option key={option.value} value={option.value} disabled={option.disabled}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+            <svg className="h-5 w-5 text-muted" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+            </svg>
+          </div>
+        </div>
         {hasError && (
-          <p id={`${selectId}-error`} className="mt-1 text-sm text-red-600 dark:text-red-400">
+          <p id={`${selectId}-error`} className="form-error">
+            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+            </svg>
             {error}
           </p>
         )}
         {helpText && !hasError && (
-          <p id={`${selectId}-help`} className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          <p id={`${selectId}-help`} className="form-help">
             {helpText}
           </p>
         )}
@@ -173,44 +166,37 @@ export const FormTextarea = forwardRef<HTMLTextAreaElement, FormTextareaProps>(
 
     return (
       <div className={`form-group ${className}`}>
-        <label
-          htmlFor={textareaId}
-          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-        >
+        <label htmlFor={textareaId} className="form-label">
           {label}
-          {props.required && <span className="text-red-500 ml-1">*</span>}
+          {props.required && <span className="required">*</span>}
         </label>
         <textarea
           ref={ref}
           id={textareaId}
           onChange={handleChange}
-          className={`
-            block w-full px-3 py-2 border rounded-md shadow-sm
-            focus:outline-none focus:ring-2 focus:ring-offset-0
-            ${hasError
-              ? 'border-red-300 text-red-900 placeholder-red-300 focus:ring-red-500 focus:border-red-500'
-              : 'border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-blue-500 focus:border-blue-500'
-            }
-          `}
+          className={`form-input w-full resize-y min-h-[100px] ${hasError ? 'has-error' : ''}`}
           aria-invalid={hasError}
           aria-describedby={hasError ? `${textareaId}-error` : helpText ? `${textareaId}-help` : undefined}
           {...props}
         />
-        <div className="flex justify-between mt-1">
+        <div className="flex justify-between mt-1.5">
           <div>
             {hasError && (
-              <p id={`${textareaId}-error`} className="text-sm text-red-600 dark:text-red-400">
+              <p id={`${textareaId}-error`} className="form-error">
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
                 {error}
               </p>
             )}
             {helpText && !hasError && (
-              <p id={`${textareaId}-help`} className="text-sm text-gray-500 dark:text-gray-400">
+              <p id={`${textareaId}-help`} className="form-help">
                 {helpText}
               </p>
             )}
           </div>
           {showCount && props.maxLength && (
-            <p className={`text-sm ${charCount > props.maxLength * 0.9 ? 'text-orange-500' : 'text-gray-500'}`}>
+            <p className={`text-sm font-mono ${charCount > props.maxLength * 0.9 ? 'text-danger-accent' : 'text-muted'}`}>
               {charCount}/{props.maxLength}
             </p>
           )}
@@ -239,36 +225,40 @@ export const FormCheckbox = forwardRef<HTMLInputElement, FormCheckboxProps>(
 
     return (
       <div className={`form-group ${className}`}>
-        <div className="flex items-start">
-          <div className="flex items-center h-5">
+        <label className="flex items-start gap-3 cursor-pointer group">
+          <div className="flex items-center h-5 mt-0.5">
             <input
               ref={ref}
               type="checkbox"
               id={checkboxId}
               className={`
-                h-4 w-4 rounded border-gray-300 dark:border-gray-600
-                text-blue-600 focus:ring-blue-500
-                ${hasError ? 'border-red-300' : ''}
+                h-5 w-5 rounded-md border-2 transition-all duration-200
+                text-navy-600 focus:ring-0 focus:ring-offset-0
+                checked:bg-navy-600 checked:border-navy-600
+                ${hasError ? 'border-crimson-400' : 'border-[var(--color-border)] group-hover:border-navy-400'}
               `}
               aria-invalid={hasError}
               aria-describedby={hasError ? `${checkboxId}-error` : helpText ? `${checkboxId}-help` : undefined}
               {...props}
             />
           </div>
-          <div className="ml-3 text-sm">
-            <label htmlFor={checkboxId} className="text-gray-700 dark:text-gray-300">
+          <div className="text-sm">
+            <span className="text-secondary font-medium">
               {label}
-              {props.required && <span className="text-red-500 ml-1">*</span>}
-            </label>
+              {props.required && <span className="required">*</span>}
+            </span>
             {helpText && (
-              <p id={`${checkboxId}-help`} className="text-gray-500 dark:text-gray-400">
+              <p id={`${checkboxId}-help`} className="form-help mt-0.5">
                 {helpText}
               </p>
             )}
           </div>
-        </div>
+        </label>
         {hasError && (
-          <p id={`${checkboxId}-error`} className="mt-1 text-sm text-red-600 dark:text-red-400 ml-7">
+          <p id={`${checkboxId}-error`} className="form-error ml-8">
+            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+            </svg>
             {error}
           </p>
         )}
@@ -310,14 +300,19 @@ export function FormRadioGroup({
 
   return (
     <fieldset className={`form-group ${className}`}>
-      <legend className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+      <legend className="form-label mb-3">
         {label}
-        {required && <span className="text-red-500 ml-1">*</span>}
+        {required && <span className="required">*</span>}
       </legend>
-      <div className="space-y-2">
+      <div className="space-y-3">
         {options.map((option) => (
-          <div key={option.value} className="flex items-start">
-            <div className="flex items-center h-5">
+          <label
+            key={option.value}
+            className={`selectable-card flex items-start gap-3 p-3 ${
+              value === option.value ? 'selected' : ''
+            } ${hasError ? 'border-crimson-300' : ''}`}
+          >
+            <div className="flex items-center h-5 mt-0.5">
               <input
                 type="radio"
                 id={`${name}-${option.value}`}
@@ -326,31 +321,33 @@ export function FormRadioGroup({
                 checked={value === option.value}
                 onChange={(e) => onChange?.(e.target.value)}
                 className={`
-                  h-4 w-4 border-gray-300 dark:border-gray-600
-                  text-blue-600 focus:ring-blue-500
-                  ${hasError ? 'border-red-300' : ''}
+                  h-5 w-5 border-2 transition-all duration-200
+                  text-navy-600 focus:ring-0 focus:ring-offset-0
+                  ${hasError ? 'border-crimson-400' : 'border-[var(--color-border)]'}
                 `}
               />
             </div>
-            <div className="ml-3 text-sm">
-              <label
-                htmlFor={`${name}-${option.value}`}
-                className="font-medium text-gray-700 dark:text-gray-300"
-              >
+            <div className="text-sm flex-1">
+              <span className={`font-medium ${value === option.value ? 'text-accent' : 'text-secondary'}`}>
                 {option.label}
-              </label>
+              </span>
               {option.description && (
-                <p className="text-gray-500 dark:text-gray-400">{option.description}</p>
+                <p className="text-muted mt-0.5">{option.description}</p>
               )}
             </div>
-          </div>
+          </label>
         ))}
       </div>
       {hasError && (
-        <p className="mt-1 text-sm text-red-600 dark:text-red-400">{error}</p>
+        <p className="form-error mt-2">
+          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+          </svg>
+          {error}
+        </p>
       )}
       {helpText && !hasError && (
-        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{helpText}</p>
+        <p className="form-help mt-2">{helpText}</p>
       )}
     </fieldset>
   );
