@@ -5,8 +5,7 @@
  */
 
 import { useState, useEffect } from 'react';
-
-const API_BASE = import.meta.env.PUBLIC_API_URL || 'http://localhost:8787';
+import { API_BASE } from '../lib/api';
 
 interface Event {
   id: string;
@@ -66,7 +65,8 @@ export default function EventDetail({ eventId }: Props) {
         }
         const data = await response.json();
         setEvent(data);
-      } catch {
+      } catch (error) {
+        console.error('Event fetch failed:', error);
         setError('Unable to load event details');
       } finally {
         setLoading(false);

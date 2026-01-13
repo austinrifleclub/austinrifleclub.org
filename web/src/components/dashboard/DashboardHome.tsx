@@ -11,8 +11,7 @@
 
 import { useState, useEffect } from 'react';
 import DashboardLayout from './DashboardLayout';
-
-const API_BASE = import.meta.env.PUBLIC_API_URL || 'http://localhost:8787';
+import { API_BASE } from '../../lib/api';
 
 interface MemberProfile {
   id: string;
@@ -79,8 +78,9 @@ export default function DashboardHome() {
             .map((reg: { event: Event }) => reg.event);
           setUpcomingEvents(upcoming);
         }
-      } catch {
-        // Silently handle errors - dashboard will show empty state
+      } catch (error) {
+        // Log error for debugging, but show empty state to user
+        console.error('Dashboard data fetch failed:', error);
       } finally {
         setLoading(false);
       }

@@ -9,7 +9,7 @@
  */
 
 import { Hono } from "hono";
-import { eq, and, like, desc, asc, gte, lte, or, sql } from "drizzle-orm";
+import { eq, and, like, desc, asc, gte, lte, sql } from "drizzle-orm";
 import { Env } from "../lib/auth";
 import {
   requireAuth,

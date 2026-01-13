@@ -14,8 +14,7 @@
 import { useState, useEffect } from 'react';
 import DashboardLayout from './DashboardLayout';
 import MembershipGate, { type MemberStatus } from '../ui/MembershipGate';
-
-const API_BASE = import.meta.env.PUBLIC_API_URL || 'http://localhost:8787';
+import { API_BASE } from '../../lib/api';
 
 interface Guest {
   id: string;

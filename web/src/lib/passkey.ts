@@ -10,8 +10,7 @@ import {
   browserSupportsWebAuthn,
   platformAuthenticatorIsAvailable,
 } from '@simplewebauthn/browser';
-
-const API_BASE = import.meta.env.PUBLIC_API_URL || 'http://localhost:8787';
+import { API_BASE } from './api';
 
 export interface PasskeyInfo {
   id: string;

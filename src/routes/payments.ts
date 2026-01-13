@@ -139,7 +139,8 @@ app.get("/session/:sessionId", requireMember, async (c) => {
       status: session.payment_status,
       metadata: session.metadata,
     });
-  } catch {
+  } catch (error) {
+    log.error('Stripe getCheckoutSession failed', error instanceof Error ? error : new Error(String(error)), { sessionId });
     throw new NotFoundError("Checkout session", sessionId);
   }
 });

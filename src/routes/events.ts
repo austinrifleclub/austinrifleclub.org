@@ -23,7 +23,7 @@ import {
   createEventSchema,
   updateEventSchema,
   eventRegistrationSchema,
-  paginationSchema,
+  eventsQuerySchema,
 } from "../lib/validation";
 import { generateId } from "../lib/utils";
 import {
@@ -60,16 +60,12 @@ app.get("/", optionalAuth, async (c) => {
   const user = c.get("user");
 
   const query = c.req.query();
-  const { page, limit } = paginationSchema.parse(query);
+  const { page, limit, start, end, type: eventType } = eventsQuerySchema.parse(query);
   const offset = (page - 1) * limit;
 
-  // Date range filters
-  const startDate = query.start ? new Date(query.start) : new Date();
-  const endDate = query.end
-    ? new Date(query.end)
-    : new Date(Date.now() + 90 * 24 * 60 * 60 * 1000); // 90 days ahead
-
-  const eventType = query.type;
+  // Date range filters (with defaults)
+  const startDate = start ?? new Date();
+  const endDate = end ?? new Date(Date.now() + 90 * 24 * 60 * 60 * 1000); // 90 days ahead
 
   // Build access context for filtering
   const accessCtx = await buildAccessContext(db, user?.id);

@@ -6,8 +6,7 @@
 
 import { useState, useEffect } from 'react';
 import DashboardLayout from './DashboardLayout';
-
-const API_BASE = import.meta.env.PUBLIC_API_URL || 'http://localhost:8787';
+import { API_BASE } from '../../lib/api';
 
 interface Payment {
   id: string;

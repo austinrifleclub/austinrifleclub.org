@@ -16,8 +16,7 @@ import { useState } from 'react';
 import { useFormValidation, type FormConfig } from '../hooks/useFormValidation';
 import { email, phone, minLength } from '../lib/validation';
 import { FormInput, FormSelect, FormCheckbox, FormRow } from './ui/FormInput';
-
-const API_BASE = import.meta.env.PUBLIC_API_URL || 'http://localhost:8787';
+import { API_BASE } from '../lib/api';
 
 type Step = 'info' | 'membership' | 'acknowledgments' | 'review';
 
@@ -133,7 +132,9 @@ export default function ApplicationForm() {
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || 'Failed to start application');
+        // Handle both string error and structured error response
+        const errorMsg = data.error?.message || data.error || 'Failed to start application';
+        throw new Error(errorMsg);
       }
 
       const data = await res.json();

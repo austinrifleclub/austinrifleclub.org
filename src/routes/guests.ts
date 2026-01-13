@@ -103,6 +103,11 @@ app.get("/:id", async (c) => {
     throw new NotFoundError("Guest", id);
   }
 
+  // Verify member owns this guest
+  if (guest.createdByMemberId !== member.id) {
+    throw new ForbiddenError("You can only view guests you created");
+  }
+
   // Get visit history
   const visits = await db.query.guestVisits.findMany({
     where: eq(guestVisits.guestId, id),
@@ -143,6 +148,11 @@ app.post("/:id/sign-in", async (c) => {
 
   if (!guest) {
     throw new NotFoundError("Guest", guestId);
+  }
+
+  // Verify member owns this guest
+  if (guest.createdByMemberId !== member.id) {
+    throw new ForbiddenError("You can only sign in guests you created");
   }
 
   // Check if guest is banned

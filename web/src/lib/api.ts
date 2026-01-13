@@ -4,7 +4,11 @@
  * Handles authentication, request formatting, and error handling.
  */
 
-const API_BASE = import.meta.env.PUBLIC_API_URL || 'http://localhost:8787';
+/**
+ * Base URL for API requests.
+ * Uses PUBLIC_API_URL from environment, falls back to localhost for development.
+ */
+export const API_BASE = import.meta.env.PUBLIC_API_URL || 'http://localhost:8787';
 
 interface ApiOptions {
   method?: 'GET' | 'POST' | 'PATCH' | 'DELETE';

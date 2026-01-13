@@ -8,6 +8,7 @@
  */
 
 import { useState, useEffect, useMemo } from 'react';
+import { API_BASE } from '../lib/api';
 
 interface Event {
   id: string;
@@ -31,8 +32,6 @@ interface EventsResponse {
     limit: number;
   };
 }
-
-const API_BASE = import.meta.env.PUBLIC_API_URL || 'http://localhost:8787';
 
 // Friendly display names for event types
 const eventTypeLabels: Record<string, string> = {

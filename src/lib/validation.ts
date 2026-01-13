@@ -70,6 +70,25 @@ export const paginationSchema = z.object({
   limit: z.coerce.number().int().min(1).max(100).default(20),
 });
 
+/**
+ * Events list query params
+ */
+export const eventsQuerySchema = paginationSchema.extend({
+  start: z.coerce.date().optional(),
+  end: z.coerce.date().optional(),
+  type: z.enum([
+    "match",
+    "class",
+    "arc_education",
+    "arc_event",
+    "arc_meeting",
+    "organized_practice",
+    "work_day",
+    "youth_event",
+    "range_unavailable",
+  ]).optional(),
+});
+
 // =============================================================================
 // MEMBER SCHEMAS
 // =============================================================================

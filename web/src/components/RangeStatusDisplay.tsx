@@ -9,6 +9,7 @@
 
 import { useState, useEffect } from 'react';
 import { OpenIcon, EventIcon, ClosedIcon, MaintenanceIcon, StatusDot } from './ui/RangeStatusIcons';
+import { API_BASE } from '../lib/api';
 
 interface RangeStatus {
   id: string;
@@ -30,8 +31,6 @@ interface RangeStatusResponse {
   ranges: RangeStatus[];
   lastUpdated: string;
 }
-
-const API_BASE = import.meta.env.PUBLIC_API_URL || 'http://localhost:8787';
 
 const statusConfig = {
   open: {

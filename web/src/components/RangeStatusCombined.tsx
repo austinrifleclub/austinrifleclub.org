@@ -7,6 +7,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { OpenIcon, EventIcon, ClosedIcon, MaintenanceIcon } from './ui/RangeStatusIcons';
+import { API_BASE } from '../lib/api';
 
 interface RangeStatus {
   id: string;
@@ -131,8 +132,6 @@ const rangeDetails: RangeInfo[] = [
     maxCaliber: 'Contact RSO',
   },
 ];
-
-const API_BASE = import.meta.env.PUBLIC_API_URL || 'http://localhost:8787';
 
 const statusLabels: Record<string, string> = {
   open: 'Open',
